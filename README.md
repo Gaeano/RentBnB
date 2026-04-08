@@ -12,6 +12,7 @@ The platform provides a seamless hub to discover, book, and pay for vacation act
 * **Detailed Listings:** View high-resolution photos, itineraries, inclusions, and user ratings.
 * **Real-Time Booking:** Check live availability and book instantly or send a request.
 * **Secure Payments:** Integrated checkout supporting local digital wallets (e.g., GCash).
+* In-App Chat: Message hosts directly to coordinate meetups or ask questions.
 * **Booking Dashboard:** Manage active trips and receive push notifications.
 
 ### For Hosts (Equipment Owners & Guides)

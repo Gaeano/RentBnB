@@ -78,7 +78,7 @@ public class SignUpActivity extends AppCompatActivity {
         }
 
         if (passwordText.length() < 7){
-            Toast.makeText(SignUpActivity.this, "Password must be at least 6 characters", Toast.LENGTH_LONG).show();
+            Toast.makeText(SignUpActivity.this, "Password must be at least 7 characters", Toast.LENGTH_LONG).show();
             return;
         }
 

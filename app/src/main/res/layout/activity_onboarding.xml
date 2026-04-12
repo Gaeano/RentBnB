@@ -33,6 +33,7 @@
         android:layout_marginBottom="40dp"
         android:background="@drawable/btn_next_bg"
         android:src="@drawable/ic_arrow_next"
+        android:contentDescription="Next"
         android:padding="16dp"
         android:scaleType="fitCenter"
         android:elevation="6dp"

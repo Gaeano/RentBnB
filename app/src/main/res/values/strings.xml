@@ -26,4 +26,11 @@
     <string name="final_title">Ready to set sail?</string>
     <string name="final_subtitle">Start exploring boats and plan your next adventure today.</string>
     <string name="get_started">Get Started</string>
+
+    <!--  Bottom Navigation  -->
+    <string name="nav_home">Home</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_add">Add new</string>
+    <string name="nav_bookings">History</string>
+    <string name="nav_profile">Profile</string>
 </resources>

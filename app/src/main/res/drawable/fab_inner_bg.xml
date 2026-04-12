@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    FAB inner circle: teal oval that carries the "+" icon.
+    Pressed state darkens slightly for tactile feedback.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="@color/teal_dark" />
+            <size android:width="50dp" android:height="50dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/teal_primary" />
+            <size android:width="50dp" android:height="50dp" />
+        </shape>
+    </item>
+</selector>

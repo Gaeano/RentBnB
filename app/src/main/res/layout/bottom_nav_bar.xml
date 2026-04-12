@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottomNavContainer"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:background="@drawable/bottom_nav_bg">
+
+    <!-- home -->
+    <ImageView
+        android:id="@+id/navHome"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_home"
+        android:scaleType="center"
+        android:contentDescription="@string/nav_home"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:alpha="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/navFavorites"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_percent="0.22" />
+
+    <!-- favs -->
+    <ImageView
+        android:id="@+id/navFavorites"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_favorites"
+        android:scaleType="center"
+        android:contentDescription="@string/nav_favorites"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:alpha="0.65"
+        app:layout_constraintStart_toEndOf="@id/navHome"
+        app:layout_constraintEnd_toStartOf="@id/navFabAnchor"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_percent="0.22" />
+
+    <!-- center lease button -->
+    <View
+        android:id="@+id/navFabAnchor"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toEndOf="@id/navFavorites"
+        app:layout_constraintEnd_toStartOf="@id/navBookings"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_percent="0.12" />
+
+    <!-- history -->
+    <ImageView
+        android:id="@+id/navBookings"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_history"
+        android:scaleType="center"
+        android:contentDescription="@string/nav_bookings"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:alpha="0.65"
+        app:layout_constraintStart_toEndOf="@id/navFabAnchor"
+        app:layout_constraintEnd_toStartOf="@id/navProfile"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_percent="0.22" />
+
+    <!-- Profile -->
+    <ImageView
+        android:id="@+id/navProfile"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_profile"
+        android:scaleType="center"
+        android:contentDescription="@string/nav_profile"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:alpha="0.65"
+        app:layout_constraintStart_toEndOf="@id/navBookings"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_percent="0.22" />
+
+    <FrameLayout
+        android:id="@+id/navFab"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginBottom="14dp"
+        android:elevation="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/fab_ring_bg"
+        android:contentDescription="@string/nav_add"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/fab_inner_bg"
+            android:src="@drawable/ic_lease"
+            android:scaleType="center"
+            android:contentDescription="@null" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

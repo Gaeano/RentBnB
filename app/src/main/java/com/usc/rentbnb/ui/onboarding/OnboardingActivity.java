@@ -1,6 +1,5 @@
 package com.usc.rentbnb.ui.onboarding;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -12,7 +11,6 @@ import androidx.core.content.ContextCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.usc.rentbnb.R;
-import com.usc.rentbnb.ui.auth.SignUpActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -164,8 +162,8 @@ public class OnboardingActivity extends AppCompatActivity {
 
     public void onGetStartedClicked(View view) {
         // Uncomment if login activity is active
-         Intent intent = new Intent(this, SignUpActivity.class);
-         startActivity(intent);
+        // Intent intent = new Intent(this, LoginActivity.class);
+        // startActivity(intent);
         finish();
     }
 }

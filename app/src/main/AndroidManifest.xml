@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RentBnb.Onboarding">
         <activity
+            android:name=".ui.auth.SignUpActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.onboarding.OnboardingActivity"
             android:exported="true">
             <intent-filter>

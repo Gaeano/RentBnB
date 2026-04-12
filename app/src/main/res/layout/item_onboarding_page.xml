@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <!-- Full screen background image for first and last pages -->
+    <ImageView
+        android:id="@+id/ivFullscreenBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@android:color/darker_gray"
+        tools:visibility="visible" />
+
+    <!-- A semi-transparent overlay for background images if needed -->
+    <View
+        android:id="@+id/bgOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#40000000"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/ivFullscreenBackground"
+        app:layout_constraintEnd_toEndOf="@+id/ivFullscreenBackground"
+        app:layout_constraintStart_toStartOf="@+id/ivFullscreenBackground"
+        app:layout_constraintTop_toTopOf="@+id/ivFullscreenBackground"
+        tools:visibility="visible" />
+
+    <!-- Central Icon for tutorial pages -->
+    <ImageView
+        android:id="@+id/ivCenterIcon"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="100dp"
+        app:layout_constraintBottom_toTopOf="@+id/tvTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:src="@android:drawable/ic_menu_camera" />
+
+    <!-- Title text -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="48dp"
+        android:gravity="center"
+        android:textColor="#333333"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/tvDescription"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ivCenterIcon"
+        tools:text="Discover and Choose" />
+
+    <!-- Description text -->
+    <TextView
+        android:id="@+id/tvDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="48dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:textColor="#777777"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+        tools:text="Find boats using filters, maps, photos, and real reviews - all in one place." />
+
+    <!-- "Next" Button -->
+    <!-- Using a simple Button styled to look like an FAB or circular button -->
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="#40E0D0"
+        android:text="Next"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:insetBottom="0dp"
+        android:insetTop="0dp"
+        app:cornerRadius="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- "Get Started" Button for final page -->
+    <Button
+        android:id="@+id/btnGetStarted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="#40E0D0"
+        android:paddingHorizontal="32dp"
+        android:paddingVertical="12dp"
+        android:text="Get Started"
+        android:textColor="@android:color/white"
+        android:visibility="gone"
+        app:cornerRadius="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvDescription"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

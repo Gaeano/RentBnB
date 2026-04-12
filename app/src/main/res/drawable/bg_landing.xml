@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Placeholder gradient for the landing-page photo background.
+    Replace with an actual lagoon/El Nido photo named bg_landing.jpg/png
+    in res/drawable-xxhdpi/ for production.
+    This gradient mimics the green-teal of the lagoon image seen in the spec.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:type="linear"
+        android:angle="180"
+        android:startColor="#1A3A2A"
+        android:centerColor="#1E6B55"
+        android:endColor="#3DCFCF" />
+</shape>

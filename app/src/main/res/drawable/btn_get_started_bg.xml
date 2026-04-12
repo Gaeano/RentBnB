@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pill-shaped teal background for the "Get Started" button -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/teal_dark" />
+            <corners android:radius="100dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/teal_primary" />
+            <corners android:radius="100dp" />
+        </shape>
+    </item>
+</selector>

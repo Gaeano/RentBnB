@@ -1,3 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">rentBnB</string>
+    <string name="app_name">RentBnb</string>
+
+    <!-- Landing  -->
+    <string name="landing_title">\"Explore the water\nlike never before.\"</string>
+    <string name="landing_subtitle">Seamless booking, Flexible options, and unforgettable experiences on every trip.</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_discover_title">Discover and Choose</string>
+    <string name="tutorial_discover_desc">Find boats using filters, maps, photos, and real reviews—all in one place.</string>
+
+    <string name="tutorial_book_title">Book Your Trip</string>
+    <string name="tutorial_book_desc">Check availability, pick your schedule, and book instantly or send a request in just a few taps.</string>
+
+    <string name="tutorial_pay_title">Pay Securely</string>
+    <string name="tutorial_pay_desc">Use GCash, Maya, or cards with flexible payments, clear pricing, and instant confirmation.</string>
+
+    <string name="tutorial_safe_title">Safe &amp; Reliable</string>
+    <string name="tutorial_safe_desc">Enjoy verified boats, trusted reviews, GPS tracking, and real-time weather protection.</string>
+
+    <string name="tutorial_smart_title">Smart Travel</string>
+    <string name="tutorial_smart_desc">Get personalized boat picks, smart itineraries, and weather-based suggestions instantly.</string>
+
+    <!-- Final -->
+    <string name="final_title">Ready to set sail?</string>
+    <string name="final_subtitle">Start exploring boats and plan your next adventure today.</string>
+    <string name="get_started">Get Started</string>
 </resources>

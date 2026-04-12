@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imgBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_landing" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/scrim_bottom" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="28dp"
+        android:gravity="top">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="@string/app_name"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:fontFamily="@font/jost"
+            android:textStyle="bold"
+            android:paddingTop="35dp"
+            android:letterSpacing="0.04" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/landing_title"
+            android:textColor="@color/white"
+            android:textSize="28sp"
+            android:fontFamily="@font/jost_italic"
+            android:lineSpacingMultiplier="1.15"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/landing_subtitle"
+            android:textColor="#CCffffff"
+            android:textSize="16sp"
+            android:fontFamily="@font/jost"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="72dp" />
+
+    </LinearLayout>
+
+</FrameLayout>

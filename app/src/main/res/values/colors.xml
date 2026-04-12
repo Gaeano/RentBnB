@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- temporaryyy -->
+    <!-- Brand -->
+    <color name="teal_primary">#3DCFCF</color>
+    <color name="teal_dark">#29AAAA</color>
+    <color name="teal_light">#E8FAFA</color>
+
+    <!-- Text -->
+    <color name="text_dark">#1A1A2E</color>
+    <color name="text_grey">#6B7280</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- Indicators -->
+    <color name="indicator_active">#3DCFCF</color>
+    <color name="indicator_inactive">#C8E6E6</color>
+
+    <!-- System -->
+    <color name="colorPrimary">#3DCFCF</color>
+    <color name="colorPrimaryDark">#29AAAA</color>
+    <color name="colorAccent">#3DCFCF</color>
 </resources>

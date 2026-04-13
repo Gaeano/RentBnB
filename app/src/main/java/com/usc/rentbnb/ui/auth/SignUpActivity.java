@@ -1,6 +1,7 @@
 package com.usc.rentbnb.ui.auth;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -24,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -34,6 +36,7 @@ public class SignUpActivity extends AppCompatActivity {
     private TextInputEditText fullName, email, password, confirmPassword;
 
     private FirebaseAuth auth;
+    private FirebaseUser currentUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,19 +56,29 @@ public class SignUpActivity extends AppCompatActivity {
 
 
         auth = FirebaseAuth.getInstance();
+        currentUser = auth.getCurrentUser();
+
+        loginBtnRedirect.setOnClickListener(v -> {
+            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
 
         signUpBtn.setOnClickListener(v -> {
             signUpAttempt();
         });
+
+
 
     }
 
 
     private void signUpAttempt(){
         String fullNameText = fullName.getText().toString();
-        String emailText = email.getText().toString();
-        String passwordText = password.getText().toString();
-        String confirmPasswordText = confirmPassword.getText().toString();
+        String emailText = email.getText().toString().trim();
+        String passwordText = password.getText().toString().trim();
+        String confirmPasswordText = confirmPassword.getText().toString().trim();
 
         if (fullName.getText().toString().isEmpty() || email.getText().toString().isEmpty() || password.getText().toString().isEmpty() || confirmPassword.getText().toString().isEmpty()){
             Toast.makeText(SignUpActivity.this, "Please fill up all fields", Toast.LENGTH_LONG).show();
@@ -100,9 +113,9 @@ public class SignUpActivity extends AppCompatActivity {
 
                     //add logic to add to db using backend
 
-                    //uncomment if login page is implemented
-//                    Intent intent = new Intent(this, LoginActivity.class);
-//                    startActivity(intent);
+                    Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
+                    startActivity(intent);
+                    finish();
 
                 } else {
                     signUpBtn.setEnabled(true);
@@ -116,4 +129,6 @@ public class SignUpActivity extends AppCompatActivity {
 
 
     }
+
+
 }

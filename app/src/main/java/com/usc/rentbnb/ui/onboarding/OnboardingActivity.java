@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -165,8 +166,10 @@ public class OnboardingActivity extends AppCompatActivity {
 
     public void onGetStartedClicked(View view) {
         // Uncomment if login activity is active
-         Intent intent = new Intent(this, LoginActivity.class);
-         startActivity(intent);
-        finish();
+//         Intent intent = new Intent(this, HomePageActivity.class);
+//         startActivity(intent);
+//        finish();
+
+        Toast.makeText(this, "Redirecting...", Toast.LENGTH_LONG).show();
     }
 }

@@ -101,6 +101,10 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 editor.apply();
 
+                Intent intent = new Intent (LoginActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+
 
             } else {
                 String errorMsg = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";

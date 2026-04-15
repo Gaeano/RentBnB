@@ -32,7 +32,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
-    private boolean isEmailVerified;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

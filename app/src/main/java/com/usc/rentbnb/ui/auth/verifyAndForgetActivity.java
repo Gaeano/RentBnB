@@ -19,7 +19,6 @@ public class verifyAndForgetActivity extends AppCompatActivity {
     private TextView backBtn;
     private FirebaseAuth auth;
     private FirebaseUser user;
-    private boolean isEmailVerified;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 

@@ -61,7 +61,6 @@ public class SignUpActivity extends AppCompatActivity {
         loginBtnRedirect.setOnClickListener(v -> {
             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
             startActivity(intent);
-            finish();
         });
 
 
@@ -103,13 +102,23 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()){
-                    Toast.makeText(SignUpActivity.this, "Account created successfully", Toast.LENGTH_LONG).show();
+                    Toast.makeText(SignUpActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
                     FirebaseUser user = auth.getCurrentUser();
 
                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                             .setDisplayName(fullNameText)
                             .build();
                     user.updateProfile(profileUpdates);
+
+                    //sign in automatically
+                    auth.signInWithEmailAndPassword(emailText, passwordText).addOnCompleteListener(autoSignInTask -> {
+                       if (autoSignInTask.isSuccessful()){
+                            Log.d("SignUpActivity", "signInWithEmail:success");
+                       } else {
+                           String errorMsg = autoSignInTask.getException() != null ? autoSignInTask.getException().getMessage() : "Authentication failed.";
+                           Log.e("SignUpActivity", "signInWithEmail:failure");
+                       }
+                    });
 
                     //add logic to add to db using backend
 
@@ -121,7 +130,7 @@ public class SignUpActivity extends AppCompatActivity {
                     signUpBtn.setEnabled(true);
                     signUpBtn.setText("Sign up");
                     String errorMsg = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
-                    Toast.makeText(SignUpActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(SignUpActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
                     Log.e("SignUpActivity", "createUserWithEmail:failure", task.getException());
                 }
             }
@@ -129,6 +138,8 @@ public class SignUpActivity extends AppCompatActivity {
 
 
     }
+
+
 
 
 }

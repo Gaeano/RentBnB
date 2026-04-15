@@ -109,9 +109,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Remember me"
+                android:layout_weight="1"
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 app:buttonTint="#69B3BE" />
+
+            <TextView
+                android:id="@+id/forget_password_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:text="Forgot password?"
+                android:textColor="#69B3BE"
+                android:textSize="14sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton

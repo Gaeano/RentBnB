@@ -19,11 +19,12 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private TextView backBtn, signUpBtn;
+    private TextView backBtn, signUpBtn, forgetPasswordBtn;
     private TextInputEditText emailField, passwordField;
     private CheckBox rememberMeBtn;
     private ImageView googleBtn;
@@ -31,6 +32,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
+    private boolean isEmailVerified;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +46,13 @@ public class LoginActivity extends AppCompatActivity {
         emailField = findViewById(R.id.email_textfield);
         passwordField = findViewById(R.id.password_textfield);
         rememberMeBtn = findViewById(R.id.checkBoxRememberMe);
+        forgetPasswordBtn = findViewById(R.id.forget_password_btn);
 
         auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
         checkRememberMeStatus();
+
+
 
         backBtn.setOnClickListener(v -> {
             finish();
@@ -61,6 +66,12 @@ public class LoginActivity extends AppCompatActivity {
 
         loginBtn.setOnClickListener(v ->{
             loginBtnFunctionality();
+        });
+
+        forgetPasswordBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, verifyAndForgetActivity.class);
+            intent.putExtra("FRAGMENT_MODE", "FORGOT_PASSWORD");
+            startActivity(intent);
         });
 
     }
@@ -90,7 +101,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 editor.apply();
 
-                // uncomment if homePage implemented
 
             } else {
                 String errorMsg = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
@@ -107,9 +117,9 @@ public class LoginActivity extends AppCompatActivity {
         if (currentUser != null){
 
             if (isRemembered){
-//           Intent intent = new Intent(LoginActivity.this, HomePageActivity.class);
-//            startActivity(intent);
-//            finish();
+           Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(intent);
+            finish();
             } else {
                 auth.signOut();
                 currentUser = null;

@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RentBnb.Onboarding">
         <activity
+            android:name=".ui.home.HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.auth.verifyAndForgetActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="false" />
         <activity
@@ -23,11 +29,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.onboarding.OnboardingActivity"
-            android:exported="false"/>
-
+            android:exported="false" />
     </application>
 
 </manifest>

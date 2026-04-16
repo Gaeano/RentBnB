@@ -5,7 +5,9 @@
     android:id="@+id/bottomNavContainer"
     android:layout_width="match_parent"
     android:layout_height="72dp"
-    android:background="@drawable/bottom_nav_bg">
+    android:background="@drawable/bottom_nav_bg"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
     <!-- home -->
     <ImageView
@@ -59,17 +61,18 @@
         android:id="@+id/navBookings"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:src="@drawable/ic_history"
-        android:scaleType="center"
-        android:contentDescription="@string/nav_bookings"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackgroundBorderless"
         android:alpha="0.65"
-        app:layout_constraintStart_toEndOf="@id/navFabAnchor"
-        app:layout_constraintEnd_toStartOf="@id/navProfile"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/nav_bookings"
+        android:focusable="true"
+        android:scaleType="center"
+        android:src="@drawable/ic_history"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/navProfile"
+        app:layout_constraintStart_toEndOf="@id/navFabAnchor"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
         app:layout_constraintWidth_percent="0.22" />
 
     <!-- Profile -->
@@ -92,26 +95,26 @@
 
     <FrameLayout
         android:id="@+id/navFab"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="69dp"
+        android:layout_height="73dp"
         android:layout_marginBottom="14dp"
-        android:elevation="8dp"
-        android:clickable="true"
-        android:focusable="true"
         android:background="@drawable/fab_ring_bg"
+        android:clickable="true"
         android:contentDescription="@string/nav_add"
-        app:layout_constraintStart_toStartOf="parent"
+        android:elevation="8dp"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
             android:background="@drawable/fab_inner_bg"
-            android:src="@drawable/ic_lease"
+            android:contentDescription="@null"
             android:scaleType="center"
-            android:contentDescription="@null" />
+            android:src="@drawable/ic_lease" />
 
     </FrameLayout>
 

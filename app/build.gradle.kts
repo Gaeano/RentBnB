@@ -49,4 +49,6 @@ dependencies {
     implementation("androidx.credentials:credentials:1.2.2")
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("com.airbnb.android:lottie:6.4.0")
 }

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Step 3 — Pricing & Preferred Payment Methods -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -20,14 +19,13 @@
             android:paddingTop="24dp"
             android:paddingBottom="16dp">
 
-            <!-- Heading -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Set Your Pricing"
                 android:textSize="20sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_bold"
                 android:layout_marginBottom="6dp" />
 
             <TextView
@@ -35,19 +33,18 @@
                 android:layout_height="wrap_content"
                 android:text="Choose how you'd like to charge renters and which payment methods you accept."
                 android:textSize="13sp"
-                android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
                 android:lineSpacingMultiplier="1.4"
                 android:layout_marginBottom="28dp" />
 
-            <!-- ── Pricing Unit Toggle ── -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pricing Unit"
                 android:textSize="14sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_semibold"
                 android:layout_marginBottom="10dp" />
 
             <LinearLayout
@@ -80,7 +77,7 @@
                     android:gravity="center"
                     android:text="Daily"
                     android:textSize="13sp"
-                    android:fontFamily="@font/jost"
+                    android:fontFamily="@font/jost_bold"
                     android:background="@drawable/unit_btn_selected_bg"
                     android:clickable="true"
                     android:focusable="true" />
@@ -100,17 +97,15 @@
 
             </LinearLayout>
 
-            <!-- ── Base Price ── -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Base Price"
                 android:textSize="14sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_semibold"
                 android:layout_marginBottom="8dp" />
 
-            <!-- PHP prefix + amount input -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
@@ -151,18 +146,17 @@
                 android:layout_height="wrap_content"
                 android:text="This is the price per unit selected above."
                 android:textSize="12sp"
-                android:textColor="@color/white"
-                android:fontFamily="@font/jost"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
                 android:layout_marginBottom="28dp" />
 
-            <!-- ── Preferred Payment Methods ── -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Accepted Payment Methods"
                 android:textSize="14sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_semibold"
                 android:layout_marginBottom="6dp" />
 
             <TextView
@@ -170,11 +164,10 @@
                 android:layout_height="wrap_content"
                 android:text="Select all that you accept. Renters will only see the options you enable."
                 android:textSize="12sp"
-                android:textColor="@color/white"
-                android:fontFamily="@font/jost"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
                 android:layout_marginBottom="14dp" />
 
-            <!-- Cash -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
@@ -199,7 +192,7 @@
                     android:text="Cash"
                     android:textSize="14sp"
                     android:textColor="@color/black"
-                    android:fontFamily="@font/jost" />
+                    android:fontFamily="@font/jost_semibold" />
 
                 <CheckBox
                     android:id="@+id/cbCash"
@@ -210,7 +203,6 @@
 
             </LinearLayout>
 
-            <!-- GCash -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
@@ -235,7 +227,7 @@
                     android:text="GCash"
                     android:textSize="14sp"
                     android:textColor="@color/black"
-                    android:fontFamily="@font/jost" />
+                    android:fontFamily="@font/jost_semibold" />
 
                 <CheckBox
                     android:id="@+id/cbGcash"
@@ -246,7 +238,6 @@
 
             </LinearLayout>
 
-            <!-- PayPal -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
@@ -271,7 +262,7 @@
                     android:text="PayPal"
                     android:textSize="14sp"
                     android:textColor="@color/black"
-                    android:fontFamily="@font/jost" />
+                    android:fontFamily="@font/jost_semibold" />
 
                 <CheckBox
                     android:id="@+id/cbPaypal"
@@ -285,7 +276,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Continue button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -301,7 +291,7 @@
             android:text="Continue"
             android:textSize="15sp"
             android:textColor="@color/white"
-            android:fontFamily="@font/jost"
+            android:fontFamily="@font/jost_bold"
             android:background="@drawable/btn_primary_bg"
             android:stateListAnimator="@null" />
 

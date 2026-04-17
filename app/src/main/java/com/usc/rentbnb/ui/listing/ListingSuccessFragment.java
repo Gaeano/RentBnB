@@ -23,12 +23,6 @@ public class ListingSuccessFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        view.findViewById(R.id.btnGoHome).setOnClickListener(v -> {
-            if (getActivity() != null) {
-                getActivity().finish();
-            }
-        });
-
         view.findViewById(R.id.btnViewListing).setOnClickListener(v -> {
             // Implementation for viewing the newly created listing
             if (getActivity() != null) {

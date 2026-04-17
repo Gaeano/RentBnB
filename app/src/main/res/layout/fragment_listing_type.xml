@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Step 2 — What type of product are you listing? -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -26,7 +25,7 @@
                 android:text="What are you listing?"
                 android:textSize="20sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_bold"
                 android:layout_marginBottom="6dp" />
 
             <TextView
@@ -34,12 +33,11 @@
                 android:layout_height="wrap_content"
                 android:text="Choose the category that best describes your rental item."
                 android:textSize="13sp"
-                android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
                 android:lineSpacingMultiplier="1.4"
                 android:layout_marginBottom="24dp" />
 
-            <!-- Category rows injected programmatically -->
             <LinearLayout
                 android:id="@+id/categoryList"
                 android:layout_width="match_parent"
@@ -49,7 +47,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Continue button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -65,7 +62,7 @@
             android:text="Continue"
             android:textSize="15sp"
             android:textColor="@color/white"
-            android:fontFamily="@font/jost"
+            android:fontFamily="@font/jost_bold"
             android:background="@drawable/btn_primary_bg"
             android:stateListAnimator="@null" />
 

@@ -12,7 +12,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.usc.rentbnb.R;
@@ -38,7 +37,6 @@ public class AddListingActivity extends AppCompatActivity {
     private TextView tvStepLabel;
     private TextView tvStepCounter;
     private ProgressBar progressBar;
-    private View toolbarDivider;
 
     private int currentStep = 1;
 
@@ -51,7 +49,6 @@ public class AddListingActivity extends AppCompatActivity {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            // This adds padding to the top (status bar) and bottom (navigation bar)
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
@@ -68,12 +65,10 @@ public class AddListingActivity extends AppCompatActivity {
         if (currentStep < TOTAL_STEPS) {
             navigateToStep(currentStep + 1, true);
         } else if (currentStep == TOTAL_STEPS) {
-            // After summary → success screen
             navigateToSuccess();
         }
     }
 
-    /** Hardware / toolbar back — move to previous step or finish activity. */
     public void onBackStep() {
         if (currentStep > 1) {
             navigateToStep(currentStep - 1, false);
@@ -87,14 +82,12 @@ public class AddListingActivity extends AppCompatActivity {
         onBackStep();
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────────
 
     private void bindViews() {
-        btnBack       = findViewById(R.id.btnBack);
-        tvStepLabel   = findViewById(R.id.tvStepLabel);
+        btnBack= findViewById(R.id.btnBack);
+        tvStepLabel= findViewById(R.id.tvStepLabel);
         tvStepCounter = findViewById(R.id.tvStepCounter);
-        progressBar   = findViewById(R.id.progressBar);
-        toolbarDivider = findViewById(R.id.toolbarDivider);
+        progressBar = findViewById(R.id.progressBar);
     }
 
     private void setupBackButton() {
@@ -109,26 +102,23 @@ public class AddListingActivity extends AppCompatActivity {
 
     private void navigateToSuccess() {
         currentStep = TOTAL_STEPS + 1;
-        // Hide the toolbar / progress for the success screen
+
         tvStepLabel.setVisibility(View.GONE);
         tvStepCounter.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
-        toolbarDivider.setVisibility(View.GONE);
         btnBack.setVisibility(View.GONE);
-        // Change title
         TextView tvTitle = findViewById(R.id.tvTitle);
+
         tvTitle.setVisibility(View.GONE);
 
         replaceFragment(new ListingSuccessFragment(), true);
     }
 
     private void updateToolbar(int step) {
-        // Make sure all toolbar views are visible (in case returning from success)
         btnBack.setVisibility(View.VISIBLE);
         tvStepLabel.setVisibility(View.VISIBLE);
         tvStepCounter.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.VISIBLE);
-        toolbarDivider.setVisibility(View.VISIBLE);
         TextView tvTitle = findViewById(R.id.tvTitle);
         tvTitle.setVisibility(View.VISIBLE);
 
@@ -137,23 +127,23 @@ public class AddListingActivity extends AppCompatActivity {
         progressBar.setProgress(step);
 
         switch (step) {
-            case 1: tvStepLabel.setText("Listing Details");    break;
-            case 2: tvStepLabel.setText("Listing Type");       break;
-            case 3: tvStepLabel.setText("Pricing");            break;
-            case 4: tvStepLabel.setText("Activities");         break;
-            case 5: tvStepLabel.setText("Photos");             break;
-            case 6: tvStepLabel.setText("Review & Submit");    break;
+            case 1: tvStepLabel.setText("Listing Details"); break;
+            case 2: tvStepLabel.setText("Listing Type"); break;
+            case 3: tvStepLabel.setText("Pricing"); break;
+            case 4: tvStepLabel.setText("Activities"); break;
+            case 5: tvStepLabel.setText("Photos"); break;
+            case 6: tvStepLabel.setText("Review & Submit"); break;
         }
     }
 
     private Fragment fragmentForStep(int step) {
         switch (step) {
-            case 1:  return new ListingInfoFragment();
-            case 2:  return new ListingTypeFragment();
-            case 3:  return new ListingPricingFragment();
-            case 4:  return new ListingActivitiesFragment();
-            case 5:  return new ListingImagesFragment();
-            case 6:  return new ListingSummaryFragment();
+            case 1: return new ListingInfoFragment();
+            case 2: return new ListingTypeFragment();
+            case 3: return new ListingPricingFragment();
+            case 4: return new ListingActivitiesFragment();
+            case 5: return new ListingImagesFragment();
+            case 6: return new ListingSummaryFragment();
             default: return new ListingInfoFragment();
         }
     }

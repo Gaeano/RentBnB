@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -14,19 +15,12 @@ import androidx.fragment.app.Fragment;
 
 import com.usc.rentbnb.R;
 
-/**
- * Step 2 / 6 — Listing Category
- * Matches: listings/{id}.category (enum)
- * Categories for RentBnb boat/activity rentals:
- *   boat · kayak · snorkel · scuba · bicycle · motorcycle ·
- *   surfboard · camera · tent · atv · jetski · other
- */
 public class ListingTypeFragment extends Fragment {
 
     private static final String[] CATEGORIES = {
             "Boat", "Kayak / Paddle Board", "Snorkel Set",
             "Scuba Gear", "Bicycle", "Motorcycle",
-            "Surfboard", "Camera / GoPro", "Camping Gear",
+            "Surfboard", "Camera", "Camping Gear",
             "ATV / Quad Bike", "Jet Ski", "Other"
     };
 
@@ -106,7 +100,10 @@ public class ListingTypeFragment extends Fragment {
                             : R.drawable.category_row_bg));
             TextView tv = row.findViewById(R.id.tvCategoryName);
             tv.setTextColor(ContextCompat.getColor(requireContext(),
-                    i == index ? R.color.black : R.color.white));
+                    i == index ? R.color.black : R.color.text_grey));
+            ImageView iv = row.findViewById(R.id.ivCategoryIcon);
+            iv.setColorFilter(ContextCompat.getColor(requireContext(),
+                    i == index ? R.color.black : R.color.text_grey));
         }
     }
 }

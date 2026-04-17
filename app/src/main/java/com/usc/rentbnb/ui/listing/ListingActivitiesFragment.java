@@ -84,9 +84,9 @@ public class ListingActivitiesFragment extends Fragment {
         } else {
             selectedActivities.add(idx);
             chip.setBackground(ContextCompat.getDrawable(requireContext(),
-                    R.drawable.chip_background_selected));
+                    R.drawable.chip_background_teal));
             chip.setTextColor(ContextCompat.getColor(requireContext(),
-                    R.color.black));
+                    R.color.white));
         }
     }
 }

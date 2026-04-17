@@ -26,7 +26,7 @@
                 android:text="Listing Information"
                 android:textSize="20sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_bold"
                 android:layout_marginBottom="6dp" />
 
             <TextView
@@ -34,8 +34,8 @@
                 android:layout_height="wrap_content"
                 android:text="Tell renters what you're offering. Be clear and descriptive so your listing stands out."
                 android:textSize="13sp"
-                android:textColor="@color/white"
-                android:fontFamily="@font/jost"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
                 android:lineSpacingMultiplier="1.4"
                 android:layout_marginBottom="28dp" />
 
@@ -45,7 +45,7 @@
                 android:text="Product Name"
                 android:textSize="14sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_semibold"
                 android:layout_marginBottom="8dp" />
 
             <EditText
@@ -63,14 +63,13 @@
                 android:maxLines="1"
                 android:layout_marginBottom="20dp" />
 
-            <!-- ── Description ── -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Description"
                 android:textSize="14sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_semibold"
                 android:layout_marginBottom="8dp" />
 
             <EditText
@@ -93,10 +92,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Island / Location"
+                android:text="Island/Location"
                 android:textSize="14sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_semibold"
                 android:layout_marginBottom="8dp" />
 
             <EditText
@@ -120,7 +119,7 @@
                 android:text="Full Address"
                 android:textSize="14sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/jost_semibold"
                 android:layout_marginBottom="8dp" />
 
             <EditText
@@ -155,7 +154,7 @@
             android:text="Continue"
             android:textSize="15sp"
             android:textColor="@color/white"
-            android:fontFamily="@font/jost"
+            android:fontFamily="@font/jost_bold"
             android:background="@drawable/btn_primary_bg"
             android:stateListAnimator="@null" />
 

@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -57,6 +58,9 @@ public class SignUpActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
+
+        checkRememberMeStatus();
+
 
         loginBtnRedirect.setOnClickListener(v -> {
             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
@@ -135,6 +139,33 @@ public class SignUpActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+    }
+    //this method to be transferreed to the splash screen
+    private void checkRememberMeStatus(){
+        SharedPreferences sharedPreferences = getSharedPreferences("RentBnBPrefs", MODE_PRIVATE);
+        Boolean isRemembered = sharedPreferences.getBoolean("IS_REMEMBERED", false);
+
+        if (currentUser != null){
+
+            if (isRemembered){
+                Intent intent = new Intent(SignUpActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                auth.signOut();
+                currentUser = null;
+            }
+
+        }
+
+//        String savedEmail = sharedPreferences.getString("SAVED_EMAIL", "");
+//        if (!savedEmail.isEmpty()){
+//            emailField.setText(savedEmail);
+//            rememberMeBtn.setChecked(true);
+//        }
+
 
 
     }

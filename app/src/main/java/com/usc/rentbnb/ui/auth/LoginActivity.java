@@ -49,7 +49,6 @@ public class LoginActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
-        checkRememberMeStatus();
 
 
 
@@ -112,31 +111,5 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    //this method to be transferreed to the splash screen
-    private void checkRememberMeStatus(){
-        SharedPreferences sharedPreferences = getSharedPreferences("RentBnBPrefs", MODE_PRIVATE);
-        Boolean isRemembered = sharedPreferences.getBoolean("IS_REMEMBERED", false);
 
-        if (currentUser != null){
-
-            if (isRemembered){
-           Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-            startActivity(intent);
-            finish();
-            } else {
-                auth.signOut();
-                currentUser = null;
-            }
-
-        }
-
-        String savedEmail = sharedPreferences.getString("SAVED_EMAIL", "");
-        if (!savedEmail.isEmpty()){
-            emailField.setText(savedEmail);
-            rememberMeBtn.setChecked(true);
-        }
-
-
-
-    }
 }

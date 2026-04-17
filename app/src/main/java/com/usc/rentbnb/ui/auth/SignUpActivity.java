@@ -12,9 +12,6 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -38,6 +35,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
+    private GoogleAuthHelper googleAuthHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,12 +58,34 @@ public class SignUpActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
 
+        googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback(){
+            @Override
+            public void onSuccess(FirebaseUser user, boolean isNewUser) {
+                Toast.makeText(SignUpActivity.this, "Google Sign-In successful", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
+                startActivity(intent);
+                finish();
+
+            }
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(SignUpActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+
+        });
+
+        googleBtn.setOnClickListener(v -> {
+            googleAuthHelper.launchGoogleSignIn();
+        });
+
+
         checkRememberMeStatus();
 
 
         loginBtnRedirect.setOnClickListener(v -> {
             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
             startActivity(intent);
+            Log.d("SignUpActivity", "Redirecting to log in activity");
         });
 
 
@@ -148,16 +169,19 @@ public class SignUpActivity extends AppCompatActivity {
         Boolean isRemembered = sharedPreferences.getBoolean("IS_REMEMBERED", false);
 
         if (currentUser != null){
+                currentUser.reload().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        if (isRemembered){
+                            Intent intent = new Intent(SignUpActivity.this, HomeActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    } else {
+                        purgeLocalSession(sharedPreferences);
+                    }
 
-            if (isRemembered){
-                Intent intent = new Intent(SignUpActivity.this, HomeActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                auth.signOut();
-                currentUser = null;
-            }
 
+            });
         }
 
 //        String savedEmail = sharedPreferences.getString("SAVED_EMAIL", "");
@@ -167,6 +191,17 @@ public class SignUpActivity extends AppCompatActivity {
 //        }
 
 
+    }
+    private void purgeLocalSession(SharedPreferences sharedPreferences) {
+        auth.signOut(); // Kills the Firebase cache
+
+        // Wipe the Remember Me data
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("IS_REMEMBERED", false);
+        editor.putString("SAVED_EMAIL", "");
+        editor.apply();
+
+        Toast.makeText(this, "Session expired. Please log in again.", Toast.LENGTH_LONG).show();
 
     }
 

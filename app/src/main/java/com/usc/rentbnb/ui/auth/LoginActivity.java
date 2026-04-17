@@ -3,6 +3,7 @@ package com.usc.rentbnb.ui.auth;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -32,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
+    private GoogleAuthHelper googleAuthHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +48,30 @@ public class LoginActivity extends AppCompatActivity {
         passwordField = findViewById(R.id.password_textfield);
         rememberMeBtn = findViewById(R.id.checkBoxRememberMe);
         forgetPasswordBtn = findViewById(R.id.forget_password_btn);
+        googleBtn = findViewById(R.id.btn_google_sign_in);
 
         auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
 
+        googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback(){
+
+            @Override
+            public void onSuccess(FirebaseUser user, boolean isNewUser) {
+                Toast.makeText(LoginActivity.this, "Google Sign-In successful", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent (LoginActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        googleBtn.setOnClickListener(v -> {
+            googleAuthHelper.launchGoogleSignIn();
+        });
 
 
         backBtn.setOnClickListener(v -> {

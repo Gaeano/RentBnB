@@ -9,39 +9,40 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.home.HomeActivity;
 
-public class FavoritesActivity extends AppCompatActivity {
+public class FavoritesProductActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_favorites);
+        setContentView(R.layout.activity_favorites_product);
 
+        // 1. Handle Back Button (Returns to FavoritesActivity)
+        ImageView backButton = findViewById(R.id.back_button);
+        if (backButton != null) {
+            backButton.setOnClickListener(v -> finish());
+        }
 
-        setupHeartToggle(findViewById(R.id.fav_card_1));
-        setupHeartToggle(findViewById(R.id.fav_card_2));
-        setupHeartToggle(findViewById(R.id.fav_card_3));
-        setupHeartToggle(findViewById(R.id.fav_card_4));
-        setupHeartToggle(findViewById(R.id.fav_card_5));
+        setupHeartToggle(findViewById(R.id.fav_item_card_1));
+        setupHeartToggle(findViewById(R.id.fav_item_card_2));
+        setupHeartToggle(findViewById(R.id.fav_item_card_3));
     }
 
-    // Helper method to handle the clicking and swapping of the icons
     private void setupHeartToggle(View cardView) {
         if (cardView == null) return;
 
-        // 1. Set up the intent for when the user clicks the actual card background
-        cardView.setOnClickListener(v -> {
-            Intent intent = new Intent(FavoritesActivity.this, FavoritesProductActivity.class);
-            startActivity(intent);
-        });
-
-        // 2. Set up the toggle for the heart icon specifically
-        ImageView heartIcon = cardView.findViewById(R.id.favorite_heart_icon);
+        // Find the specific heart icon inside THIS card (note the ID is item_favorite_heart)
+        ImageView heartIcon = cardView.findViewById(R.id.item_favorite_heart);
         if (heartIcon != null) {
+
+            // Assume true since they are in the favorites page
             heartIcon.setTag(true);
+
             heartIcon.setOnClickListener(v -> {
                 boolean isFavorite = (boolean) v.getTag();
+
                 isFavorite = !isFavorite;
                 v.setTag(isFavorite);
 

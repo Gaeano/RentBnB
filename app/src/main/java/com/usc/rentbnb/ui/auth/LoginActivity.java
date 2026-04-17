@@ -39,7 +39,6 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        backBtn = findViewById(R.id.tv_back);
         signUpBtn = findViewById(R.id.tv_signup_link);
         loginBtn = findViewById(R.id.btn_login);
         emailField = findViewById(R.id.email_textfield);
@@ -53,9 +52,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
-        backBtn.setOnClickListener(v -> {
-            finish();
-        });
 
         signUpBtn.setOnClickListener(v -> {
             Intent intent = new Intent(this, SignUpActivity.class);

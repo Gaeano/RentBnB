@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Step 4 — Select Activities this listing supports -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Supported Activities"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select all the activities that renters can use this item for. This helps match your listing to the right adventurers."
+                android:textSize="13sp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/jost"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginBottom="24dp" />
+
+            <!--
+                FlexboxLayout lets chips wrap naturally across rows.
+                Add dependency in build.gradle:
+                implementation 'com.google.android.flexbox:flexbox:3.0.0'
+            -->
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/chipContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:flexWrap="wrap"
+                app:alignItems="flex_start"
+                app:alignContent="flex_start" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Continue button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="16dp"
+        android:background="@color/white"
+        android:elevation="8dp">
+
+        <Button
+            android:id="@+id/btnContinue"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="Continue"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:fontFamily="@font/jost"
+            android:background="@drawable/btn_primary_bg"
+            android:stateListAnimator="@null" />
+
+    </LinearLayout>
+
+</LinearLayout>

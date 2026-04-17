@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Step 6 — Review & Submit. Read-only summary of all entered details. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Review Your Listing"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Double-check everything before making your item available to renters."
+                android:textSize="13sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginBottom="24dp" />
+
+            <!-- ── Cover photo preview ── -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:background="@drawable/summary_image_placeholder"
+                android:layout_marginBottom="20dp">
+
+                <ImageView
+                    android:id="@+id/ivSummaryCover"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Cover photo preview"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="No photo added"
+                    android:textSize="13sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost" />
+
+            </FrameLayout>
+
+            <!-- ── Section: Listing Details ── -->
+            <include layout="@layout/include_summary_section_header"
+                android:id="@+id/headerInfo" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/summary_card_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+
+                <!-- Name -->
+                <include layout="@layout/include_summary_row"
+                    android:id="@+id/rowName" />
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="@color/black" android:layout_marginVertical="10dp"/>
+
+                <!-- Description -->
+                <include layout="@layout/include_summary_row"
+                    android:id="@+id/rowDesc" />
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="@color/black" android:layout_marginVertical="10dp"/>
+
+                <!-- Location -->
+                <include layout="@layout/include_summary_row"
+                    android:id="@+id/rowLocation" />
+
+            </LinearLayout>
+
+            <!-- ── Section: Category ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/summary_card_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Category"
+                    android:textSize="11sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tvSummaryCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="— not selected —"
+                    android:textSize="15sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost" />
+
+            </LinearLayout>
+
+            <!-- ── Section: Pricing ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/summary_card_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pricing"
+                    android:textSize="11sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Price row -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Base Price"
+                        android:textSize="14sp"
+                        android:textColor="@color/black"
+                        android:fontFamily="@font/jost"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true" />
+
+                    <TextView
+                        android:id="@+id/tvSummaryPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₱0.00 / daily"
+                        android:textSize="14sp"
+                        android:textColor="@color/black"
+                        android:fontFamily="@font/jost"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+
+                </RelativeLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="@color/black" android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Payment Methods"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tvSummaryPayments"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cash"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost" />
+
+            </LinearLayout>
+
+            <!-- ── Section: Activities ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/summary_card_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Activities"
+                    android:textSize="11sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tvSummaryActivities"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="— none selected —"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost"
+                    android:lineSpacingMultiplier="1.5" />
+
+            </LinearLayout>
+
+            <!-- ── Section: Photos ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/summary_card_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Photos"
+                    android:textSize="11sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tvSummaryPhotos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 photos attached"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- "List Product" CTA -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="16dp"
+        android:background="@color/white"
+        android:elevation="8dp">
+
+        <Button
+            android:id="@+id/btnListProduct"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="List Product"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:fontFamily="@font/jost"
+            android:background="@drawable/btn_primary_bg"
+            android:stateListAnimator="@null" />
+
+    </LinearLayout>
+
+</LinearLayout>

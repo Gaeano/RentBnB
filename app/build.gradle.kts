@@ -47,4 +47,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
 
+    // Flexbox
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
+
 }

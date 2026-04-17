@@ -28,6 +28,7 @@
                 android:fontFamily="@font/josefinsans_bolditalic"
                 android:textSize="18sp"
                 android:textStyle="bold|italic"
+                android:paddingTop="10dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -49,6 +50,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
+                android:paddingTop="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 

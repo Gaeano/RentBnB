@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -22,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.AuthViewModel;
 import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
 
@@ -33,9 +35,11 @@ public class SignUpActivity extends AppCompatActivity {
 
     private TextInputEditText fullName, email, password, confirmPassword;
 
-    private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private GoogleAuthHelper googleAuthHelper;
+
+    private AuthViewModel authViewModel;
+    private static final String TAG = "SignUpActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,16 +59,11 @@ public class SignUpActivity extends AppCompatActivity {
         confirmPassword = findViewById(R.id.confirm_password_textfield);
 
 
-        auth = FirebaseAuth.getInstance();
-        currentUser = auth.getCurrentUser();
 
         googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback(){
             @Override
-            public void onSuccess(FirebaseUser user, boolean isNewUser) {
-                Toast.makeText(SignUpActivity.this, "Google Sign-In successful", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
-                startActivity(intent);
-                finish();
+            public void onSuccess(String idToken) {
+                authViewModel.signInWithGoogle(idToken);
 
             }
             @Override
@@ -74,24 +73,30 @@ public class SignUpActivity extends AppCompatActivity {
 
         });
 
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+        setUpObservers();
+
+
         googleBtn.setOnClickListener(v -> {
             googleAuthHelper.launchGoogleSignIn();
         });
 
 
-        checkRememberMeStatus();
 
 
         loginBtnRedirect.setOnClickListener(v -> {
             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
             startActivity(intent);
-            Log.d("SignUpActivity", "Redirecting to log in activity");
+            Log.d(TAG, "Redirecting to log in activity");
         });
 
 
         signUpBtn.setOnClickListener(v -> {
             signUpAttempt();
         });
+
+        checkRememberMeStatus();
 
 
 
@@ -119,48 +124,7 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
-        signUpBtn.setEnabled(false);
-        signUpBtn.setText("Signing up...");
-
-        auth.createUserWithEmailAndPassword(emailText, passwordText).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()){
-                    Toast.makeText(SignUpActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
-                    FirebaseUser user = auth.getCurrentUser();
-
-                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                            .setDisplayName(fullNameText)
-                            .build();
-                    user.updateProfile(profileUpdates);
-
-                    //sign in automatically
-                    auth.signInWithEmailAndPassword(emailText, passwordText).addOnCompleteListener(autoSignInTask -> {
-                       if (autoSignInTask.isSuccessful()){
-                            Log.d("SignUpActivity", "signInWithEmail:success");
-                       } else {
-                           String errorMsg = autoSignInTask.getException() != null ? autoSignInTask.getException().getMessage() : "Authentication failed.";
-                           Log.e("SignUpActivity", "signInWithEmail:failure");
-                       }
-                    });
-
-                    //add logic to add to db using backend
-
-                    Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
-                    startActivity(intent);
-                    finish();
-
-                } else {
-                    signUpBtn.setEnabled(true);
-                    signUpBtn.setText("Sign up");
-                    String errorMsg = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
-                    Toast.makeText(SignUpActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
-                    Log.e("SignUpActivity", "createUserWithEmail:failure", task.getException());
-                }
-            }
-        });
-
+        authViewModel.signUp(emailText, passwordText, fullNameText);
 
     }
     //this method to be transferreed to the splash screen
@@ -193,7 +157,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     }
     private void purgeLocalSession(SharedPreferences sharedPreferences) {
-        auth.signOut(); // Kills the Firebase cache
+        authViewModel.logout(); // Kills the Firebase cache
 
         // Wipe the Remember Me data
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -205,6 +169,35 @@ public class SignUpActivity extends AppCompatActivity {
 
     }
 
+    private void setUpObservers(){
+        authViewModel.getUserLiveData().observe(this, user -> {
+           if (user != null){
+               Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_LONG).show();
+               currentUser = user;
+               Log.d(TAG, "successfully initialized user");
+               Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
+               startActivity(intent);
+               finish();
+           }
+        });
+
+
+        authViewModel.getErrorLiveData().observe(this, errorMessage -> {
+            if (errorMessage != null){
+                Toast.makeText(SignUpActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        authViewModel.getLiveLoadingData().observe(this, isLoading -> {
+            if (isLoading != null && isLoading){
+                signUpBtn.setEnabled(false);
+                signUpBtn.setText("Signing up...");
+            } else {
+                signUpBtn.setEnabled(true);
+                signUpBtn.setText("Sign up");
+            }
+        });
+    }
 
 
 

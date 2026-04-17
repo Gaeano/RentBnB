@@ -25,7 +25,6 @@ import com.usc.rentbnb.R;
 public class GoogleAuthHelper {
 
     private final Activity activity;
-    private final FirebaseAuth auth;
     private final CredentialManager credentialManager;
     private final GoogleAuthCallback callback;
 
@@ -33,7 +32,7 @@ public class GoogleAuthHelper {
 
     // 1. The Interface: This is how the helper talks back to your Activity
     public interface GoogleAuthCallback {
-        void onSuccess(FirebaseUser user, boolean isNewUser);
+        void onSuccess(String idToken);
         void onError(String errorMessage);
     }
 
@@ -41,7 +40,6 @@ public class GoogleAuthHelper {
     public GoogleAuthHelper(Activity activity, GoogleAuthCallback callback) {
         this.activity = activity;
         this.callback = callback;
-        this.auth = FirebaseAuth.getInstance();
         this.credentialManager = CredentialManager.create(activity);
     }
 
@@ -83,7 +81,7 @@ public class GoogleAuthHelper {
                 credential.getType().equals(GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)) {
             try {
                 GoogleIdTokenCredential googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.getData());
-                firebaseAuthWithGoogle(googleIdTokenCredential.getIdToken());
+                callback.onSuccess(googleIdTokenCredential.getIdToken());
                 Log.d(TAG, "Successfully got google ID credential");
             } catch (Exception e) {
                 callback.onError("Failed to parse Google credentials.");
@@ -92,23 +90,4 @@ public class GoogleAuthHelper {
         }
     }
 
-    private void firebaseAuthWithGoogle(String idToken) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-
-        auth.signInWithCredential(credential).addOnCompleteListener(activity, task -> {
-            if (task.isSuccessful()) {
-                FirebaseUser user = auth.getCurrentUser();
-
-                boolean isNewUser = task.getResult().getAdditionalUserInfo().isNewUser();
-
-                callback.onSuccess(user, isNewUser);
-                Log.d(TAG, "Successfully Signed in using credential");
-
-            } else {
-                String error = task.getException() != null ? task.getException().getMessage() : "Firebase Auth Failed";
-                callback.onError(error);
-                Log.e(TAG, "Firebase Auth Failed");
-            }
-        });
-    }
 }

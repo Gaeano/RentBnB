@@ -11,11 +11,6 @@ import androidx.fragment.app.Fragment;
 
 import com.usc.rentbnb.R;
 
-/**
- * Step 6 / 6 — Review & Submit
- * Shows a read-only summary of all entered data before posting.
- * "List Product" button triggers success screen.
- */
 public class ListingSummaryFragment extends Fragment {
 
     @Nullable
@@ -30,7 +25,6 @@ public class ListingSummaryFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // "List Product" goes to success screen (which is also step 7 internally)
         view.findViewById(R.id.btnListProduct).setOnClickListener(v -> {
             if (getActivity() instanceof AddListingActivity) {
                 ((AddListingActivity) getActivity()).goNextStep();

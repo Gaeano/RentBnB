@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -56,7 +57,7 @@
                 android:textSize="14sp"
                 android:textColor="@color/black"
                 android:textColorHint="@color/hint_color"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/inconsolata"
                 android:background="@drawable/input_bg"
                 android:paddingHorizontal="16dp"
                 android:inputType="textCapSentences"
@@ -77,10 +78,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="110dp"
                 android:hint="Describe your item — condition, what's included, best uses…"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textColor="@color/black"
                 android:textColorHint="@color/hint_color"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/inconsolata"
                 android:background="@drawable/input_bg"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="12dp"
@@ -106,7 +107,7 @@
                 android:textSize="14sp"
                 android:textColor="@color/black"
                 android:textColorHint="@color/hint_color"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/inconsolata"
                 android:background="@drawable/input_bg"
                 android:paddingHorizontal="16dp"
                 android:inputType="textCapSentences"
@@ -130,7 +131,7 @@
                 android:textSize="14sp"
                 android:textColor="@color/black"
                 android:textColorHint="@color/hint_color"
-                android:fontFamily="@font/jost"
+                android:fontFamily="@font/inconsolata"
                 android:background="@drawable/input_bg"
                 android:paddingHorizontal="16dp"
                 android:inputType="textPostalAddress"
@@ -144,20 +145,17 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="20dp"
         android:paddingVertical="16dp"
-        android:background="@color/white"
-        android:elevation="8dp">
+        android:background="@color/white">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnContinue"
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:text="Continue"
-            android:textSize="15sp"
             android:textColor="@color/white"
             android:fontFamily="@font/jost_bold"
-            android:background="@drawable/btn_primary_bg"
-            android:stateListAnimator="@null" />
-
+            android:textAllCaps="false"
+            android:background="@drawable/btn_primary_bg" />
     </LinearLayout>
 
 </LinearLayout>

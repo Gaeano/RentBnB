@@ -1,9 +1,7 @@
 package com.usc.rentbnb.ui.auth;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -12,18 +10,13 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
-import com.usc.rentbnb.models.AuthViewModel;
+import com.usc.rentbnb.viewmodels.AuthViewModel;
 import com.usc.rentbnb.ui.home.HomeActivity;
-import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
 
 public class LoginActivity extends AppCompatActivity {
 

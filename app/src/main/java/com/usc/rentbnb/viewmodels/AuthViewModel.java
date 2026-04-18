@@ -1,14 +1,12 @@
-package com.usc.rentbnb.models;
+package com.usc.rentbnb.viewmodels;
 
 import android.util.Log;
 
-import androidx.core.app.NavUtils;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.usc.rentbnb.repositories.AuthRepository;
 
 public class AuthViewModel extends ViewModel {

@@ -1,10 +1,28 @@
 package com.usc.rentbnb.network;
 
+import com.usc.rentbnb.models.AuthResponse;
 import com.usc.rentbnb.models.IslandResponse;
+import com.usc.rentbnb.models.RegisterRequest;
+
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
 
 public interface ApiService {
     @GET("islands")
     Call<IslandResponse> getIslands();
+
+    @POST("auth/register")
+    Call<AuthResponse> registerUser(
+            @Header("Authorization") String token,
+            @Body RegisterRequest registerRequest
+    );
+
+    @POST("auth/google")
+    Call<AuthResponse> googleSignIn(
+            @Header("Authorization") String token
+    );
+
 }

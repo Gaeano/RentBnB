@@ -7,7 +7,15 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.usc.rentbnb.models.AuthResponse;
+import com.usc.rentbnb.models.RegisterRequest;
+import com.usc.rentbnb.network.ApiClient;
+import com.usc.rentbnb.network.ApiService;
 import com.usc.rentbnb.repositories.AuthRepository;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AuthViewModel extends ViewModel {
     private final AuthRepository authRepository;
@@ -31,6 +39,8 @@ public class AuthViewModel extends ViewModel {
         return loadingLiveData;
     }
 
+    private ApiService apiService = ApiClient.getApiService();
+
     public void login(String email, String password){
         loadingLiveData.setValue(true);
 
@@ -47,49 +57,114 @@ public class AuthViewModel extends ViewModel {
 
     }
 
-    public void signUp(String email, String password, String fullName){
+    public void signUp(String email, String password, String fullName) {
         loadingLiveData.setValue(true);
 
         authRepository.signUp(email, password).addOnCompleteListener(task -> {
-           if (task.isSuccessful()){
-               authRepository.updateProfile(fullName).addOnCompleteListener(updateTask -> {
-                   if (updateTask.isSuccessful()){
+            if (!task.isSuccessful()) {
+                handleError("Sign up failed", task.getException());
+                return;
+            }
 
-                       FirebaseUser user = authRepository.getCurrentUser();
-                       if (user != null){
-                           user.getIdToken(true).addOnCompleteListener(tokenTask -> {
-                              String token = tokenTask.getResult().getToken();
-                              Log.e("POSTMAN_TOKEN", token);
-                           });
-                       }
+            authRepository.updateProfile(fullName).addOnCompleteListener(updateTask -> {
+                if (!updateTask.isSuccessful()) {
+                    handleError("Profile update failed", updateTask.getException());
+                    return;
+                }
 
-                       userLiveData.setValue(authRepository.getCurrentUser());
-                       loadingLiveData.setValue(false);
-                       Log.d(TAG, "Sign up successful with display name updated");
-                   } else {
-                       loadingLiveData.setValue(false);
-                       errorLiveData.setValue(updateTask.getException().getMessage());
-                       Log.e(TAG, "Sign up failed" + updateTask.getException().getMessage());
-                   }
-               });
-           }
+                FirebaseUser user = authRepository.getCurrentUser();
+
+                if (user == null) {
+                    handleError("User session lost", null);
+                    return;
+                }
+
+                user.getIdToken(true).addOnCompleteListener(tokenTask -> {
+                    if (!tokenTask.isSuccessful()) {
+                        handleError("Token retrieval failed", tokenTask.getException());
+                        return;
+                    }
+
+                    String token = "Bearer " + tokenTask.getResult().getToken();
+                    apiService.registerUser(token, new RegisterRequest(fullName)).enqueue(new Callback<AuthResponse>() {
+                        @Override
+                        public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                            loadingLiveData.setValue(false);
+                            if (response.isSuccessful()) {
+                                userLiveData.setValue(user);
+                                Log.d(TAG, "User added to db    ");
+                            } else {
+                                errorLiveData.setValue("Backend Error: " + response.code());
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<AuthResponse> call, Throwable t) {
+                            loadingLiveData.setValue(false);
+                            errorLiveData.setValue("Network Failure: " + t.getMessage());
+                            Log.e(TAG, t.getMessage());
+                        }
+                    });
+                });
+            });
         });
+    }
+
+    private void handleError(String message, Exception e) {
+        loadingLiveData.setValue(false);
+        String error = (e != null) ? e.getMessage() : "Unknown error";
+        errorLiveData.setValue(message + ": " + error);
+        Log.e(TAG, message + ": " + error);
     }
 
     public void signInWithGoogle(String idToken){
         loadingLiveData.setValue(true);
 
         authRepository.loginWithGoogle(idToken).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                userLiveData.setValue(authRepository.getCurrentUser());
-                loadingLiveData.setValue(false);
-                Log.d(TAG, "Sign in with Google successful");
-            } else {
-                loadingLiveData.setValue(false);
-                errorLiveData.setValue(task.getException().getMessage());
-                Log.e(TAG, "Sign in with Google failed" + task.getException().getMessage());
+            if (!task.isSuccessful()) {
+                handleError("Sign in with Google failed", task.getException());
+                return;
             }
-        });
+            FirebaseUser user = authRepository.getCurrentUser();
+
+            if (user == null) {
+                handleError("User session lost", null);
+                return;
+            }
+
+            user.getIdToken(true).addOnCompleteListener(tokenTask -> {
+                if (!tokenTask.isSuccessful()) {
+                    handleError("Token retrieval failed", tokenTask.getException());
+                    return;
+                }
+
+                String token = "Bearer " + tokenTask.getResult().getToken();
+                apiService.googleSignIn(token).enqueue(new Callback<AuthResponse>(){
+
+                    @Override
+                    public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                        loadingLiveData.setValue(false);
+                        if(response.isSuccessful()){
+                            userLiveData.setValue(user);
+                            Log.d(TAG, "User added to db    ");
+                        } else {
+                            loadingLiveData.setValue(true);
+                            errorLiveData.setValue("Backend Error: " + response.code());
+                            Log.e(TAG, "Backend Error: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<AuthResponse> call, Throwable t) {
+                        loadingLiveData.setValue(false);
+                        errorLiveData.setValue("Network Failure: " + t.getMessage());
+                        Log.e(TAG, t.getMessage());
+                    }
+                });
+
+
+            });
+    });
     }
 
     public void logout(){

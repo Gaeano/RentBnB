@@ -26,11 +26,6 @@ public class verifyAndForgetActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.verify_forgetpassword_activity);
 
-
-        backBtn.setOnClickListener(v ->{
-            backNavigation();
-        });
-
         getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {

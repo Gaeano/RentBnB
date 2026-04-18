@@ -14,7 +14,7 @@
         android:usesCleartextTraffic="true"> <!-- set to false before publishing app -->
         <activity
             android:name=".ui.listing.AddListingActivity"
-            android:exported="true">
+            android:exported="false">
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
 

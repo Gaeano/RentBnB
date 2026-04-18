@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
@@ -28,10 +29,12 @@ public class SignUpActivity extends AppCompatActivity {
 
     private TextInputEditText fullName, email, password, confirmPassword;
 
+    FirebaseAuth auth;
     private FirebaseUser currentUser;
     private GoogleAuthHelper googleAuthHelper;
 
     private AuthViewModel authViewModel;
+    private boolean isPerformingAuthAction = false;
     private static final String TAG = "SignUpActivity";
 
     @Override
@@ -56,6 +59,7 @@ public class SignUpActivity extends AppCompatActivity {
         googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback(){
             @Override
             public void onSuccess(String idToken) {
+                isPerformingAuthAction = true;
                 authViewModel.signInWithGoogle(idToken);
 
             }
@@ -66,7 +70,11 @@ public class SignUpActivity extends AppCompatActivity {
 
         });
 
+        auth = FirebaseAuth.getInstance();
+        currentUser = auth.getCurrentUser();
+
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
 
         setUpObservers();
 
@@ -101,6 +109,7 @@ public class SignUpActivity extends AppCompatActivity {
         String emailText = email.getText().toString().trim();
         String passwordText = password.getText().toString().trim();
         String confirmPasswordText = confirmPassword.getText().toString().trim();
+        isPerformingAuthAction = true;
 
         if (fullName.getText().toString().isEmpty() || email.getText().toString().isEmpty() || password.getText().toString().isEmpty() || confirmPassword.getText().toString().isEmpty()){
             Toast.makeText(SignUpActivity.this, "Please fill up all fields", Toast.LENGTH_LONG).show();
@@ -116,6 +125,7 @@ public class SignUpActivity extends AppCompatActivity {
             Toast.makeText(SignUpActivity.this, "Password must be at least 7 characters", Toast.LENGTH_LONG).show();
             return;
         }
+
 
         authViewModel.signUp(emailText, passwordText, fullNameText);
 
@@ -164,9 +174,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void setUpObservers(){
         authViewModel.getUserLiveData().observe(this, user -> {
-           if (user != null){
+           if (user != null && isPerformingAuthAction){
                Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_LONG).show();
-               currentUser = user;
                Log.d(TAG, "successfully initialized user");
                Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
                startActivity(intent);

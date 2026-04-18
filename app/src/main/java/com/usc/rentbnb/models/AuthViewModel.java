@@ -56,6 +56,15 @@ public class AuthViewModel extends ViewModel {
            if (task.isSuccessful()){
                authRepository.updateProfile(fullName).addOnCompleteListener(updateTask -> {
                    if (updateTask.isSuccessful()){
+
+                       FirebaseUser user = authRepository.getCurrentUser();
+                       if (user != null){
+                           user.getIdToken(true).addOnCompleteListener(tokenTask -> {
+                              String token = tokenTask.getResult().getToken();
+                              Log.e("POSTMAN_TOKEN", token);
+                           });
+                       }
+
                        userLiveData.setValue(authRepository.getCurrentUser());
                        loadingLiveData.setValue(false);
                        Log.d(TAG, "Sign up successful with display name updated");

@@ -15,6 +15,12 @@
             android:name=".ui.listing.AddListingActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.favorites.FavoritesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.favorites.FavoritesProductActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.home.HomeActivity"
             android:exported="false" />
         <activity

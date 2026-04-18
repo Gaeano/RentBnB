@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.ui.auth.LoginActivity;
+import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.ui.listing.IslandDetailsActivity;
 
 public class HomeActivity extends AppCompatActivity {
@@ -34,8 +35,11 @@ public class HomeActivity extends AppCompatActivity {
 
         // --- 2. Setup Filter Chips ---
         setupFilterChips();
+        
+        // --- 3. Setup Bottom Navigation ---
+        setupBottomNavigation();
 
-        // --- 3. Setup Logout ---
+        // --- 4. Setup Logout ---
         if (logout != null) {
             logout.setOnClickListener(v -> {
                 auth.signOut();
@@ -91,5 +95,15 @@ public class HomeActivity extends AppCompatActivity {
 
         selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
         selectedChip.setTextColor(Color.WHITE);
+    }
+
+    private void setupBottomNavigation() {
+        View addListingFab = findViewById(R.id.navFab);
+        if (addListingFab != null) {
+            addListingFab.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, AddListingActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 }

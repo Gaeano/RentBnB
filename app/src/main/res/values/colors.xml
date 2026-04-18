@@ -9,7 +9,9 @@
     <!-- Text -->
     <color name="text_dark">#1A1A2E</color>
     <color name="text_grey">#6B7280</color>
-    <color name="white">#FFFFFF</color>
+    <color name="white">#FAFAFA</color>
+    <color name="black">#000000</color>
+    <color name="hint_color">#808080</color>
 
     <!-- Indicators -->
     <color name="indicator_active">#3DCFCF</color>
@@ -19,4 +21,5 @@
     <color name="colorPrimary">#3DCFCF</color>
     <color name="colorPrimaryDark">#29AAAA</color>
     <color name="colorAccent">#3DCFCF</color>
+
 </resources>

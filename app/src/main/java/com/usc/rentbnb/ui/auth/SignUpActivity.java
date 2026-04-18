@@ -12,9 +12,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -25,6 +23,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.AuthViewModel;
+import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -35,8 +35,12 @@ public class SignUpActivity extends AppCompatActivity {
 
     private TextInputEditText fullName, email, password, confirmPassword;
 
-    private FirebaseAuth auth;
     private FirebaseUser currentUser;
+    private GoogleAuthHelper googleAuthHelper;
+
+    private AuthViewModel authViewModel;
+    private static final String TAG = "SignUpActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,18 +59,44 @@ public class SignUpActivity extends AppCompatActivity {
         confirmPassword = findViewById(R.id.confirm_password_textfield);
 
 
-        auth = FirebaseAuth.getInstance();
-        currentUser = auth.getCurrentUser();
+
+        googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback(){
+            @Override
+            public void onSuccess(String idToken) {
+                authViewModel.signInWithGoogle(idToken);
+
+            }
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(SignUpActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+
+        });
+
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+        setUpObservers();
+
+
+        googleBtn.setOnClickListener(v -> {
+            googleAuthHelper.launchGoogleSignIn();
+        });
+
+
+
 
         loginBtnRedirect.setOnClickListener(v -> {
             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
             startActivity(intent);
+            Log.d(TAG, "Redirecting to log in activity");
         });
 
 
         signUpBtn.setOnClickListener(v -> {
             signUpAttempt();
         });
+
+        checkRememberMeStatus();
 
 
 
@@ -94,51 +124,80 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
-        signUpBtn.setEnabled(false);
-        signUpBtn.setText("Signing up...");
+        authViewModel.signUp(emailText, passwordText, fullNameText);
 
-        auth.createUserWithEmailAndPassword(emailText, passwordText).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+    }
+    //this method to be transferreed to the splash screen
+    private void checkRememberMeStatus(){
+        SharedPreferences sharedPreferences = getSharedPreferences("RentBnBPrefs", MODE_PRIVATE);
+        Boolean isRemembered = sharedPreferences.getBoolean("IS_REMEMBERED", false);
 
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()){
-                    Toast.makeText(SignUpActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
-                    FirebaseUser user = auth.getCurrentUser();
+        if (currentUser != null){
+                currentUser.reload().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        if (isRemembered){
+                            Intent intent = new Intent(SignUpActivity.this, HomeActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    } else {
+                        purgeLocalSession(sharedPreferences);
+                    }
 
-                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                            .setDisplayName(fullNameText)
-                            .build();
-                    user.updateProfile(profileUpdates);
 
-                    //sign in automatically
-                    auth.signInWithEmailAndPassword(emailText, passwordText).addOnCompleteListener(autoSignInTask -> {
-                       if (autoSignInTask.isSuccessful()){
-                            Log.d("SignUpActivity", "signInWithEmail:success");
-                       } else {
-                           String errorMsg = autoSignInTask.getException() != null ? autoSignInTask.getException().getMessage() : "Authentication failed.";
-                           Log.e("SignUpActivity", "signInWithEmail:failure");
-                       }
-                    });
+            });
+        }
 
-                    //add logic to add to db using backend
-
-                    Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
-                    startActivity(intent);
-                    finish();
-
-                } else {
-                    signUpBtn.setEnabled(true);
-                    signUpBtn.setText("Sign up");
-                    String errorMsg = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
-                    Toast.makeText(SignUpActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
-                    Log.e("SignUpActivity", "createUserWithEmail:failure", task.getException());
-                }
-            }
-        });
+//        String savedEmail = sharedPreferences.getString("SAVED_EMAIL", "");
+//        if (!savedEmail.isEmpty()){
+//            emailField.setText(savedEmail);
+//            rememberMeBtn.setChecked(true);
+//        }
 
 
     }
+    private void purgeLocalSession(SharedPreferences sharedPreferences) {
+        authViewModel.logout(); // Kills the Firebase cache
 
+        // Wipe the Remember Me data
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("IS_REMEMBERED", false);
+        editor.putString("SAVED_EMAIL", "");
+        editor.apply();
+
+        Toast.makeText(this, "Session expired. Please log in again.", Toast.LENGTH_LONG).show();
+
+    }
+
+    private void setUpObservers(){
+        authViewModel.getUserLiveData().observe(this, user -> {
+           if (user != null){
+               Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_LONG).show();
+               currentUser = user;
+               Log.d(TAG, "successfully initialized user");
+               Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
+               startActivity(intent);
+               finish();
+           }
+        });
+
+
+        authViewModel.getErrorLiveData().observe(this, errorMessage -> {
+            if (errorMessage != null){
+                Toast.makeText(SignUpActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        authViewModel.getLiveLoadingData().observe(this, isLoading -> {
+            if (isLoading != null && isLoading){
+                signUpBtn.setEnabled(false);
+                signUpBtn.setText("Signing up...");
+            } else {
+                signUpBtn.setEnabled(true);
+                signUpBtn.setText("Sign up");
+            }
+        });
+    }
 
 
 

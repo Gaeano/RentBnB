@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Listing Information"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_bold"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tell renters what you're offering. Be clear and descriptive so your listing stands out."
+                android:textSize="13sp"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginBottom="28dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Product Name"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_semibold"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/etProductName"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:hint="e.g. Reef-Ready Snorkel Set"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/hint_color"
+                android:fontFamily="@font/jost"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:inputType="textCapSentences"
+                android:maxLines="1"
+                android:layout_marginBottom="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_semibold"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/etDescription"
+                android:layout_width="match_parent"
+                android:layout_height="110dp"
+                android:hint="Describe your item — condition, what's included, best uses…"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/hint_color"
+                android:fontFamily="@font/jost"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:inputType="textMultiLine|textCapSentences"
+                android:gravity="top|start"
+                android:maxLines="5"
+                android:layout_marginBottom="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Island/Location"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_semibold"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/etIsland"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:hint="e.g. Moalboal, Cebu"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/hint_color"
+                android:fontFamily="@font/jost"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:inputType="textCapSentences"
+                android:maxLines="1"
+                android:layout_marginBottom="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Full Address"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_semibold"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/etAddress"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:hint="Street, Barangay, Municipality (optional)"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/hint_color"
+                android:fontFamily="@font/jost"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:inputType="textPostalAddress"
+                android:maxLines="1" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="16dp"
+        android:background="@color/white"
+        android:elevation="8dp">
+
+        <Button
+            android:id="@+id/btnContinue"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="Continue"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:fontFamily="@font/jost_bold"
+            android:background="@drawable/btn_primary_bg"
+            android:stateListAnimator="@null" />
+
+    </LinearLayout>
+
+</LinearLayout>

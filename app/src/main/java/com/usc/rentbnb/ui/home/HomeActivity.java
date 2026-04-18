@@ -8,18 +8,30 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
-import com.usc.rentbnb.ui.listing.IslandDetailsActivity;
+import com.usc.rentbnb.islands.IslandDetailsActivity;
+import com.usc.rentbnb.viewmodels.HomeViewModel;
+
+import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
 
     private TextView logout;
     private FirebaseAuth auth;
     private TextView[] filterChips;
+    private HomeViewModel homeViewModel;
+
+    private final int[] cardIds = {
+            R.id.island_card_1, R.id.island_card_2,
+            R.id.island_card_3, R.id.island_card_4,
+            R.id.island_card_5, R.id.island_card_6
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,17 +39,18 @@ public class HomeActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
 
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        setupFilterChips();
+        setupBottomNavigation();
+
+        homeViewModel.getIslands().observe(this, islands -> {
+            populateIslandCards(islands);
+        });
+
+        homeViewModel.fetchIslands();
+
 //        logout = findViewById(R.id.logout_btn);
         auth = FirebaseAuth.getInstance();
-
-        // --- 1. Setup Island Cards ---
-        setupIslandCards();
-
-        // --- 2. Setup Filter Chips ---
-        setupFilterChips();
-        
-        // --- 3. Setup Bottom Navigation ---
-        setupBottomNavigation();
 
         // --- 4. Setup Logout ---
         if (logout != null) {
@@ -50,24 +63,32 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void setupIslandCards() {
-        // Create an array containing all the IDs of your island cards
-        int[] cardIds = {
-                R.id.island_card_1, R.id.island_card_2,
-                R.id.island_card_3, R.id.island_card_4,
-                R.id.island_card_5, R.id.island_card_6
-        };
+    private void populateIslandCards(List<Island> islands) {
+        for (int i = 0; i < cardIds.length; i++) {
+            if (i >= islands.size()) break;
 
-        // Loop through every ID in the array
-        for (int id : cardIds) {
-            View card = findViewById(id);
-            if (card != null) {
-                // Set the click listener for each card found
-                card.setOnClickListener(v -> {
-                    Intent intent = new Intent(HomeActivity.this, IslandDetailsActivity.class);
-                    startActivity(intent);
-                });
-            }
+            Island island = islands.get(i);
+            View card = findViewById(cardIds[i]);
+
+            if (card == null) continue;
+
+            TextView nameView = card.findViewById(R.id.island_name);
+            TextView locationView = card.findViewById(R.id.island_location);
+            TextView ratingView = card.findViewById(R.id.island_rating);
+
+            if (nameView != null) nameView.setText(island.getIslandName());
+            if (locationView != null) locationView.setText(island.getLocation());
+            if (ratingView != null) ratingView.setText(String.valueOf(island.getRating()));
+
+            card.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, IslandDetailsActivity.class);
+                intent.putExtra("island_name", island.getIslandName());
+                intent.putExtra("location", island.getLocation());
+                intent.putExtra("rating", island.getRating());
+                intent.putExtra("category", island.getCategory());
+                intent.putExtra("description", island.getDescription());
+                startActivity(intent);
+            });
         }
     }
 

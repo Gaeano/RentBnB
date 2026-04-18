@@ -1,13 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- onboarding theme -->
-    <style name="Theme.RentBnb.Onboarding" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/teal_primary</item>
-        <item name="colorPrimaryDark">@color/teal_dark</item>
+    <!-- Base application theme. -->
+    <style name="Theme.RentBnb" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Primary color: #FAFAFA (white) -->
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryVariant">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
+
+        <!-- Secondary color: Teal -->
+        <item name="colorSecondary">@color/teal_primary</item>
+        <item name="colorSecondaryVariant">@color/teal_dark</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Accent/Tertiary color: Black -->
         <item name="colorAccent">@color/teal_primary</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="colorError">#B00020</item>
+
+        <!-- Window attributes -->
+        <item name="android:windowBackground">@color/white</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+
         <item name="android:textAllCaps">false</item>
     </style>
 </resources>

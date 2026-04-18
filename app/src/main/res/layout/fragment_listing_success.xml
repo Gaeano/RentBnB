@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingVertical="24dp">
+    android:paddingVertical="24dp"
+    android:background="@color/white">
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/ivSuccessIcon"
@@ -54,11 +55,12 @@
         android:paddingHorizontal="20dp"
         android:paddingVertical="16dp"
         android:elevation="8dp"
+        android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnViewListing"
             android:layout_width="match_parent"
             android:layout_height="54dp"
@@ -66,9 +68,8 @@
             android:textSize="15sp"
             android:textColor="@color/white"
             android:fontFamily="@font/jost_bold"
-            android:background="@drawable/btn_primary_bg"
-            android:stateListAnimator="@null" />
-
+            android:textAllCaps="false"
+            android:background="@drawable/btn_primary_bg" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

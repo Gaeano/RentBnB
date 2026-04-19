@@ -254,7 +254,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="20dp"
@@ -270,6 +270,16 @@
             android:fontFamily="@font/jost_bold"
             android:textAllCaps="false"
             android:background="@drawable/btn_primary_bg" />
-    </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone"
+            android:indeterminateTint="@color/white" />
+    </FrameLayout>
 
 </LinearLayout>

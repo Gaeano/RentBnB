@@ -10,14 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.viewmodels.AddListingViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ListingActivitiesFragment extends Fragment {
+    private AddListingViewModel viewModel;
 
     private static final String[] ACTIVITIES = {
             "Swimming", "Snorkeling", "Scuba Diving",
@@ -42,11 +45,18 @@ public class ListingActivitiesFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(AddListingViewModel.class);
 
         FlexboxLayout chipContainer = view.findViewById(R.id.chipContainer);
         buildActivityChips(chipContainer);
 
         view.findViewById(R.id.btnContinue).setOnClickListener(v -> {
+            List<String> selectedActivities = new ArrayList<>();
+            for (int i : this.selectedActivities) {
+                selectedActivities.add(ACTIVITIES[i]);
+            }
+            viewModel.suggestedActivities = selectedActivities;
+
             if (getActivity() instanceof AddListingActivity) {
                 ((AddListingActivity) getActivity()).goNextStep();
             }

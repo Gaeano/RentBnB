@@ -1,6 +1,8 @@
 package com.usc.rentbnb.network;
 
 import com.usc.rentbnb.models.AuthResponse;
+import com.usc.rentbnb.models.CreateListingRequest;
+import com.usc.rentbnb.models.CreateListingResponse;
 import com.usc.rentbnb.models.IslandResponse;
 import com.usc.rentbnb.models.RegisterRequest;
 
@@ -24,5 +26,8 @@ public interface ApiService {
     Call<AuthResponse> googleSignIn(
             @Header("Authorization") String token
     );
+
+    @POST("listings")
+    Call<CreateListingResponse> createListing(@Body CreateListingRequest createListingRequest);
 
 }

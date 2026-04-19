@@ -64,8 +64,8 @@
                     android:gravity="center"
                     android:text="Hourly"
                     android:textSize="13sp"
-                    android:fontFamily="@font/jost"
-                    android:background="@drawable/unit_btn_bg"
+                    android:fontFamily="@font/jost_bold"
+                    android:background="@drawable/unit_btn_selected_bg"
                     android:clickable="true"
                     android:focusable="true" />
 
@@ -78,8 +78,8 @@
                     android:gravity="center"
                     android:text="Daily"
                     android:textSize="13sp"
-                    android:fontFamily="@font/jost_bold"
-                    android:background="@drawable/unit_btn_selected_bg"
+                    android:fontFamily="@font/jost"
+                    android:background="@drawable/unit_btn_bg"
                     android:clickable="true"
                     android:focusable="true" />
 
@@ -90,6 +90,19 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="Weekly"
+                    android:textSize="13sp"
+                    android:fontFamily="@font/jost"
+                    android:background="@drawable/unit_btn_bg"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnMonthly"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Monthly"
                     android:textSize="13sp"
                     android:fontFamily="@font/jost"
                     android:background="@drawable/unit_btn_bg"

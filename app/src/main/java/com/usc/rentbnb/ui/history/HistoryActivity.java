@@ -90,12 +90,21 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void handleChipSelection(TextView selectedChip) {
-        // IMPORTANT FIX: If the chip is already selected (white text), ignore the click!
-        // This prevents the text from briefly flashing black when tapped again.
+        // 1. Check if the user is trying to DESELECT the currently active chip
         if (selectedChip.getCurrentTextColor() == Color.WHITE) {
-            return;
+            // Remove the selected background
+            selectedChip.setBackgroundResource(R.drawable.chip_background_teal);
+
+            // Fade the text smoothly back to Black
+            ValueAnimator deselectAnim = ValueAnimator.ofArgb(Color.WHITE, Color.BLACK);
+            deselectAnim.setDuration(200);
+            deselectAnim.addUpdateListener(animator -> selectedChip.setTextColor((int) animator.getAnimatedValue()));
+            deselectAnim.start();
+
+            return; // Stop here so it doesn't get re-selected!
         }
 
+        // 2. Otherwise, the user clicked a new unselected chip.
         // Reset all OTHER chips to their normal, unselected state
         for (TextView chip : filterChips) {
             if (chip != null && chip != selectedChip) {
@@ -111,7 +120,7 @@ public class HistoryActivity extends AppCompatActivity {
             }
         }
 
-        // Apply the selected styles to the newly clicked chip
+        // 3. Apply the selected styles to the newly clicked chip
         selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
 
         // Smooth color transition from its current color to White

@@ -83,12 +83,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="32dp"
                         android:layout_marginEnd="8dp"
-                        android:background="@drawable/chip_background_selected"
+                        android:background="@drawable/chip_background_teal"
                         android:gravity="center"
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
                         android:text="Camera"
-                        android:textColor="@android:color/white"
+                        android:textColor="@android:color/black"
                         android:textSize="13sp"
                         android:textStyle="bold" />
 

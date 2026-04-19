@@ -27,6 +27,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
 
+    // TODO: Replace with real island data (recycler view)
     private final int[] cardIds = {
             R.id.island_card_1, R.id.island_card_2,
             R.id.island_card_3, R.id.island_card_4,
@@ -61,9 +62,12 @@ public class HomeActivity extends AppCompatActivity {
                 finish();
             });
         }
+
+        // TODO: Implement search bar logic
     }
 
     private void populateIslandCards(List<Island> islands) {
+        //TODO: Replace with real images from Firebase storage char
         for (int i = 0; i < cardIds.length; i++) {
             if (i >= islands.size()) break;
 
@@ -118,6 +122,7 @@ public class HomeActivity extends AppCompatActivity {
         selectedChip.setTextColor(Color.WHITE);
     }
 
+    // TODO: Setup flexible bottom navbar logic (can be accessed from any page w/o having to manually add the logic for each activity)
     private void setupBottomNavigation() {
         View addListingFab = findViewById(R.id.navFab);
         if (addListingFab != null) {

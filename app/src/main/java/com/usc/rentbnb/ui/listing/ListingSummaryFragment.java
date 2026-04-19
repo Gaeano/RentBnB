@@ -102,6 +102,7 @@ public class ListingSummaryFragment extends Fragment {
     }
 
     private void setTextForIncludedRow(View parentView, int includeId, String value) {
+        // TODO: Change "Label" to respective labels
         View row = parentView.findViewById(includeId);
         if (row != null) {
             int innerTextViewId = getResources().getIdentifier("tvValue", "id", requireContext().getPackageName());

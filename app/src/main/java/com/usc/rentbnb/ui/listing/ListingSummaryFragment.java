@@ -29,6 +29,10 @@ import retrofit2.Response;
 
 public class ListingSummaryFragment extends Fragment {
     private AddListingViewModel viewModel;
+    
+    private View btnContainer;
+    private TextView tvBtnText;
+    private ProgressBar progressBar;
 
     @Nullable
     @Override
@@ -44,14 +48,22 @@ public class ListingSummaryFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(AddListingViewModel.class);
 
         populateSummaryData(view);
-        View btnListProduct = view.findViewById(R.id.btnListProduct);
-        ProgressBar progressBar = view.findViewById(R.id.progressBar);
+        
+        btnContainer = view.findViewById(R.id.btnListProductContainer);
+        tvBtnText = view.findViewById(R.id.tvBtnText);
+        progressBar = view.findViewById(R.id.progressBar);
 
-        view.findViewById(R.id.btnListProduct).setOnClickListener(v -> {
-            progressBar.setVisibility(View.VISIBLE);
-            btnListProduct.setVisibility(View.GONE);
-            submitListing(progressBar, btnListProduct);
-        });
+        if (btnContainer != null) {
+            btnContainer.setOnClickListener(v -> {
+                btnContainer.setEnabled(false);
+                btnContainer.setAlpha(0.8f);
+
+                if (tvBtnText != null) tvBtnText.setVisibility(View.GONE);
+                if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+                
+                submitListing();
+            });
+        }
     }
 
     private void populateSummaryData(View view) {
@@ -63,7 +75,7 @@ public class ListingSummaryFragment extends Fragment {
         tvCategory.setText(viewModel.category.isEmpty() ? "— none selected —" : viewModel.category);
 
         TextView tvPrice = view.findViewById(R.id.tvSummaryPrice);
-        tvPrice.setText(String.format("P%.2f / %s", viewModel.price, viewModel.priceUnit));
+        tvPrice.setText(String.format("₱%.2f / %s", viewModel.price, viewModel.priceUnit));
 
         TextView tvPayments = view.findViewById(R.id.tvSummaryPayments);
         if(viewModel.paymentMethods.isEmpty()) {
@@ -101,7 +113,7 @@ public class ListingSummaryFragment extends Fragment {
         }
     }
 
-    private void submitListing(ProgressBar progressBar, View btnListProduct) {
+    private void submitListing() {
         CreateListingRequest createListingRequest = new CreateListingRequest(
                 viewModel.productName,
                 viewModel.description,
@@ -117,8 +129,12 @@ public class ListingSummaryFragment extends Fragment {
         ApiClient.getApiService().createListing(createListingRequest).enqueue(new Callback<CreateListingResponse>() {
             @Override
             public void onResponse(Call<CreateListingResponse> call, Response<CreateListingResponse> response) {
-                progressBar.setVisibility(View.GONE);
-                btnListProduct.setVisibility(View.VISIBLE);
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                if (tvBtnText != null) tvBtnText.setVisibility(View.VISIBLE);
+                if (btnContainer != null) {
+                    btnContainer.setEnabled(true);
+                    btnContainer.setAlpha(1.0f);
+                }
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     if (getActivity() instanceof AddListingActivity) {
@@ -135,17 +151,20 @@ public class ListingSummaryFragment extends Fragment {
                     }
 
                     Log.e("AddListing", "HTTP " + response.code() + ": " + errorMessage);
-
                     Toast.makeText(requireContext(), "Error " + response.code() + ": " + errorMessage, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<CreateListingResponse> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                btnListProduct.setVisibility(View.VISIBLE);
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                if (tvBtnText != null) tvBtnText.setVisibility(View.VISIBLE);
+                if (btnContainer != null) {
+                    btnContainer.setEnabled(true);
+                    btnContainer.setAlpha(1.0f);
+                }
+
                 Toast.makeText(requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                //t.printStackTrace();
             }
         });
     }

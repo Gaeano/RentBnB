@@ -10,7 +10,7 @@ public class AddListingViewModel extends ViewModel {
     public String description = "";
 
     public String category = "";
-
+    public String address = "";
     public double price = 0.0;
     public String priceUnit = "hourly"; // hourly, daily, weekly, monthly
     public List<String> paymentMethods = new ArrayList<>(); // gcash, paypal, or cash

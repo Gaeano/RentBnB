@@ -93,31 +93,53 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Island/Location"
+                android:text="Island"
                 android:textSize="14sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/jost_semibold"
                 android:layout_marginBottom="8dp" />
 
-            <EditText
-                android:id="@+id/etIsland"
+            <LinearLayout
+                android:id="@+id/islandDropdownContainer"
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
-                android:hint="e.g. Moalboal, Cebu"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:textColorHint="@color/hint_color"
-                android:fontFamily="@font/inconsolata"
+                android:orientation="horizontal"
                 android:background="@drawable/input_bg"
                 android:paddingHorizontal="16dp"
-                android:inputType="textCapSentences"
-                android:maxLines="1"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="20dp">
+
+                <Spinner
+                    android:id="@+id/spinnerIsland"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/inconsolata"
+                    android:prompt="@string/select_island" />
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_back"
+                    android:rotation="-90"
+                    android:alpha="0.5" />
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/islandLoadingProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
                 android:layout_marginBottom="20dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Full Address"
+                android:text="Full Address (optional)"
                 android:textSize="14sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/jost_semibold"
@@ -127,7 +149,7 @@
                 android:id="@+id/etAddress"
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
-                android:hint="Street, Barangay, Municipality (optional)"
+                android:hint="Street, Barangay, Municipality"
                 android:textSize="14sp"
                 android:textColor="@color/black"
                 android:textColorHint="@color/hint_color"

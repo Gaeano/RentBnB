@@ -52,7 +52,7 @@ public class ListingPricingFragment extends Fragment {
         selectUnit(view, R.id.btnHourly);
 
         btnHourly.setOnClickListener(v -> selectUnit(view, R.id.btnHourly));
-        btnDaily .setOnClickListener(v -> selectUnit(view, R.id.btnDaily));
+        btnDaily.setOnClickListener(v -> selectUnit(view, R.id.btnDaily));
         btnWeekly.setOnClickListener(v -> selectUnit(view, R.id.btnWeekly));
         btnMonthly.setOnClickListener(v-> selectUnit(view, R.id.btnMonthly));
 
@@ -90,7 +90,7 @@ public class ListingPricingFragment extends Fragment {
     private int selectedUnitId = R.id.btnDaily;
 
     private void selectUnit(View root, int targetId) {
-        int[] ids = {R.id.btnHourly, R.id.btnDaily, R.id.btnWeekly };
+        int[] ids = {R.id.btnHourly, R.id.btnDaily, R.id.btnWeekly, R.id.btnMonthly };
 
         for (int id : ids) {
             TextView textView = root.findViewById(id);

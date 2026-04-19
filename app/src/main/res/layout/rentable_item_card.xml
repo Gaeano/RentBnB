@@ -73,7 +73,7 @@
             app:layout_constraintTop_toBottomOf="@id/item_category" />
 
         <TextView
-            android:id="@+id/item_rents"
+            android:id="@+id/item_rent_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="20 rents"

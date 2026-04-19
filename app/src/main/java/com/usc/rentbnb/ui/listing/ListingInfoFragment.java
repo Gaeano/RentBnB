@@ -147,7 +147,7 @@ public class ListingInfoFragment extends Fragment {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_spinner_item,
+                android.R.layout.simple_spinner_item, // TODO: Change to custom spinner layout
                 displayNames
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

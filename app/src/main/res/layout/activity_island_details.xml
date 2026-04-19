@@ -68,6 +68,7 @@
                         android:textColor="#80A0DC"
                         android:textSize="28sp"
                         android:textStyle="bold"
+                        android:fontFamily="@font/jost_bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/rating_container"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -94,6 +95,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
                             android:text="4.5"
+                            android:fontFamily="@font/jost_bold"
                             android:textColor="@android:color/black"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -104,7 +106,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/inconsolata"
                         android:text="Small description of a small description, that is a small description. That is maybe a small description"
                         android:textColor="#555555"
                         android:textSize="12sp"
@@ -139,6 +141,7 @@
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
                         android:text="Camera"
+                        android:fontFamily="@font/jost"
                         android:textColor="@android:color/black"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -153,6 +156,7 @@
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
                         android:text="Snorkel"
+                        android:fontFamily="@font/jost"
                         android:textColor="@android:color/black"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -167,6 +171,7 @@
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
                         android:text="Motorcycle"
+                        android:fontFamily="@font/jost"
                         android:textColor="@android:color/black"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -181,6 +186,7 @@
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
                         android:text="Bike"
+                        android:fontFamily="@font/jost"
                         android:textColor="@android:color/black"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -195,6 +201,7 @@
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
                         android:text="Label"
+                        android:fontFamily="@font/jost"
                         android:textColor="@android:color/black"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -209,6 +216,7 @@
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
                         android:text="Label"
+                        android:fontFamily="@font/jost"
                         android:textColor="@android:color/black"
                         android:textSize="13sp"
                         android:textStyle="bold" />

@@ -48,13 +48,12 @@
                 android:text="4.5"
                 android:textColor="@android:color/white"
                 android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@android:drawable/star_on"
-                app:tint="#FFD700" />
+                android:textStyle="bold"
+                android:fontFamily="@font/inconsolata" /> <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@android:drawable/star_on"
+            app:tint="#FFD700" />
         </LinearLayout>
 
         <LinearLayout
@@ -72,8 +71,7 @@
                 android:id="@+id/island_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/jost"
-                android:text="ISLAND NAME"
+                android:fontFamily="@font/inconsolata" android:text="ISLAND NAME"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:textStyle="bold" />

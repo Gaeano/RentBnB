@@ -41,7 +41,7 @@
             android:id="@+id/item_menu"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:src="@drawable/ic_more_horiz"
+            android:src="@drawable/ic_more_dots"
             app:tint="@android:color/black"
             app:layout_constraintBottom_toBottomOf="@id/item_title"
             app:layout_constraintEnd_toEndOf="parent"

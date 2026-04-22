@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/title_row_products"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/rent_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rent"
+            android:textColor="#80A0DC"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/inconsolata" />
+
+        <ImageView
+            android:id="@+id/btn_switch_to_islands"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_dialog_map"
+            app:tint="#BCBCBC" />
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/search_bar_container_products"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#F9F9F9"
+        app:layout_constraintTop_toBottomOf="@id/title_row_products">
+
+        <EditText
+            android:id="@+id/search_bar_products"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="12dp"
+            android:hint="Find gear to rent"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textSize="14sp"
+            android:fontFamily="@font/inconsolata" />
+    </androidx.cardview.widget.CardView>
+
+    <HorizontalScrollView
+        android:id="@+id/filter_chips_products"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/search_bar_container_products">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView android:layout_width="wrap_content" android:layout_height="36dp" android:text="Camera" android:background="@drawable/chip_background_selected" android:textColor="@android:color/white" android:gravity="center" android:paddingStart="16dp" android:paddingEnd="16dp" android:layout_marginEnd="8dp" android:fontFamily="@font/inconsolata" />
+            <TextView android:layout_width="wrap_content" android:layout_height="36dp" android:text="Snorkel" android:background="@drawable/chip_background" android:textColor="#5F5F5F" android:gravity="center" android:paddingStart="16dp" android:paddingEnd="16dp" android:layout_marginEnd="8dp" android:fontFamily="@font/inconsolata" />
+            <TextView android:layout_width="wrap_content" android:layout_height="36dp" android:text="Motorcycle" android:background="@drawable/chip_background" android:textColor="#5F5F5F" android:gravity="center" android:paddingStart="16dp" android:paddingEnd="16dp" android:layout_marginEnd="8dp" android:fontFamily="@font/inconsolata" />
+            <TextView android:layout_width="wrap_content" android:layout_height="36dp" android:text="Bike" android:background="@drawable/chip_background" android:textColor="#5F5F5F" android:gravity="center" android:paddingStart="16dp" android:paddingEnd="16dp" android:fontFamily="@font/inconsolata" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/product_grid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/filter_chips_products">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <include layout="@layout/rentable_item_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="6dp" />
+            <include layout="@layout/rentable_item_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+            <include layout="@layout/rentable_item_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="6dp" />
+            <include layout="@layout/rentable_item_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+            <include layout="@layout/rentable_item_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="6dp" />
+            <include layout="@layout/rentable_item_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

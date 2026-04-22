@@ -41,6 +41,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.12.0"))

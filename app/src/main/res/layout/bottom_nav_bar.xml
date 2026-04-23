@@ -8,7 +8,6 @@
     android:clipChildren="false"
     android:clipToPadding="false">
 
-    <!-- The actual bar background -->
     <View
         android:id="@+id/navBackground"
         android:layout_width="match_parent"
@@ -17,7 +16,6 @@
         android:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Navigation Items -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -25,70 +23,128 @@
         android:elevation="6dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageView
-            android:id="@+id/navHome"
+        <FrameLayout
+            android:id="@+id/btnNavHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/ic_home"
-            android:scaleType="center"
-            android:contentDescription="@string/nav_home"
             android:clickable="true"
             android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/white" />
+            android:background="?attr/selectableItemBackgroundBorderless">
+            
+            <ImageView
+                android:id="@+id/navHome"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_home"
+                android:scaleType="center"
+                android:contentDescription="@string/nav_home"
+                app:tint="@color/white" />
 
-        <ImageView
-            android:id="@+id/navFavorites"
+            <View
+                android:id="@+id/dotHome"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/nav_dot_indicator"
+                android:visibility="visible" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnNavFavorites"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/ic_favorites"
-            android:scaleType="center"
-            android:contentDescription="@string/nav_favorites"
             android:clickable="true"
             android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:alpha="0.7"
-            app:tint="@color/white" />
+            android:background="?attr/selectableItemBackgroundBorderless">
 
-        <!-- Spacer for FAB centered in the bar -->
+            <ImageView
+                android:id="@+id/navFavorites"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_favorites"
+                android:scaleType="center"
+                android:contentDescription="@string/nav_favorites"
+                android:alpha="0.7"
+                app:tint="@color/white" />
+
+            <View
+                android:id="@+id/dotFavorites"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/nav_dot_indicator"
+                android:visibility="gone" />
+        </FrameLayout>
+
         <View
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.8"
             android:visibility="invisible" />
 
-        <ImageView
-            android:id="@+id/navBookings"
+        <FrameLayout
+            android:id="@+id/btnNavBookings"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/ic_history"
-            android:scaleType="center"
-            android:contentDescription="@string/nav_bookings"
             android:clickable="true"
             android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:alpha="0.7"
-            app:tint="@color/white" />
+            android:background="?attr/selectableItemBackgroundBorderless">
 
-        <ImageView
-            android:id="@+id/navProfile"
+            <ImageView
+                android:id="@+id/navBookings"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_chat"
+                android:scaleType="center"
+                android:contentDescription="@string/nav_bookings"
+                android:alpha="0.7"
+                app:tint="@color/white" />
+
+            <View
+                android:id="@+id/dotBookings"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/nav_dot_indicator"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnNavProfile"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/ic_profile"
-            android:scaleType="center"
-            android:contentDescription="@string/nav_profile"
             android:clickable="true"
             android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:alpha="0.7"
-            app:tint="@color/white" />
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:id="@+id/navProfile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_profile"
+                android:scaleType="center"
+                android:contentDescription="@string/nav_profile"
+                android:alpha="0.7"
+                app:tint="@color/white" />
+
+            <View
+                android:id="@+id/dotProfile"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/nav_dot_indicator"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 
-    <!-- Floating Action Button - Now centered inside the bar -->
     <FrameLayout
         android:id="@+id/navFab"
         android:layout_width="48dp"
@@ -101,7 +157,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <!-- Inner circle in #FAFAFA -->
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"

@@ -4,16 +4,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bottomNavContainer"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:background="@drawable/bottom_nav_bg"
+    android:layout_height="90dp"
     android:clipChildren="false"
     android:clipToPadding="false">
+
+    <!-- Actual visible background for the bar (bottom 72dp) -->
+    <View
+        android:id="@+id/navBackground"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@drawable/bottom_nav_bg"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <!-- home -->
     <ImageView
         android:id="@+id/navHome"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="72dp"
         android:src="@drawable/ic_home"
         android:scaleType="center"
         android:contentDescription="@string/nav_home"
@@ -23,7 +30,6 @@
         android:alpha="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/navFavorites"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintWidth_percent="0.22" />
 
@@ -31,7 +37,7 @@
     <ImageView
         android:id="@+id/navFavorites"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="72dp"
         android:src="@drawable/ic_favorites"
         android:scaleType="center"
         android:contentDescription="@string/nav_favorites"
@@ -41,18 +47,16 @@
         android:alpha="0.65"
         app:layout_constraintStart_toEndOf="@id/navHome"
         app:layout_constraintEnd_toStartOf="@id/navFabAnchor"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintWidth_percent="0.22" />
 
-    <!-- center lease button -->
+    <!-- center lease button anchor -->
     <View
         android:id="@+id/navFabAnchor"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="72dp"
         app:layout_constraintStart_toEndOf="@id/navFavorites"
         app:layout_constraintEnd_toStartOf="@id/navBookings"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintWidth_percent="0.12" />
 
@@ -60,7 +64,7 @@
     <ImageView
         android:id="@+id/navBookings"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="72dp"
         android:alpha="0.65"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
@@ -71,15 +75,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/navProfile"
         app:layout_constraintStart_toEndOf="@id/navFabAnchor"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
         app:layout_constraintWidth_percent="0.22" />
 
     <!-- Profile -->
     <ImageView
         android:id="@+id/navProfile"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="72dp"
         android:src="@drawable/ic_profile"
         android:scaleType="center"
         android:contentDescription="@string/nav_profile"
@@ -89,7 +91,6 @@
         android:alpha="0.65"
         app:layout_constraintStart_toEndOf="@id/navBookings"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintWidth_percent="0.22" />
 
@@ -97,7 +98,7 @@
         android:id="@+id/navFab"
         android:layout_width="69dp"
         android:layout_height="73dp"
-        android:layout_marginBottom="14dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/fab_ring_bg"
         android:clickable="true"
         android:contentDescription="@string/nav_add"

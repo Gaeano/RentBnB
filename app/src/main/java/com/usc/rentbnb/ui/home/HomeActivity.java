@@ -3,14 +3,19 @@ package com.usc.rentbnb.ui.home;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.ui.auth.LoginActivity;
@@ -18,82 +23,88 @@ import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.islands.IslandDetailsActivity;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
 
-import java.util.List;
-
 public class HomeActivity extends AppCompatActivity {
 
-    private TextView logout;
-    private FirebaseAuth auth;
+    private TextView feedTitleView;
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
 
-    // TODO: Replace with real island data (recycler view)
-    private final int[] cardIds = {
-            R.id.island_card_1, R.id.island_card_2,
-            R.id.island_card_3, R.id.island_card_4,
-            R.id.island_card_5, R.id.island_card_6
-    };
+    private boolean showingIslands = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
 
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        setupFilterChips();
-        setupBottomNavigation();
-
-        homeViewModel.getIslands().observe(this, islands -> {
-            populateIslandCards(islands);
+        LinearLayout homeHeader = findViewById(R.id.homeHeader);
+        ViewCompat.setOnApplyWindowInsetsListener(homeHeader, (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    statusBarHeight + 8,
+                    v.getPaddingRight(),
+                    v.getPaddingBottom()
+            );
+            return insets;
         });
 
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        feedTitleView = findViewById(R.id.feed_title);
+
+        setupFilterChips();
+        setupTitleToggle();
+        setupBottomNavigation();
+
         homeViewModel.fetchIslands();
+        homeViewModel.fetchListings();
 
-//        logout = findViewById(R.id.logout_btn);
-        auth = FirebaseAuth.getInstance();
-
-        // --- 4. Setup Logout ---
-        if (logout != null) {
-            logout.setOnClickListener(v -> {
-                auth.signOut();
-                Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-            });
-        }
+        switchFeed(true);
 
         // TODO: Implement search bar logic
     }
 
-    private void populateIslandCards(List<Island> islands) {
-        //TODO: Replace with real images from Firebase storage char
-        for (int i = 0; i < cardIds.length; i++) {
-            if (i >= islands.size()) break;
+    private void switchFeed(boolean toIslands) {
+        showingIslands = toIslands;
 
-            Island island = islands.get(i);
-            View card = findViewById(cardIds[i]);
+        String label = toIslands ? "Islands" : "Rentals";
+        feedTitleView.setText(label);
 
-            if (card == null) continue;
+        Fragment fragment = toIslands ? new IslandsFragment() : new RentalsFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(R.id.homeFeedContainer, fragment)
+                .commit();
+    }
 
-            TextView nameView = card.findViewById(R.id.island_name);
-            TextView locationView = card.findViewById(R.id.island_location);
-            TextView ratingView = card.findViewById(R.id.island_rating);
+    private void setupTitleToggle() {
+        LinearLayout titleRow = findViewById(R.id.feed_title_row);
+        titleRow.setOnClickListener(this::showFeedDropdown);
+    }
 
-            if (nameView != null) nameView.setText(island.getIslandName());
-            if (locationView != null) locationView.setText(island.getLocation());
-            if (ratingView != null) ratingView.setText(String.valueOf(island.getRating()));
+    private void showFeedDropdown(View anchor) {
+        View dropdownView = LayoutInflater.from(this)
+                .inflate(R.layout.dropdown_feed_menu, null);
 
-            card.setOnClickListener(v -> {
-                Intent intent = new Intent(HomeActivity.this, IslandDetailsActivity.class);
-                intent.putExtra("island_name", island.getIslandName());
-                intent.putExtra("location", island.getLocation());
-                intent.putExtra("rating", island.getRating());
-                intent.putExtra("category", island.getCategory());
-                intent.putExtra("description", island.getDescription());
-                startActivity(intent);
-            });
-        }
+        PopupWindow popup = new PopupWindow(
+                dropdownView,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                true
+        );
+        popup.setElevation(12f);
+
+        dropdownView.findViewById(R.id.menuIslands).setOnClickListener(v -> {
+            switchFeed(true);
+            popup.dismiss();
+        });
+
+        dropdownView.findViewById(R.id.menuRentals).setOnClickListener(v -> {
+            switchFeed(false);
+            popup.dismiss();
+        });
+
+        popup.showAsDropDown(anchor, 0, 4, Gravity.START);
     }
 
     private void setupFilterChips() {

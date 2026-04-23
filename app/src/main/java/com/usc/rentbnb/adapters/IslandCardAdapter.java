@@ -1,0 +1,69 @@
+package com.usc.rentbnb.adapters;
+
+import android.content.Intent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.usc.rentbnb.R;
+import com.usc.rentbnb.islands.IslandDetailsActivity;
+import com.usc.rentbnb.models.Island;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class IslandCardAdapter extends RecyclerView.Adapter<IslandCardAdapter.IslandViewHolder> {
+
+    private List<Island> islands = new ArrayList<>();
+
+    public void setIslands(List<Island> islands) {
+        this.islands = islands;
+        notifyDataSetChanged();
+    }
+
+    @NonNull
+    @Override
+    public IslandViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.card_island, parent, false);
+        return new IslandViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull IslandViewHolder holder, int position) {
+        holder.bind(islands.get(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        return islands.size();
+    }
+
+    static class IslandViewHolder extends RecyclerView.ViewHolder {
+        TextView nameView, descriptionView;
+
+        IslandViewHolder(@NonNull View itemView) {
+            super(itemView);
+            nameView = itemView.findViewById(R.id.islandName);
+            descriptionView = itemView.findViewById(R.id.islandDescription);
+        }
+
+        void bind(Island island) {
+            if (nameView != null) nameView.setText(island.getIslandName());
+            if (descriptionView != null) descriptionView.setText(island.getDescription());
+
+            itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(itemView.getContext(), IslandDetailsActivity.class);
+                intent.putExtra("island_name", island.getIslandName());
+                intent.putExtra("location", island.getLocation());
+                intent.putExtra("rating", island.getRating());
+                intent.putExtra("description", island.getDescription());
+                itemView.getContext().startActivity(intent);
+            });
+        }
+    }
+}

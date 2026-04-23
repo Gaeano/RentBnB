@@ -19,6 +19,12 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
         this.listings = listings;
     }
 
+    public void updateListings(List<Listing> newListings) {
+        this.listings.clear();
+        this.listings.addAll(newListings);
+        notifyDataSetChanged();
+    }
+
     @Override
     public ListingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rentable_item_card, parent, false);

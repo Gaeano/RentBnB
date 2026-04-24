@@ -6,6 +6,7 @@ import com.usc.rentbnb.models.CreateListingResponse;
 import com.usc.rentbnb.models.IslandResponse;
 import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.models.RegisterRequest;
+import com.usc.rentbnb.models.WeatherResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -34,4 +35,10 @@ public interface ApiService {
 
     @GET("listings")
     Call<ListingResponse> getListings(@Query("island") String island);
+
+    @GET("weather")
+    Call<WeatherResponse> getCurrentWeather(
+        @Query("lat") double lat,
+        @Query("lon") double lon
+    );
 }

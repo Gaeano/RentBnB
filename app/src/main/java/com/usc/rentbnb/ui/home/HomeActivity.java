@@ -3,9 +3,11 @@ package com.usc.rentbnb.ui.home;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -17,11 +19,14 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.usc.rentbnb.R;
-import com.usc.rentbnb.models.Island;
-import com.usc.rentbnb.ui.auth.LoginActivity;
+import com.usc.rentbnb.models.WeatherResponse;
+import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
-import com.usc.rentbnb.islands.IslandDetailsActivity;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -30,6 +35,10 @@ public class HomeActivity extends AppCompatActivity {
     private HomeViewModel homeViewModel;
 
     private boolean showingIslands = true;
+
+    private WeatherResponse.WeatherData currentWeather;
+    private int currentWeatherIconRes = R.drawable.ic_sun;
+    private String currentWeatherMessage = "Checking the skies...";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +68,9 @@ public class HomeActivity extends AppCompatActivity {
         homeViewModel.fetchListings();
 
         switchFeed(true);
+
+        fetchWeather(10.3157, 123.8854); // for testing purposes, del after
+        findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
         // TODO: Implement search bar logic
     }
@@ -142,5 +154,81 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+    }
+
+    private void fetchWeather(double userLat, double userLon) {
+        ApiClient.getApiService().getCurrentWeather(userLat, userLon).enqueue(new Callback<WeatherResponse>() {
+            @Override
+            public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    currentWeather = response.body().getData();
+
+                    ImageView ivWeatherIcon = findViewById(R.id.weather_icon);
+
+                    String condition = currentWeather.getCondition();
+                    if (condition == null) condition = "Clear";
+
+                    switch (condition) {
+                        case "Rain":
+                            currentWeatherMessage = "It's going to rain soon";
+                            currentWeatherIconRes = R.drawable.ic_rain;
+                            break;
+                        case "Snow":
+                            currentWeatherMessage = "Snow expected soon";
+                            currentWeatherIconRes = R.drawable.ic_snow;
+                            break;
+                        case "Cloudy":
+                            currentWeatherMessage = "Nice and cool today";
+                            currentWeatherIconRes = R.drawable.ic_cloud;
+                            break;
+                        case "Foggy":
+                            currentWeatherMessage = "Low visibility, take care";
+                            currentWeatherIconRes = R.drawable.ic_fog;
+                            break;
+                        default:
+                            currentWeatherMessage = "Perfect day for rentals";
+                            currentWeatherIconRes = R.drawable.ic_sun;
+                            break;
+                    }
+
+                    ivWeatherIcon.setImageResource(currentWeatherIconRes);
+                    ivWeatherIcon.setAlpha(1.0f);
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WeatherResponse> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    private void showWeatherDialog() {
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(R.layout.dialog_weather);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setDimAmount(0.7f);
+        }
+
+        ImageView icon = dialog.findViewById(R.id.dialog_weather_icon);
+        TextView tempText = dialog.findViewById(R.id.dialog_weather_temp);
+        TextView conditionText = dialog.findViewById(R.id.dialog_weather_condition);
+        TextView messageText = dialog.findViewById(R.id.dialog_weather_message);
+
+        icon.setImageResource(currentWeatherIconRes);
+        messageText.setText(currentWeatherMessage);
+
+        if (currentWeather != null) {
+            tempText.setText(currentWeather.getTemp() + "°C");
+            conditionText.setText(currentWeather.getCondition());
+        } else {
+            tempText.setText("--°C");
+            conditionText.setText("Loading...");
+        }
+
+        dialog.show();
     }
 }

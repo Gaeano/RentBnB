@@ -97,10 +97,6 @@ public class SignUpActivity extends AppCompatActivity {
             signUpAttempt();
         });
 
-        checkRememberMeStatus();
-
-
-
     }
 
 
@@ -129,35 +125,7 @@ public class SignUpActivity extends AppCompatActivity {
         authViewModel.signUp(emailText, passwordText, fullNameText);
 
     }
-    //this method to be transferreed to the splash screen
-    private void checkRememberMeStatus(){
-        SharedPreferences sharedPreferences = getSharedPreferences("RentBnBPrefs", MODE_PRIVATE);
-        Boolean isRemembered = sharedPreferences.getBoolean("IS_REMEMBERED", false);
 
-        if (currentUser != null){
-                currentUser.reload().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()){
-                        if (isRemembered){
-                            Intent intent = new Intent(SignUpActivity.this, HomeActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    } else {
-                        purgeLocalSession(sharedPreferences);
-                    }
-
-
-            });
-        }
-
-//        String savedEmail = sharedPreferences.getString("SAVED_EMAIL", "");
-//        if (!savedEmail.isEmpty()){
-//            emailField.setText(savedEmail);
-//            rememberMeBtn.setChecked(true);
-//        }
-
-
-    }
     private void purgeLocalSession(SharedPreferences sharedPreferences) {
         authViewModel.logout(); // Kills the Firebase cache
 

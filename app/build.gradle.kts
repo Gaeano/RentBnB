@@ -55,6 +55,7 @@ dependencies {
     // styles and animations
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("com.airbnb.android:lottie:6.4.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

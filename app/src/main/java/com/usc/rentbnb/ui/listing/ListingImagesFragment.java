@@ -47,6 +47,7 @@ public class ListingImagesFragment extends Fragment {
 
     /** Placeholder — connect ActivityResultLauncher here when wiring logic. */
     private void openImagePicker(String slotTag) {
+        // TODO: Implement image picker
         // Intent intent = new Intent(Intent.ACTION_PICK,
         //         MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         // imagePickerLauncher.launch(intent);

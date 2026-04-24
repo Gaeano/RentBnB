@@ -67,9 +67,9 @@ public class ListingSummaryFragment extends Fragment {
     }
 
     private void populateSummaryData(View view) {
-        setTextForIncludedRow(view, R.id.rowName, viewModel.productName);
-        setTextForIncludedRow(view, R.id.rowDesc, viewModel.description);
-        setTextForIncludedRow(view, R.id.rowLocation, viewModel.island);
+        setTextForIncludedRow(view, R.id.rowName, "Title", viewModel.productName);
+        setTextForIncludedRow(view, R.id.rowDesc, "Description", viewModel.description);
+        setTextForIncludedRow(view, R.id.rowLocation, "Island", viewModel.island);
 
         TextView tvCategory = view.findViewById(R.id.tvSummaryCategory);
         tvCategory.setText(viewModel.category.isEmpty() ? "— none selected —" : viewModel.category);
@@ -95,16 +95,26 @@ public class ListingSummaryFragment extends Fragment {
         tvPhotos.setText(viewModel.imageUris.size() + " photos attached");
 
         ImageView ivCover = view.findViewById(R.id.ivSummaryCover);
+        TextView tvCoverPlaceholder = view.findViewById(R.id.tvSummaryCoverPlaceholder);
         if (!viewModel.imageUris.isEmpty()) {
             ivCover.setVisibility(View.VISIBLE);
             ivCover.setImageURI(Uri.parse(viewModel.imageUris.get(0)));
+            tvCoverPlaceholder.setVisibility(View.GONE);
+        } else {
+            ivCover.setVisibility(View.GONE);
+            tvCoverPlaceholder.setVisibility(View.VISIBLE);
         }
     }
 
-    private void setTextForIncludedRow(View parentView, int includeId, String value) {
-        // TODO: Change "Label" to respective labels
+    private void setTextForIncludedRow(View parentView, int includeId, String label, String value) {
         View row = parentView.findViewById(includeId);
         if (row != null) {
+            int labelTextViewId = getResources().getIdentifier("tvLabel", "id", requireContext().getPackageName());
+            TextView tvLabel = row.findViewById(labelTextViewId);
+            if(tvLabel != null) {
+                tvLabel.setText(label);
+            }
+
             int innerTextViewId = getResources().getIdentifier("tvValue", "id", requireContext().getPackageName());
             TextView tvValue = row.findViewById(innerTextViewId);
 

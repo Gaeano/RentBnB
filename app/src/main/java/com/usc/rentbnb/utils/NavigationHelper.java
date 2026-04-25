@@ -5,13 +5,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.chat.ChatFragment;
 import com.usc.rentbnb.ui.favorites.FavoritesFragment;
 import com.usc.rentbnb.ui.home.IslandsFragment;
 import com.usc.rentbnb.ui.profile.ProfileFragment;
@@ -40,12 +39,12 @@ public class NavigationHelper {
     private void initializeViews(){
         navHome = activity.findViewById(R.id.navHome);
         navFavorites = activity.findViewById(R.id.navFavorites);
-        navBookings = activity.findViewById(R.id.navBookings);
+        navBookings = activity.findViewById(R.id.navChat);
         navProfile = activity.findViewById(R.id.navProfile);
 
         dotHome = activity.findViewById(R.id.dotHome);
         dotFavorites = activity.findViewById(R.id.dotFavorites);
-        dotBookings = activity.findViewById(R.id.dotBookings);
+        dotBookings = activity.findViewById(R.id.dotChat);
         dotProfile = activity.findViewById(R.id.dotProfile);
     }
     private void setOnClickListeners() {
@@ -57,9 +56,8 @@ public class NavigationHelper {
             navigate (favoritesFragment, navFavorites, dotFavorites, false);
         });
 
-        activity.findViewById(R.id.navBookings).setOnClickListener(v -> {
-            Log.d("NavigationHelper", "Bookings button clicked");
-            //navigate (new BookingsFragment(), navBookings, dotBookings, false);
+        activity.findViewById(R.id.navChat).setOnClickListener(v -> {
+            navigate (new ChatFragment(), navBookings, dotBookings, false);
         });
 
         activity.findViewById(R.id.navProfile).setOnClickListener(v -> {

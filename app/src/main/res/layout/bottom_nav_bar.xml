@@ -96,7 +96,7 @@
             android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:id="@+id/navBookings"
+                android:id="@+id/navChat"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_chat"
@@ -106,7 +106,7 @@
                 app:tint="@color/white" />
 
             <View
-                android:id="@+id/dotBookings"
+                android:id="@+id/dotChat"
                 android:layout_width="5dp"
                 android:layout_height="5dp"
                 android:layout_gravity="bottom|center_horizontal"

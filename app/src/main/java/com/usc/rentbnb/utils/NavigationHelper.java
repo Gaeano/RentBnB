@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentManager;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.ui.favorites.FavoritesFragment;
 import com.usc.rentbnb.ui.home.IslandsFragment;
+import com.usc.rentbnb.ui.profile.ProfileFragment;
 
 public class NavigationHelper {
 
@@ -63,7 +64,7 @@ public class NavigationHelper {
 
         activity.findViewById(R.id.navProfile).setOnClickListener(v -> {
             Log.d("NavigationHelper", "Profile button clicked");
-            // navigate (new ProfileFragment(), navProfile, dotProfile, false);
+             navigate (new ProfileFragment(), navProfile, dotProfile, false);
         });
     }
 

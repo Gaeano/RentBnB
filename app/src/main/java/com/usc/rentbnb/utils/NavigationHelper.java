@@ -1,13 +1,19 @@
 package com.usc.rentbnb.utils;
 
+import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.favorites.FavoritesFragment;
+import com.usc.rentbnb.ui.home.IslandsFragment;
 
 public class NavigationHelper {
 
@@ -18,6 +24,8 @@ public class NavigationHelper {
 
     private ImageView navHome, navFavorites, navBookings, navProfile;
     private View dotHome, dotFavorites, dotBookings, dotProfile;
+    private final Fragment islandsFragment = new IslandsFragment();
+    private final Fragment favoritesFragment = new FavoritesFragment();
 
     public NavigationHelper(AppCompatActivity activity, int containerId, View homeHeader) {
         this.activity = activity;
@@ -25,6 +33,7 @@ public class NavigationHelper {
         this.homeHeader = homeHeader;
 
         initializeViews();
+        setOnClickListeners();
     }
 
     private void initializeViews(){
@@ -40,37 +49,49 @@ public class NavigationHelper {
     }
     private void setOnClickListeners() {
         activity.findViewById(R.id.navHome).setOnClickListener(v -> {
-            // navigate (new IslandsFragment(), navHome, dotHome, true);
+             navigate (islandsFragment, navHome, dotHome, true);
         });
 
         activity.findViewById(R.id.navFavorites).setOnClickListener(v -> {
-            //navigate (new FavoritesFragment(), navFavorites, dotFavorites, false);
+            navigate (favoritesFragment, navFavorites, dotFavorites, false);
         });
 
         activity.findViewById(R.id.navBookings).setOnClickListener(v -> {
+            Log.d("NavigationHelper", "Bookings button clicked");
             //navigate (new BookingsFragment(), navBookings, dotBookings, false);
         });
 
         activity.findViewById(R.id.navProfile).setOnClickListener(v -> {
+            Log.d("NavigationHelper", "Profile button clicked");
             // navigate (new ProfileFragment(), navProfile, dotProfile, false);
         });
     }
 
     private void navigate(Fragment fragment, ImageView activeIcon, View activeDot, boolean showHeader){
+
+
         resetUI();
 
         activeIcon.setAlpha(1.0f);
         activeDot.setVisibility(View.VISIBLE);
 
         if (homeHeader != null){
+            TransitionManager.beginDelayedTransition((ViewGroup) homeHeader.getParent());
+
             homeHeader.setVisibility(showHeader ? View.VISIBLE : View.GONE);
         }
 
 
         activity.getSupportFragmentManager()
                 .beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(containerId, fragment)
                 .commit();
+
+
+
+
+
     }
 
     private void resetUI() {
@@ -83,6 +104,10 @@ public class NavigationHelper {
         dotFavorites.setVisibility(View.GONE);
         dotBookings.setVisibility(View.GONE);
         dotProfile.setVisibility(View.GONE);
+    }
+
+    public void setInitialState() {
+        navigate(new IslandsFragment(), navHome, dotHome, true);
     }
 
 }

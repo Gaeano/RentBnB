@@ -36,7 +36,7 @@
             <!-- </intent-filter> -->
         </activity>
         <activity
-            android:name=".ui.favorites.FavoritesActivity"
+            android:name=".ui.favorites.FavoritesFragment"
             android:exported="false" />
         <activity
             android:name=".ui.favorites.FavoritesProductActivity"

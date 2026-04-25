@@ -22,6 +22,7 @@ import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
+import com.usc.rentbnb.utils.NavigationHelper;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
 
 import retrofit2.Call;
@@ -39,6 +40,8 @@ public class HomeActivity extends AppCompatActivity {
     private WeatherResponse.WeatherData currentWeather;
     private int currentWeatherIconRes = R.drawable.ic_sun;
     private String currentWeatherMessage = "Checking the skies...";
+
+    private NavigationHelper navigationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,12 +62,17 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
+
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         feedTitleView = findViewById(R.id.feed_title);
 
+
+
         setupFilterChips();
         setupTitleToggle();
-        setupBottomNavigation();
+        setupBottomNavigation(homeHeader);
+
+        navigationHelper.setInitialState();
 
         homeViewModel.fetchIslands();
         homeViewModel.fetchListings();
@@ -148,7 +156,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     // TODO: Setup flexible bottom navbar logic (can be accessed from any page w/o having to manually add the logic for each activity)
-    private void setupBottomNavigation() {
+    private void setupBottomNavigation(View homeHeader) {
+        navigationHelper = new NavigationHelper(this, R.id.homeFeedContainer, homeHeader);
         View addListingFab = findViewById(R.id.navFab);
         if (addListingFab != null) {
             addListingFab.setOnClickListener(v -> {

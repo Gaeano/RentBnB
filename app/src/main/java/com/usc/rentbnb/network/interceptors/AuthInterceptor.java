@@ -17,6 +17,10 @@ public class AuthInterceptor implements Interceptor {
     @NonNull
     @Override
     public Response intercept(Chain chain) throws IOException {
+        if (chain.request().url().host().contains("cloudinary.com")) {
+            return chain.proceed(chain.request());
+        }
+
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null) {

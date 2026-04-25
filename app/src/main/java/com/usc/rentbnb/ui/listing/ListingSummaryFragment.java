@@ -17,12 +17,18 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.gson.JsonObject;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.viewmodels.AddListingViewModel;
 
+import java.util.List;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,7 +67,9 @@ public class ListingSummaryFragment extends Fragment {
                 if (tvBtnText != null) tvBtnText.setVisibility(View.GONE);
                 if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
                 
-                submitListing();
+                ///submitListing();
+
+                uploadImagesToCloudinary();
             });
         }
     }
@@ -124,7 +132,7 @@ public class ListingSummaryFragment extends Fragment {
         }
     }
 
-    private void submitListing() {
+    private void submitListing(List<String> uploadedImageUrls) {
         CreateListingRequest createListingRequest = new CreateListingRequest(
                 viewModel.productName,
                 viewModel.description,
@@ -134,7 +142,7 @@ public class ListingSummaryFragment extends Fragment {
                 viewModel.priceUnit,
                 viewModel.paymentMethods,
                 viewModel.suggestedActivities,
-                viewModel.imageUris
+                uploadedImageUrls
         );
 
         ApiClient.getApiService().createListing(createListingRequest).enqueue(new Callback<CreateListingResponse>() {
@@ -178,5 +186,100 @@ public class ListingSummaryFragment extends Fragment {
                 Toast.makeText(requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private byte[] getCompressedImageBytes(Uri imageUri) {
+        try {
+            java.io.InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
+            android.graphics.Bitmap originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream);
+
+            if (originalBitmap == null) return null;
+
+            int maxWidth = 1080;
+            int maxHeight = 1080;
+            float ratio = Math.min(
+                    (float) maxWidth / originalBitmap.getWidth(),
+                    (float) maxHeight / originalBitmap.getHeight()
+            );
+
+            android.graphics.Bitmap finalBitmap = originalBitmap;
+            if (ratio < 1.0f) {
+                int width = Math.round(originalBitmap.getWidth() * ratio);
+                int height = Math.round(originalBitmap.getHeight() * ratio);
+                finalBitmap = android.graphics.Bitmap.createScaledBitmap(originalBitmap, width, height, true);
+            }
+
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            finalBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, baos);
+
+            return baos.toByteArray();
+
+        } catch (Exception e) {
+            Log.e("ImageCompression", "Failed to compress image", e);
+            return null;
+        }
+    }
+
+    private void uploadImagesToCloudinary() {
+        if (viewModel.imageUris == null || viewModel.imageUris.isEmpty()) {
+            submitListing(new java.util.ArrayList<>());
+            return;
+        }
+
+        java.util.List<String> uploadedDownloadUrls = new java.util.ArrayList<>();
+        int totalImages = viewModel.imageUris.size();
+
+        String cloudName = "ddfqh3atl";
+        String uploadPreset = "rentbnb_preset";
+        String cloudinaryUrl = "https://api.cloudinary.com/v1_1/" + cloudName + "/image/upload";
+
+        for (int i = 0; i < totalImages; i++) {
+            Uri localUri = Uri.parse(viewModel.imageUris.get(i));
+
+            byte[] compressedData = getCompressedImageBytes(localUri);
+            if (compressedData == null) {
+                Toast.makeText(requireContext(), "Error processing an image", Toast.LENGTH_SHORT).show();
+                continue;
+            }
+
+            RequestBody presetBody = RequestBody.create(MediaType.parse("text/plain"), uploadPreset);
+            RequestBody fileBody = RequestBody.create(MediaType.parse("image/jpeg"), compressedData);
+            MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", "image.jpg", fileBody);
+
+            ApiClient.getApiService().uploadImageToCloudinary(cloudinaryUrl, presetBody, filePart).enqueue(new Callback<JsonObject>() {
+                @Override
+                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String secureUrl = response.body().get("secure_url").getAsString();
+
+                        synchronized (uploadedDownloadUrls) {
+                            uploadedDownloadUrls.add(secureUrl);
+
+                            if (uploadedDownloadUrls.size() == totalImages) {
+                                submitListing(uploadedDownloadUrls);
+                            }
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "Cloudinary Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        resetButtonState();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<JsonObject> call, Throwable t) {
+                    Toast.makeText(requireContext(), "Upload failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    resetButtonState();
+                }
+            });
+        }
+    }
+
+    private void resetButtonState() {
+        if (progressBar != null) progressBar.setVisibility(View.GONE);
+        if (tvBtnText != null) tvBtnText.setVisibility(View.VISIBLE);
+        if (btnContainer != null) {
+            btnContainer.setEnabled(true);
+            btnContainer.setAlpha(1.0f);
+        }
     }
 }

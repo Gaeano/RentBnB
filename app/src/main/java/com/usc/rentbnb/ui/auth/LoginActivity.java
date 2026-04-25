@@ -30,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private GoogleAuthHelper googleAuthHelper;
     private AuthViewModel authViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,13 +99,14 @@ public class LoginActivity extends AppCompatActivity {
         String emailText = emailField.getText().toString().trim();
         String passwordText = passwordField.getText().toString().trim();
 
+
         authViewModel.login(emailText, passwordText);
 
     }
 
-    private void setUpObservers(){
+    private void setUpObservers() {
         authViewModel.getUserLiveData().observe(this, user -> {
-            if (user != null){
+            if (user != null) {
                 Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_LONG).show();
                 currentUser = user;
 
@@ -121,13 +123,13 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         authViewModel.getErrorLiveData().observe(this, errorMessage -> {
-            if (errorMessage != null){
+            if (errorMessage != null) {
                 Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
 
         authViewModel.getLiveLoadingData().observe(this, isLoading -> {
-            if (isLoading != null && isLoading){
+            if (isLoading != null && isLoading) {
                 loginBtn.setEnabled(false);
                 loginBtn.setText("Logging in...");
             } else {

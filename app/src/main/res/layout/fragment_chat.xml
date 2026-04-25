@@ -4,17 +4,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.chat.ChatFragment">
+    android:background="#FFFFFF">
 
     <TextView
+        android:id="@+id/tvInboxHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="CHAT FRAGMENT"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="35dp"
+        android:text="Messages"
+        android:textColor="#5BC8D3"
+        android:textSize="32sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/etSearchInbox"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_chat_input"
+        android:hint="Search conversations..."
+        android:paddingHorizontal="16dp"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvInboxHeader" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvChatInbox"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etSearchInbox"
+        tools:listitem="@layout/item_chat_inbox" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

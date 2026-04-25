@@ -13,6 +13,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
@@ -35,7 +36,8 @@ public class HomeActivity extends AppCompatActivity {
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
 
-    private boolean showingIslands = true;
+    private boolean showingRentals = true;
+    private TextView tabIslands, tabRentals;
 
     private WeatherResponse.WeatherData currentWeather;
     private int currentWeatherIconRes = R.drawable.ic_sun;
@@ -60,12 +62,11 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-
+        tabIslands = findViewById(R.id.tab_islands);
+        tabRentals = findViewById(R.id.tab_rentals);
 
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        feedTitleView = findViewById(R.id.feed_title);
-
 
 
         setupFilterChips();
@@ -85,13 +86,40 @@ public class HomeActivity extends AppCompatActivity {
         // TODO: Implement search bar logic
     }
 
-    private void switchFeed(boolean toIslands) {
-        showingIslands = toIslands;
+    private void setupTitleToggle() {
+        tabRentals.setOnClickListener(v -> {
+            if (!showingRentals) {
+                switchFeed(true);
+            }
+        });
 
-        String label = toIslands ? "Islands" : "Rentals";
-        feedTitleView.setText(label);
+        tabIslands.setOnClickListener(v -> {
+            if (showingRentals) {
+                switchFeed(false);
+            }
+        });
+    }
 
-        Fragment fragment = toIslands ? new IslandsFragment() : new RentalsFragment();
+    private void switchFeed(boolean toRentals) {
+        showingRentals = toRentals;
+
+        if (toRentals) {
+            tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+
+            tabIslands.setBackgroundResource(android.R.color.transparent);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        } else {
+
+
+            tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+
+            tabRentals.setBackgroundResource(android.R.color.transparent);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        }
+
+        Fragment fragment = toRentals ? new RentalsFragment() : new IslandsFragment();
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
@@ -99,60 +127,31 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void setupTitleToggle() {
-        LinearLayout titleRow = findViewById(R.id.feed_title_row);
-        titleRow.setOnClickListener(this::showFeedDropdown);
-    }
-
-    private void showFeedDropdown(View anchor) {
-        View dropdownView = LayoutInflater.from(this)
-                .inflate(R.layout.dropdown_feed_menu, null);
-
-        PopupWindow popup = new PopupWindow(
-                dropdownView,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                true
-        );
-        popup.setElevation(12f);
-
-        dropdownView.findViewById(R.id.menuIslands).setOnClickListener(v -> {
-            switchFeed(true);
-            popup.dismiss();
-        });
-
-        dropdownView.findViewById(R.id.menuRentals).setOnClickListener(v -> {
-            switchFeed(false);
-            popup.dismiss();
-        });
-
-        popup.showAsDropDown(anchor, 0, 4, Gravity.START);
-    }
-
     private void setupFilterChips() {
-        TextView chipPopular = findViewById(R.id.chip_popular);
+        TextView chipNearYou = findViewById(R.id.chip_near_you);
         TextView chipTrending = findViewById(R.id.chip_trending);
         TextView chipNew = findViewById(R.id.chip_new);
-        TextView chipLabel1 = findViewById(R.id.chip_label1);
-        TextView chipLabel2 = findViewById(R.id.chip_label2);
+        TextView chipTopRated = findViewById(R.id.chip_top_rated);
 
-        filterChips = new TextView[]{chipPopular, chipTrending, chipNew, chipLabel1, chipLabel2};
+        filterChips = new TextView[]{chipNearYou, chipTrending, chipNew, chipTopRated};
 
         for (TextView chip : filterChips) {
             if (chip != null) {
-                chip.setOnClickListener(v -> handleChipSelection((TextView) v));
+                chip.setSelected(false);
+                chip.setOnClickListener(v -> handleChipToggle((TextView) v));
             }
         }
     }
 
-    private void handleChipSelection(TextView selectedChip) {
-        for (TextView chip : filterChips) {
-            chip.setBackgroundResource(R.drawable.chip_background);
-            chip.setTextColor(Color.parseColor("#5F5F5F"));
-        }
+    private void handleChipToggle(TextView selectedChip) {
+        boolean isNowSelected = !selectedChip.isSelected();
+        selectedChip.setSelected(isNowSelected);
 
-        selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
-        selectedChip.setTextColor(Color.WHITE);
+        if (isNowSelected) {
+            selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
+        } else {
+            selectedChip.setBackgroundResource(R.drawable.chip_background);
+        }
     }
 
     private void setupBottomNavigation(View homeHeader) {

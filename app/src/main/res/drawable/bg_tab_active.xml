@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
+<<<<<<< HEAD
     <corners android:radius="50dp" />
 
     <solid android:color="@color/tab_indicator" />
+=======
+
+    <solid android:color="#CCFCFC" />
+
+    <corners android:radius="100dp" />
+
+>>>>>>> 8d09281cbaa1a186ae2b2d098c5f29c55ee192ca
 </shape>

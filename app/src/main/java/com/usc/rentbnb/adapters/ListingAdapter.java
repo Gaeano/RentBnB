@@ -3,10 +3,12 @@ package com.usc.rentbnb.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.Listing;
 
@@ -44,6 +46,7 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
 
     static class ListingViewHolder extends RecyclerView.ViewHolder {
         TextView tvProductName, tvPrice, tvReviewCount, tvCategory;
+        ImageView ivListingImage;
 
         public ListingViewHolder(View itemView) {
             super(itemView);
@@ -51,13 +54,30 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             tvPrice = itemView.findViewById(R.id.item_price);
             tvReviewCount = itemView.findViewById(R.id.item_rent_count);
             tvCategory = itemView.findViewById(R.id.item_category);
+            ivListingImage = itemView.findViewById(R.id.item_image);
         }
 
         public void bind(Listing listing) {
+            /// TODO: Add to Favorites button functional
+            ///  TODO: onClickListener on card and redirects to listing details
             tvProductName.setText(listing.getProductName());
-            tvPrice.setText("₱" + listing.getPrice() + " / " + listing.getPriceUnit());
-            tvReviewCount.setText(listing.getTotalReviews() + " reviews");
+            tvPrice.setText("₱" + listing.getPrice() + "/" + listing.getPriceUnit());
+            tvReviewCount.setText(listing.getTotalReviews() + " rents");
             tvCategory.setText(listing.getCategory());
+
+            if (listing.getImageUrls() != null && !listing.getImageUrls().isEmpty()) {
+                String coverPhotoUrl = listing.getImageUrls().get(0);
+
+                Glide.with(itemView.getContext())
+                        .load(coverPhotoUrl)
+                        .centerCrop()
+                        .into(ivListingImage);
+            } else {
+                Glide.with(itemView.getContext())
+                        .load(R.drawable.ic_no_image_placeholder)
+                        .centerCrop()
+                        .into(ivListingImage);
+            }
         }
     }
 

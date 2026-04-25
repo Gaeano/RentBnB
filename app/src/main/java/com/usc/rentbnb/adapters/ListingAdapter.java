@@ -1,5 +1,6 @@
 package com.usc.rentbnb.adapters;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.ui.listing.ListingsDetailsActivity;
 
 import java.util.List;
 
@@ -78,6 +80,17 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
                         .centerCrop()
                         .into(ivListingImage);
             }
+
+            //TODO: instead of intents, fetch the entire data from db and pass it onto the next activity
+            itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(itemView.getContext(), ListingsDetailsActivity.class);
+
+                intent.putExtra("product_name", listing.getProductName());
+                intent.putExtra("price", String.valueOf(listing.getPrice()));
+                intent.putExtra("price_unit", listing.getPriceUnit());
+                intent.putExtra("category", listing.getCategory());
+                itemView.getContext().startActivity(intent);
+            });
         }
     }
 

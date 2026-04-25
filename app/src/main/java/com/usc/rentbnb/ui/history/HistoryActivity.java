@@ -5,16 +5,21 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.usc.rentbnb.R;
 
 public class HistoryActivity extends AppCompatActivity {
 
     private TextView[] filterChips;
+    private ImageView backButton;
+    private LinearLayout historyHeader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,28 +29,28 @@ public class HistoryActivity extends AppCompatActivity {
 
         setupFilterChips();
 
-        // Add this line to visually update the bottom nav
-        setupDisabledNavBar();
+        // Handle the Back Button
+        backButton = findViewById(R.id.back_button);
+        historyHeader = findViewById(R.id.history_header);
+
+        ViewCompat.setOnApplyWindowInsetsListener(historyHeader, (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    statusBarHeight + 8,
+                    v.getPaddingRight(),
+                    v.getPaddingBottom()
+            );
+            return insets;
+        });
+
+
+        backButton.setOnClickListener(v -> {
+            finish();
+        });
+
     }
 
-    private void setupDisabledNavBar() {
-        ImageView navHome = findViewById(R.id.navHome);
-        ImageView navFavorites = findViewById(R.id.navFavorites);
-        ImageView navBookings = findViewById(R.id.navBookings); // This is your History icon
-        ImageView navProfile = findViewById(R.id.navProfile);
-
-        // Make the History tab look active (100% opacity)
-        if (navBookings != null) {
-            navBookings.setAlpha(1.0f);
-        }
-
-        // Make sure the others look inactive (65% opacity)
-        if (navHome != null) navHome.setAlpha(0.65f);
-        if (navFavorites != null) navFavorites.setAlpha(0.65f);
-        if (navProfile != null) navProfile.setAlpha(0.65f);
-
-        // We are intentionally NOT setting click listeners, so the buttons won't function!
-    }
 
     private void setupFilterChips() {
         TextView chipCamera = findViewById(R.id.chip_camera);

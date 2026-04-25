@@ -17,11 +17,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.ui.auth.LoginActivity;
+import com.usc.rentbnb.ui.history.HistoryActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 
 public class ProfileFragment extends Fragment {
@@ -43,9 +46,19 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // EdgeToEdge is handled by the HomeActivity, so we don't need it here.
+        LinearLayout profileHeader = view.findViewById(R.id.profile_header);
 
-        // Pass the inflated view to your setup method
+        ViewCompat.setOnApplyWindowInsetsListener(profileHeader, (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    statusBarHeight + 8,
+                    v.getPaddingRight(),
+                    v.getPaddingBottom()
+            );
+            return insets;
+        });
+
         setupFilterChips(view);
 
         setClickListenersMenu(view);
@@ -135,7 +148,8 @@ public class ProfileFragment extends Fragment {
 
         menuHistory.setOnClickListener(v -> {
             //replace with navigation logic (prob fragment again)
-            Log.d("ProfileFragment", "History button clicked");
+            Intent intent = new Intent(requireActivity(), HistoryActivity.class);
+            startActivity(intent);
         });
 
         menuHelpCenter.setOnClickListener(v -> {

@@ -155,7 +155,6 @@ public class HomeActivity extends AppCompatActivity {
         selectedChip.setTextColor(Color.WHITE);
     }
 
-    // TODO: Setup flexible bottom navbar logic (can be accessed from any page w/o having to manually add the logic for each activity)
     private void setupBottomNavigation(View homeHeader) {
         navigationHelper = new NavigationHelper(this, R.id.homeFeedContainer, homeHeader);
         View addListingFab = findViewById(R.id.navFab);

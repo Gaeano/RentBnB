@@ -7,10 +7,10 @@ public class User {
     private String photoUrl;
     private String phone;
     private UserLocation location;
-    private double rating; // Add this to match your Node.js "rating"
+    private double rating;
     private double totalRatings;
     private double totalEarnings;
-    private String createdAt; // CHANGE THIS TO STRING
+    private String createdAt;
 
     public User() {}
 
@@ -94,7 +94,6 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    // IMPORTANT: Nested classes must be STATIC for GSON to work properly
     public static class UserLocation {
         private String island;
         private String province;

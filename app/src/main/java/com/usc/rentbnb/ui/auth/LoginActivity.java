@@ -1,6 +1,7 @@
 package com.usc.rentbnb.ui.auth;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -106,6 +107,13 @@ public class LoginActivity extends AppCompatActivity {
             if (user != null){
                 Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_LONG).show();
                 currentUser = user;
+
+                SharedPreferences sharedPreferences = getSharedPreferences("RentBnBPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                editor.putBoolean("IS_REMEMBERED", rememberMeBtn.isChecked());
+                editor.apply();
+
                 Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                 startActivity(intent);
                 finish();

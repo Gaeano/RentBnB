@@ -69,7 +69,7 @@ public class HomeActivity extends AppCompatActivity {
 
         switchFeed(true);
 
-        fetchWeather(10.3157, 123.8854); // for testing purposes, del after
+        fetchWeather(10.3157, 123.8854); // TODO: Use user's location (lat, lng)
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
         // TODO: Implement search bar logic

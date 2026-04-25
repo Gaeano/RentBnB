@@ -57,6 +57,8 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
+
+
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         feedTitleView = findViewById(R.id.feed_title);
 

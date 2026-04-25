@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -92,7 +93,8 @@ public class HomeActivity extends AppCompatActivity {
 
         switchFeed(true);
 
-        fetchWeather(10.3157, 123.8854); // TODO: Use user's location (lat, lng)
+        fetchUserLocation();
+
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
         // TODO: Implement search bar logic
@@ -268,6 +270,8 @@ public class HomeActivity extends AppCompatActivity {
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
 
+                fetchWeather(latitude, longitude);
+
                 try {
                     Geocoder geocoder = new Geocoder(this, Locale.getDefault());
                     List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
@@ -278,13 +282,31 @@ public class HomeActivity extends AppCompatActivity {
 
                         Log.d("LOCATION", "User is in: " + city + ", " + country);
 
-                        // TODO: update UI (e.g., set first row section title to "Near Cebu City")
+                        // TODO: update UI (e.g. set first row section title to "Near Cebu City")
                         // TODO: send these coordinates to backend to fetch nearby rentals/islands
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            } else {
+                Log.d("LOCATION", "Location null, defaulting to Cebu");
+                fetchWeather(10.3157, 123.8854);
             }
+        }).addOnFailureListener(e -> {
+            fetchWeather(10.3157, 123.8854);
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchUserLocation();
+            } else {
+                Log.d("LOCATION", "Permission denied, defaulting to Cebu");
+                fetchWeather(10.3157, 123.8854);
+            }
+        }
     }
 }

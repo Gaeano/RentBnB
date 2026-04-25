@@ -35,9 +35,7 @@
             <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
             <!-- </intent-filter> -->
         </activity>
-        <activity
-            android:name=".ui.favorites.FavoritesActivity"
-            android:exported="false" />
+
         <activity
             android:name=".ui.favorites.FavoritesProductActivity"
             android:exported="false" />

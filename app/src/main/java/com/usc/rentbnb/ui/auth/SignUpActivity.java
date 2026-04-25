@@ -126,18 +126,6 @@ public class SignUpActivity extends AppCompatActivity {
 
     }
 
-    private void purgeLocalSession(SharedPreferences sharedPreferences) {
-        authViewModel.logout(); // Kills the Firebase cache
-
-        // Wipe the Remember Me data
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("IS_REMEMBERED", false);
-        editor.putString("SAVED_EMAIL", "");
-        editor.apply();
-
-        Toast.makeText(this, "Session expired. Please log in again.", Toast.LENGTH_LONG).show();
-
-    }
 
     private void setUpObservers(){
         authViewModel.getUserLiveData().observe(this, user -> {

@@ -1,0 +1,33 @@
+package com.usc.rentbnb.ui.favorites;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.usc.rentbnb.R;
+
+public class FavoritesFragment extends Fragment {
+
+    public FavoritesFragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_favorites, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Initialize your views here using view.findViewById(...)
+        // EditText searchBar = view.findViewById(R.id.search_bar);
+    }
+}

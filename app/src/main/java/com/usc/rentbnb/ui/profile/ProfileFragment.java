@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.ui.auth.LoginActivity;
+import com.usc.rentbnb.ui.history.HistoryActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 
 public class ProfileFragment extends Fragment {
@@ -147,7 +148,8 @@ public class ProfileFragment extends Fragment {
 
         menuHistory.setOnClickListener(v -> {
             //replace with navigation logic (prob fragment again)
-            Log.d("ProfileFragment", "History button clicked");
+            Intent intent = new Intent(requireActivity(), HistoryActivity.class);
+            startActivity(intent);
         });
 
         menuHelpCenter.setOnClickListener(v -> {

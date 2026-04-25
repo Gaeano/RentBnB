@@ -3,12 +3,16 @@ package com.usc.rentbnb.islands;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,6 +36,7 @@ public class IslandDetailsActivity extends AppCompatActivity {
     private String category;
     private String description;
 
+    private FrameLayout btnBackWrapper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,22 +60,20 @@ public class IslandDetailsActivity extends AppCompatActivity {
         islandRating.setText(String.valueOf(rating));
         islandDescription.setText(description);
 
-        // 1. Handle the Top-Left Back Button
-        // Using finish() safely pops this activity off the stack and returns to whatever was before it (HomeActivity)
-        //TODO: Fix back button (inconsistent, cant be clicked sometimes)
-        ImageView backButton = findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> {
-            finish();
+        btnBackWrapper = findViewById(R.id.btn_back_wrapper);
+
+        ViewCompat.setOnApplyWindowInsetsListener(btnBackWrapper, (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+
+            params.topMargin = statusBarHeight + 16;
+            v.setLayoutParams(params);
+
+            return insets;
         });
 
-        // 2. Handle the Bottom Nav Home Button
-        View bottomNav = findViewById(R.id.bottomNavContainer);
-        ImageView navHome = bottomNav.findViewById(R.id.navHome);
-        navHome.setOnClickListener(v -> {
-            Intent intent = new Intent(IslandDetailsActivity.this, HomeActivity.class);
-
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(intent);
+        btnBackWrapper.setOnClickListener(v -> {
             finish();
         });
     }

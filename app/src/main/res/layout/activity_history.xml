@@ -21,17 +21,36 @@
             android:padding="16dp"
             android:clipToPadding="false">
 
-            <TextView
-                android:id="@+id/history_title"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/history_header"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="History"
-                android:textColor="#5BC8D3"
-                android:textSize="36sp"
-                android:textStyle="bold"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/back_button"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_back"
+                    app:tint="@color/black"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/history_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="History"
+                    android:textColor="#5BC8D3"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/search_bar_container"
@@ -44,7 +63,7 @@
                 app:cardElevation="2dp"
                 app:cardUseCompatPadding="true"
                 app:cardBackgroundColor="#F7F7F7"
-                app:layout_constraintTop_toBottomOf="@id/history_title">
+                app:layout_constraintTop_toBottomOf="@id/history_header">
 
                 <EditText
                     android:id="@+id/search_bar"
@@ -185,11 +204,5 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <include
-        layout="@layout/bottom_nav_bar"
-        android:id="@+id/bottomNavContainer"
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

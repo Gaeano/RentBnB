@@ -1,89 +1,220 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    tools:context=".ui.home.HomeActivity">
+    android:background="@color/white">
 
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/mainContent"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavContainer"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="72dp">
 
         <LinearLayout
+            android:id="@+id/homeHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="12dp">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:id="@+id/explore_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Explore"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp"
-                    android:textStyle="bold|italic"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                android:layout_marginTop="8dp">
 
                 <LinearLayout
-                    android:id="@+id/weather_container"
+                    android:id="@+id/title_group"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:orientation="vertical"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@+id/weather_button">
 
                     <TextView
+                        android:id="@+id/explore_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/weather_info_bg"
-                        android:padding="6dp"
-                        android:text="It's going to rain soon"
+                        android:text="Explore"
                         android:textColor="@android:color/black"
-                        android:textSize="11sp" />
+                        android:fontFamily="@font/inconsolata"
+                        android:textSize="14sp"
+                        android:textStyle="bold|italic" />
+
+                    <LinearLayout
+                        android:id="@+id/feed_title_row"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless">
+
+                        <TextView
+                            android:id="@+id/feed_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Islands"
+                            android:textColor="@color/teal_primary"
+                            android:textSize="32sp"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/jost_bold" />
+
+                        <ImageView
+                            android:id="@+id/feed_title_chevron"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="6dp"
+                            android:src="@drawable/ic_back"
+                            android:rotation="-90"
+                            android:alpha="0.6"
+                            app:tint="@color/teal_primary" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/weather_button"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/circular_light_bg"
+                    android:clickable="true"
+                    android:focusable="true">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="8dp"
-                        android:src="@drawable/ic_rain_soon" />
+                        android:id="@+id/weather_icon"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_gravity="center"
+                        android:alpha="0.9"
+                        app:tint="@color/teal_primary"
+                        android:src="@drawable/ic_sun" />
+                </FrameLayout>
+            </RelativeLayout>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/search_bar_container"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="14dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#F9F9F9">
+
+                <EditText
+                    android:id="@+id/search_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:drawableStart="@drawable/ic_search"
+                    android:drawablePadding="12dp"
+                    android:hint="Search islands, rentals…"
+                    android:fontFamily="@font/inconsolata"
+                    android:inputType="text"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:textColorHint="#BCBCBC"
+                    android:textSize="14sp" />
+            </androidx.cardview.widget.CardView>
+
+            <HorizontalScrollView
+                android:id="@+id/filter_chips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/chip_popular"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_background_selected"
+                        android:text="Popular"
+                        android:textColor="@android:color/white"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp" />
+
+                    <TextView
+                        android:id="@+id/chip_trending"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_background"
+                        android:text="Trending"
+                        android:textColor="#5F5F5F"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp" />
+
+                    <TextView
+                        android:id="@+id/chip_new"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_background"
+                        android:text="New"
+                        android:textColor="#5F5F5F"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp" />
+
+                    <TextView
+                        android:id="@+id/chip_label1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_background"
+                        android:text="Label"
+                        android:textColor="#5F5F5F"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp" />
+
+                    <TextView
+                        android:id="@+id/chip_label2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_background"
+                        android:text="Label"
+                        android:textColor="#5F5F5F"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp" />
                 </LinearLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <include
-                android:id="@+id/layout_islands"
-                layout="@layout/layout_islands_content"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="visible" />
-
-            <include
-                android:id="@+id/layout_products"
-                layout="@layout/layout_products_content"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
-
+            </HorizontalScrollView>
         </LinearLayout>
-    </ScrollView>
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/homeFeedContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+    </LinearLayout>
 
     <include
-        android:id="@+id/bottomNavContainer"
         layout="@layout/bottom_nav_bar"
         android:layout_width="match_parent"
         android:layout_height="72dp"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:layout_gravity="bottom" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

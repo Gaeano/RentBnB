@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="10dp"
+    app:cardBackgroundColor="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
+
+        <ImageView
+            android:id="@+id/dialog_weather_icon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:tint="@color/teal_primary"
+            android:src="@drawable/ic_sun" />
+
+        <TextView
+            android:id="@+id/dialog_weather_temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="--°C"
+            android:textColor="@color/teal_primary"
+            android:textSize="36sp"
+            android:fontFamily="@font/jost_bold" />
+
+        <TextView
+            android:id="@+id/dialog_weather_condition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loading..."
+            android:textColor="#5F5F5F"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/dialog_weather_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Checking the skies..."
+            android:textAlignment="center"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:background="@drawable/weather_info_bg"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

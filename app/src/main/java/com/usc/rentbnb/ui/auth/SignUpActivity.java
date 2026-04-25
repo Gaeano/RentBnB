@@ -4,27 +4,21 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.viewmodels.AuthViewModel;
+import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -35,8 +29,14 @@ public class SignUpActivity extends AppCompatActivity {
 
     private TextInputEditText fullName, email, password, confirmPassword;
 
-    private FirebaseAuth auth;
+    FirebaseAuth auth;
     private FirebaseUser currentUser;
+    private GoogleAuthHelper googleAuthHelper;
+
+    private AuthViewModel authViewModel;
+    private boolean isPerformingAuthAction = false;
+    private static final String TAG = "SignUpActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,20 +55,47 @@ public class SignUpActivity extends AppCompatActivity {
         confirmPassword = findViewById(R.id.confirm_password_textfield);
 
 
+
+        googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback(){
+            @Override
+            public void onSuccess(String idToken) {
+                isPerformingAuthAction = true;
+                authViewModel.signInWithGoogle(idToken);
+
+            }
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(SignUpActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+
+        });
+
         auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
+
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+
+        setUpObservers();
+
+
+        googleBtn.setOnClickListener(v -> {
+            googleAuthHelper.launchGoogleSignIn();
+        });
+
+
+
 
         loginBtnRedirect.setOnClickListener(v -> {
             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
             startActivity(intent);
+            Log.d(TAG, "Redirecting to log in activity");
         });
 
 
         signUpBtn.setOnClickListener(v -> {
             signUpAttempt();
         });
-
-
 
     }
 
@@ -78,6 +105,7 @@ public class SignUpActivity extends AppCompatActivity {
         String emailText = email.getText().toString().trim();
         String passwordText = password.getText().toString().trim();
         String confirmPasswordText = confirmPassword.getText().toString().trim();
+        isPerformingAuthAction = true;
 
         if (fullName.getText().toString().isEmpty() || email.getText().toString().isEmpty() || password.getText().toString().isEmpty() || confirmPassword.getText().toString().isEmpty()){
             Toast.makeText(SignUpActivity.this, "Please fill up all fields", Toast.LENGTH_LONG).show();
@@ -94,51 +122,39 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
-        signUpBtn.setEnabled(false);
-        signUpBtn.setText("Signing up...");
-
-        auth.createUserWithEmailAndPassword(emailText, passwordText).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()){
-                    Toast.makeText(SignUpActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
-                    FirebaseUser user = auth.getCurrentUser();
-
-                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                            .setDisplayName(fullNameText)
-                            .build();
-                    user.updateProfile(profileUpdates);
-
-                    //sign in automatically
-                    auth.signInWithEmailAndPassword(emailText, passwordText).addOnCompleteListener(autoSignInTask -> {
-                       if (autoSignInTask.isSuccessful()){
-                            Log.d("SignUpActivity", "signInWithEmail:success");
-                       } else {
-                           String errorMsg = autoSignInTask.getException() != null ? autoSignInTask.getException().getMessage() : "Authentication failed.";
-                           Log.e("SignUpActivity", "signInWithEmail:failure");
-                       }
-                    });
-
-                    //add logic to add to db using backend
-
-                    Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
-                    startActivity(intent);
-                    finish();
-
-                } else {
-                    signUpBtn.setEnabled(true);
-                    signUpBtn.setText("Sign up");
-                    String errorMsg = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
-                    Toast.makeText(SignUpActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
-                    Log.e("SignUpActivity", "createUserWithEmail:failure", task.getException());
-                }
-            }
-        });
-
+        authViewModel.signUp(emailText, passwordText, fullNameText);
 
     }
 
+
+    private void setUpObservers(){
+        authViewModel.getUserLiveData().observe(this, user -> {
+           if (user != null && isPerformingAuthAction){
+               Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_LONG).show();
+               Log.d(TAG, "successfully initialized user");
+               Intent intent = new Intent(SignUpActivity.this, OnboardingActivity.class);
+               startActivity(intent);
+               finish();
+           }
+        });
+
+
+        authViewModel.getErrorLiveData().observe(this, errorMessage -> {
+            if (errorMessage != null){
+                Toast.makeText(SignUpActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        authViewModel.getLiveLoadingData().observe(this, isLoading -> {
+            if (isLoading != null && isLoading){
+                signUpBtn.setEnabled(false);
+                signUpBtn.setText("Signing up...");
+            } else {
+                signUpBtn.setEnabled(true);
+                signUpBtn.setText("Sign up");
+            }
+        });
+    }
 
 
 

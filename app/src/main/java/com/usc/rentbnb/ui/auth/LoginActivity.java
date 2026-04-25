@@ -11,16 +11,13 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.viewmodels.AuthViewModel;
 import com.usc.rentbnb.ui.home.HomeActivity;
-import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -30,8 +27,9 @@ public class LoginActivity extends AppCompatActivity {
     private ImageView googleBtn;
     private Button loginBtn;
 
-    private FirebaseAuth auth;
     private FirebaseUser currentUser;
+    private GoogleAuthHelper googleAuthHelper;
+    private AuthViewModel authViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,23 +37,40 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        backBtn = findViewById(R.id.tv_back);
         signUpBtn = findViewById(R.id.tv_signup_link);
         loginBtn = findViewById(R.id.btn_login);
         emailField = findViewById(R.id.email_textfield);
         passwordField = findViewById(R.id.password_textfield);
         rememberMeBtn = findViewById(R.id.checkBoxRememberMe);
         forgetPasswordBtn = findViewById(R.id.forget_password_btn);
+        googleBtn = findViewById(R.id.btn_google_sign_in);
 
-        auth = FirebaseAuth.getInstance();
-        currentUser = auth.getCurrentUser();
-        checkRememberMeStatus();
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+        setUpObservers();
 
 
 
-        backBtn.setOnClickListener(v -> {
-            finish();
+
+        googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback(){
+
+            @Override
+            public void onSuccess(String idToken) {
+                Toast.makeText(LoginActivity.this, "Google Sign-In successful", Toast.LENGTH_LONG).show();
+                authViewModel.signInWithGoogle(idToken);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
         });
+
+        googleBtn.setOnClickListener(v -> {
+            googleAuthHelper.launchGoogleSignIn();
+        });
+
+
 
         signUpBtn.setOnClickListener(v -> {
             Intent intent = new Intent(this, SignUpActivity.class);
@@ -63,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         });
 
-        loginBtn.setOnClickListener(v ->{
+        loginBtn.setOnClickListener(v -> {
             loginBtnFunctionality();
         });
 
@@ -84,59 +99,45 @@ public class LoginActivity extends AppCompatActivity {
         String emailText = emailField.getText().toString().trim();
         String passwordText = passwordField.getText().toString().trim();
 
-        auth.signInWithEmailAndPassword(emailText, passwordText).addOnCompleteListener(task ->{
-            if (task.isSuccessful()){
+
+        authViewModel.login(emailText, passwordText);
+
+    }
+
+    private void setUpObservers() {
+        authViewModel.getUserLiveData().observe(this, user -> {
+            if (user != null) {
                 Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_LONG).show();
-                currentUser = auth.getCurrentUser();
+                currentUser = user;
+
                 SharedPreferences sharedPreferences = getSharedPreferences("RentBnBPrefs", MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                if (rememberMeBtn.isChecked()){
-                    editor.putBoolean("IS_REMEMBERED", true);
-                    editor.putString("SAVED_EMAIL", emailText);
-                } else {
-                    editor.putBoolean("IS_REMEMBERED", false);
-                    editor.putString("SAVED_EMAIL", "");
-                }
+                editor.putBoolean("IS_REMEMBERED", rememberMeBtn.isChecked());
                 editor.apply();
 
-                Intent intent = new Intent (LoginActivity.this, HomeActivity.class);
+                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                 startActivity(intent);
                 finish();
+            }
+        });
 
+        authViewModel.getErrorLiveData().observe(this, errorMessage -> {
+            if (errorMessage != null) {
+                Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
 
+        authViewModel.getLiveLoadingData().observe(this, isLoading -> {
+            if (isLoading != null && isLoading) {
+                loginBtn.setEnabled(false);
+                loginBtn.setText("Logging in...");
             } else {
-                String errorMsg = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
-                Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                loginBtn.setEnabled(true);
+                loginBtn.setText("Login");
             }
         });
     }
 
-    //this method to be transferreed to the splash screen
-    private void checkRememberMeStatus(){
-        SharedPreferences sharedPreferences = getSharedPreferences("RentBnBPrefs", MODE_PRIVATE);
-        Boolean isRemembered = sharedPreferences.getBoolean("IS_REMEMBERED", false);
 
-        if (currentUser != null){
-
-            if (isRemembered){
-           Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-            startActivity(intent);
-            finish();
-            } else {
-                auth.signOut();
-                currentUser = null;
-            }
-
-        }
-
-        String savedEmail = sharedPreferences.getString("SAVED_EMAIL", "");
-        if (!savedEmail.isEmpty()){
-            emailField.setText(savedEmail);
-            rememberMeBtn.setChecked(true);
-        }
-
-
-
-    }
 }

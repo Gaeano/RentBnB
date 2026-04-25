@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Photos"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_bold"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Upload clear photos of your item. A good cover photo increases bookings significantly."
+                android:textSize="13sp"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginBottom="24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cover Photo"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_semibold"
+                android:layout_marginBottom="10dp" />
+
+            <FrameLayout
+                android:id="@+id/coverPhotoSlot"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="@drawable/photo_slot_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginBottom="20dp"
+                android:clipToOutline="true">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_add_photo"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@null"
+                        android:layout_marginBottom="10dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tap to add cover photo"
+                        android:textSize="13sp"
+                        android:textColor="@color/black"
+                        android:fontFamily="@font/inconsolata" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/ivCoverPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Cover photo"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/btnRemoveCover"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/circular_light_bg"
+                    android:src="@drawable/ic_close"
+                    android:padding="6dp"
+                    app:tint="@color/black"
+                    android:elevation="4dp"
+                    android:visibility="gone" />
+
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Additional Photos (up to 5)"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_semibold"
+                android:layout_marginBottom="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <RelativeLayout
+                    android:id="@+id/photoSlot1"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/photo_slot_bg"
+                    android:clipToOutline="true"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:gravity="center">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_add_photo" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/listingImagePreview1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/btnRemove1"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circular_light_bg"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:padding="5dp"
+                        app:tint="@color/black"
+                        android:elevation="4dp"
+                        android:visibility="gone" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/photoSlot2"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/photo_slot_bg"
+                    android:clipToOutline="true"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:gravity="center">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_add_photo" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/listingImagePreview2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/btnRemove2"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circular_light_bg"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:padding="5dp"
+                        app:tint="@color/black"
+                        android:elevation="4dp"
+                        android:visibility="gone" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/photoSlot3"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/photo_slot_bg"
+                    android:clipToOutline="true"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:gravity="center">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_add_photo" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/listingImagePreview3"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/btnRemove3"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circular_light_bg"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:padding="5dp"
+                        app:tint="@color/black"
+                        android:elevation="4dp"
+                        android:visibility="gone" />
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+                    android:id="@+id/photoSlot4"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/photo_slot_bg"
+                    android:clipToOutline="true"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:gravity="center">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_add_photo" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/listingImagePreview4"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/btnRemove4"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circular_light_bg"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:padding="5dp"
+                        app:tint="@color/black"
+                        android:elevation="4dp"
+                        android:visibility="gone" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/photoSlot5"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/photo_slot_bg"
+                    android:clipToOutline="true"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:gravity="center">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_add_photo" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/listingImagePreview5"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/btnRemove5"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circular_light_bg"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:padding="5dp"
+                        app:tint="@color/black"
+                        android:elevation="4dp"
+                        android:visibility="gone" />
+                </RelativeLayout>
+
+                <View android:layout_width="0dp" android:layout_height="96dp" android:layout_weight="1" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="16dp"
+        android:background="@color/white">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnContinue"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="Continue"
+            android:textColor="@color/white"
+            android:fontFamily="@font/jost_bold"
+            android:textAllCaps="false"
+            android:background="@drawable/btn_primary_bg" />
+    </LinearLayout>
+
+</LinearLayout>

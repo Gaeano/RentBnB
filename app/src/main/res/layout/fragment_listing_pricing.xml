@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set Your Pricing"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_bold"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choose how you'd like to charge renters and which payment methods you accept."
+                android:textSize="13sp"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginBottom="28dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pricing Unit"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_semibold"
+                android:layout_marginBottom="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:background="@drawable/toggle_group_bg"
+                android:padding="4dp"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:id="@+id/btnHourly"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Hourly"
+                    android:textSize="13sp"
+                    android:fontFamily="@font/jost_bold"
+                    android:background="@drawable/unit_btn_selected_bg"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnDaily"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="4dp"
+                    android:gravity="center"
+                    android:text="Daily"
+                    android:textSize="13sp"
+                    android:fontFamily="@font/jost"
+                    android:background="@drawable/unit_btn_bg"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnWeekly"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Weekly"
+                    android:textSize="13sp"
+                    android:fontFamily="@font/jost"
+                    android:background="@drawable/unit_btn_bg"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnMonthly"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Monthly"
+                    android:textSize="13sp"
+                    android:fontFamily="@font/jost"
+                    android:background="@drawable/unit_btn_bg"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Base Price"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_semibold"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:orientation="horizontal"
+                android:background="@drawable/input_bg"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₱"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="4dp" />
+
+                <EditText
+                    android:id="@+id/etBasePrice"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:hint="0.00"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/hint_color"
+                    android:fontFamily="@font/jost"
+                    android:background="@android:color/transparent"
+                    android:paddingEnd="16dp"
+                    android:inputType="numberDecimal"
+                    android:maxLines="1" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="This is the price per unit selected above."
+                android:textSize="12sp"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
+                android:layout_marginBottom="28dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Accepted Payment Methods"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/jost_semibold"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select all that you accept. Renters will only see the options you enable."
+                android:textSize="12sp"
+                android:textColor="@color/text_grey"
+                android:fontFamily="@font/inconsolata"
+                android:layout_marginBottom="14dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:layout_marginBottom="10dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_cash"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@null"
+                    android:layout_marginEnd="12dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cash"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost_semibold" />
+
+                <CheckBox
+                    android:id="@+id/cbCash"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:buttonTint="@color/black" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:layout_marginBottom="10dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_gcash"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@null"
+                    android:layout_marginEnd="12dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="GCash"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost_semibold" />
+
+                <CheckBox
+                    android:id="@+id/cbGcash"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:buttonTint="@color/black" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:layout_marginBottom="10dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_paypal"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@null"
+                    android:layout_marginEnd="12dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="PayPal"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/jost_semibold" />
+
+                <CheckBox
+                    android:id="@+id/cbPaypal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:buttonTint="@color/black" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="16dp"
+        android:background="@color/white">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnContinue"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="Continue"
+            android:textColor="@color/white"
+            android:fontFamily="@font/jost_bold"
+            android:textAllCaps="false"
+            android:background="@drawable/btn_primary_bg" />
+    </LinearLayout>
+
+</LinearLayout>

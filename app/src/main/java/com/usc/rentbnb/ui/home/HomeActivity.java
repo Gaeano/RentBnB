@@ -83,6 +83,35 @@ public class HomeActivity extends AppCompatActivity {
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
         // TODO: Implement search bar logic
+        android.widget.EditText searchBar = findViewById(R.id.search_bar);
+        searchBar.addTextChangedListener(new android.text.TextWatcher() {
+            private android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+            private Runnable searchRunnable;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                // Remove previous pending search requests
+                handler.removeCallbacks(searchRunnable);
+
+                // Schedule a new search request after 500ms
+                searchRunnable = () -> {
+                    String query = s.toString().trim();
+                    if (showingIslands) {
+                        homeViewModel.filterIslands(query);
+                    } else {
+                        homeViewModel.filterRentals(query);
+                    }
+                };
+                handler.postDelayed(searchRunnable, 500);
+            }
+        });
+
     }
 
     private void switchFeed(boolean toIslands) {

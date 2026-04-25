@@ -31,4 +31,5 @@ public class Listing {
     public List<String> getImageUrls() {return imageUrls;}
     public boolean isNew() {return isNew;}
     public boolean isTrending() {return isTrending;}
+
 }

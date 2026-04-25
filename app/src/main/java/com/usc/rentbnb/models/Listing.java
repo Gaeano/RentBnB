@@ -17,6 +17,21 @@ public class Listing {
     private boolean isNew;
     private boolean isTrending;
 
+    public Listing(String id, String productName, String description, String category, String island, double price, String priceUnit, double rating, int totalReviews, List<String> imageUrls, boolean isNew, boolean isTrending) {
+        this.id = id;
+        this.productName = productName;
+        this.description = description;
+        this.category = category;
+        this.island = island;
+        this.price = price;
+        this.priceUnit = priceUnit;
+        this.rating = rating;
+        this.totalReviews = totalReviews;
+        this.imageUrls = imageUrls;
+        this.isNew = isNew;
+        this.isTrending = isTrending;
+    }
+
     public Listing() {}
 
     public String getId() {return id;}

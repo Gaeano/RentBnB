@@ -17,33 +17,42 @@
         <ImageView
             android:id="@+id/profile_header_bg"
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="0dp"
             android:background="@drawable/bg_final"
             android:scaleType="centerCrop"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/my_account_title"
-            android:layout_width="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/stats_card"
+            android:layout_marginBottom="40dp" />
+        <LinearLayout
+            android:id="@+id/profile_header"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
-            android:text="My Account"
-            android:textColor="#8CE3D9"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_menu"
-            app:tint="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="@id/my_account_title"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/my_account_title" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/my_account_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="My Account"
+                android:textColor="#8CE3D9"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/profile_menu_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_menu"
+                app:tint="@android:color/white" />
+        </LinearLayout>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/profile_image_card"
@@ -54,7 +63,7 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/my_account_title">
+            app:layout_constraintTop_toBottomOf="@id/profile_header">
 
             <ImageView
                 android:id="@+id/profile_image"
@@ -84,11 +93,11 @@
             android:layout_height="80dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="-40dp"
+            android:layout_marginTop="24dp"
             app:cardCornerRadius="24dp"
             app:cardElevation="4dp"
             app:cardBackgroundColor="#F3F3F3"
-            app:layout_constraintTop_toBottomOf="@id/profile_header_bg">
+            app:layout_constraintTop_toBottomOf="@id/profile_image_card">
 
             <LinearLayout
                 android:layout_width="match_parent"

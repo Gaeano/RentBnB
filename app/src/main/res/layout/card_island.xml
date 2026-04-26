@@ -94,7 +94,7 @@
                 android:layout_height="22dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_favorites"
-                app:tint="@color/black" />
+                app:tint="@color/favorite_color" />
         </FrameLayout>
 
 

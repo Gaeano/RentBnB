@@ -80,6 +80,7 @@ public class FavoritesIslandsFragment extends Fragment {
 
         skeleton = SkeletonLayoutUtils.applySkeleton(rv, R.layout.favorite_island_card_item, 3);
         skeleton.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
+        skeleton.setMaskCornerRadius(20);
 
         setUpObservers();
 

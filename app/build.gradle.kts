@@ -52,6 +52,7 @@ dependencies {
     implementation("androidx.credentials:credentials:1.2.2")
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // styles and animations
     implementation("com.google.android.flexbox:flexbox:3.0.0")
@@ -66,5 +67,6 @@ dependencies {
     // skeleton loading
     implementation("com.faltenreich:skeletonlayout:4.0.0")
 
+    // image
     implementation("com.github.bumptech.glide:glide:4.16.0")
 }

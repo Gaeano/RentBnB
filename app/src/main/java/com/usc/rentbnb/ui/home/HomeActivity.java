@@ -93,7 +93,8 @@ public class HomeActivity extends AppCompatActivity {
 
         switchFeed(true);
 
-        fetchWeather(10.3157, 123.8854); // TODO: Use user's location (lat, lng)
+        fetchUserLocation();
+
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
         // TODO: Implement search bar logic
@@ -116,7 +117,7 @@ public class HomeActivity extends AppCompatActivity {
                 // Schedule a new search request after 500ms
                 searchRunnable = () -> {
                     String query = s.toString().trim();
-                    if (showingIslands) {
+                    if (showingRentals) {
                         homeViewModel.filterIslands(query);
                     } else {
                         homeViewModel.filterRentals(query);
@@ -125,22 +126,6 @@ public class HomeActivity extends AppCompatActivity {
                 handler.postDelayed(searchRunnable, 500);
             }
         });
-
-    }
-
-    private void switchFeed(boolean toIslands) {
-        showingIslands = toIslands;
-
-        String label = toIslands ? "Islands" : "Rentals";
-        feedTitleView.setText(label);
-
-        Fragment fragment = toIslands ? new IslandsFragment() : new RentalsFragment();
-
-        fetchUserLocation();
-
-        findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
-
-        // TODO: Implement search bar logic
     }
 
     private void setupTitleToggle() {
@@ -182,36 +167,6 @@ public class HomeActivity extends AppCompatActivity {
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(R.id.homeFeedContainer, fragment)
                 .commit();
-    }
-
-    private void setupTitleToggle() {
-        LinearLayout titleRow = findViewById(R.id.feed_title_row);
-        titleRow.setOnClickListener(this::showFeedDropdown);
-    }
-
-    private void showFeedDropdown(View anchor) {
-        View dropdownView = LayoutInflater.from(this)
-                .inflate(R.layout.dropdown_feed_menu, null);
-
-        PopupWindow popup = new PopupWindow(
-                dropdownView,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                true
-        );
-        popup.setElevation(12f);
-
-        dropdownView.findViewById(R.id.menuIslands).setOnClickListener(v -> {
-            switchFeed(true);
-            popup.dismiss();
-        });
-
-        dropdownView.findViewById(R.id.menuRentals).setOnClickListener(v -> {
-            switchFeed(false);
-            popup.dismiss();
-        });
-
-        popup.showAsDropDown(anchor, 0, 4, Gravity.START);
     }
 
     private void setupFilterChips() {
@@ -381,92 +336,5 @@ public class HomeActivity extends AppCompatActivity {
                 fetchWeather(10.3157, 123.8854);
             }
         }
-    }
-
-    private void setupBottomNavigation(View homeHeader) {
-        navigationHelper = new NavigationHelper(this, R.id.homeFeedContainer, homeHeader);
-        View addListingFab = findViewById(R.id.navFab);
-        if (addListingFab != null) {
-            addListingFab.setOnClickListener(v -> {
-                Intent intent = new Intent(HomeActivity.this, AddListingActivity.class);
-                startActivity(intent);
-            });
-        }
-    }
-
-    private void fetchWeather(double userLat, double userLon) {
-        ApiClient.getApiService().getCurrentWeather(userLat, userLon).enqueue(new Callback<WeatherResponse>() {
-            @Override
-            public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    currentWeather = response.body().getData();
-
-                    ImageView ivWeatherIcon = findViewById(R.id.weather_icon);
-
-                    String condition = currentWeather.getCondition();
-                    if (condition == null) condition = "Clear";
-
-                    switch (condition) {
-                        case "Rain":
-                            currentWeatherMessage = "It's going to rain soon";
-                            currentWeatherIconRes = R.drawable.ic_rain;
-                            break;
-                        case "Snow":
-                            currentWeatherMessage = "Snow expected soon";
-                            currentWeatherIconRes = R.drawable.ic_snow;
-                            break;
-                        case "Cloudy":
-                            currentWeatherMessage = "Nice and cool today";
-                            currentWeatherIconRes = R.drawable.ic_cloud;
-                            break;
-                        case "Foggy":
-                            currentWeatherMessage = "Low visibility, take care";
-                            currentWeatherIconRes = R.drawable.ic_fog;
-                            break;
-                        default:
-                            currentWeatherMessage = "Perfect day for rentals";
-                            currentWeatherIconRes = R.drawable.ic_sun;
-                            break;
-                    }
-
-                    ivWeatherIcon.setImageResource(currentWeatherIconRes);
-                    ivWeatherIcon.setAlpha(1.0f);
-
-                }
-            }
-
-            @Override
-            public void onFailure(Call<WeatherResponse> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
-    }
-
-    private void showWeatherDialog() {
-        android.app.Dialog dialog = new android.app.Dialog(this);
-        dialog.setContentView(R.layout.dialog_weather);
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-            dialog.getWindow().setDimAmount(0.7f);
-        }
-
-        ImageView icon = dialog.findViewById(R.id.dialog_weather_icon);
-        TextView tempText = dialog.findViewById(R.id.dialog_weather_temp);
-        TextView conditionText = dialog.findViewById(R.id.dialog_weather_condition);
-        TextView messageText = dialog.findViewById(R.id.dialog_weather_message);
-
-        icon.setImageResource(currentWeatherIconRes);
-        messageText.setText(currentWeatherMessage);
-
-        if (currentWeather != null) {
-            tempText.setText(currentWeather.getTemp() + "°C");
-            conditionText.setText(currentWeather.getCondition());
-        } else {
-            tempText.setText("--°C");
-            conditionText.setText("Loading...");
-        }
-
-        dialog.show();
     }
 }

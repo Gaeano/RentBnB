@@ -55,13 +55,6 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
         notifyDataSetChanged();
     }
 
-    public void updateListings(List<Listing> newListings) {
-        this.listings.clear();
-        if (newListings != null) {
-            this.listings.addAll(newListings);
-        }
-        notifyDataSetChanged();
-    }
 
     @Override
     public ListingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

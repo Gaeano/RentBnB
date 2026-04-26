@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.faltenreich.skeletonlayout.Skeleton;
@@ -35,6 +36,7 @@ public class FavoritesRentalsFragment extends Fragment {
     private ListingAdapter adapter;
     private FirebaseAuth auth;
     private FirebaseUser user;
+    private LinearLayout emptyStateLayout;
 
     public FavoritesRentalsFragment() {
         // Required empty public constructor
@@ -62,6 +64,7 @@ public class FavoritesRentalsFragment extends Fragment {
         favoriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavoriteViewModel.class);
 
         rv = view.findViewById(R.id.rentalsRecyclerView);
+        emptyStateLayout = view.findViewById(R.id.empty_state_layout);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(),2);
 
         rv.setLayoutManager(gridLayoutManager);
@@ -96,7 +99,11 @@ public class FavoritesRentalsFragment extends Fragment {
         favoriteViewModel.getFavoriteListings().observe(getViewLifecycleOwner(), listings -> {
             if (listings != null){
                 if (listings.isEmpty()){
-                    Toast.makeText(requireContext(), "No favorite Listings available", Toast.LENGTH_LONG).show();
+                    emptyStateLayout.setVisibility(View.VISIBLE);
+                    rv.setVisibility(View.GONE);
+                } else {
+                    emptyStateLayout.setVisibility(View.GONE);
+                    rv.setVisibility(View.VISIBLE);
                 }
                 List<String> favoriteIds = new ArrayList<>();
                 for (Listing listing : listings){

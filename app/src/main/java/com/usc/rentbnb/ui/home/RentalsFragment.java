@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.faltenreich.skeletonlayout.Skeleton;
@@ -28,11 +30,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RentalsFragment extends Fragment {
+    private TextView locationTitleView;
 
-    private Skeleton skeleton;
+    private ListingAdapter adapterNear;
+    private ListingAdapter adapterAll;
+
+
+    private Skeleton skeletonNear;
+    private Skeleton skeletonAll;
+
     private HomeViewModel homeViewModel;
     private FavoriteViewModel favoriteViewModel;
-    private ListingAdapter adapter;
+
     private List<Listing> currentAllListings = new ArrayList<>();
     private List<String> currentFavoriteIds = new ArrayList<>();
 
@@ -49,6 +58,7 @@ public class RentalsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
@@ -56,31 +66,46 @@ public class RentalsFragment extends Fragment {
         }
         String userId = currentUser.getUid();
 
-        RecyclerView rv = view.findViewById(R.id.rentalsRecyclerView);
-        rv.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        locationTitleView = view.findViewById(R.id.tv_rentals_location_title);
+        RecyclerView rvNear = view.findViewById(R.id.rv_rentals_near);
+        RecyclerView rvAll = view.findViewById(R.id.rv_rentals_all);
 
-         homeViewModel = new ViewModelProvider(requireActivity())
-                .get(HomeViewModel.class);
-        favoriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavoriteViewModel.class);
-
-        adapter = new ListingAdapter((listing, isCurrentlyFavorite) -> {
+        ListingAdapter.onFavoriteClickListener favListener = (listing, isCurrentlyFavorite) -> {
             if (isCurrentlyFavorite){
                 favoriteViewModel.deleteFavoriteListing(userId, listing.getId());
             } else {
                 favoriteViewModel.addFavoriteListing(userId, listing);
             }
-        });
-        rv.setAdapter(adapter);
+        };
 
-        skeleton = SkeletonLayoutUtils.applySkeleton(rv, R.layout.rentable_item_card, 4);
-        skeleton.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
-        skeleton.showSkeleton();
+        // near you list
+        rvNear.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        adapterNear = new ListingAdapter(favListener);
+        rvNear.setAdapter(adapterNear);
+
+        // all rentals list
+        rvAll.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        adapterAll = new ListingAdapter(favListener);
+        rvAll.setAdapter(adapterAll);
+
+        skeletonNear = SkeletonLayoutUtils.applySkeleton(rvNear, R.layout.rentable_item_card, 2);
+        skeletonNear.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
+        skeletonNear.showSkeleton();
+
+        skeletonAll = SkeletonLayoutUtils.applySkeleton(rvAll, R.layout.rentable_item_card, 4);
+        skeletonAll.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
+        skeletonAll.showSkeleton();
+
+        if (requireActivity() instanceof HomeActivity) {
+            HomeActivity activity = (HomeActivity) requireActivity();
+            onLocationUpdated(activity.userCity, activity.userLat, activity.userLon);
+        }
+
+        homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+        favoriteViewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
 
         setupObservers();
-
         favoriteViewModel.loadListings(userId);
-        homeViewModel.fetchListings();
-
     }
 
     private void setupObservers() {
@@ -88,7 +113,11 @@ public class RentalsFragment extends Fragment {
         homeViewModel.getListings().observe(getViewLifecycleOwner(), listings -> {
             if (listings != null) {
                 currentAllListings = listings;
-                    adapter.submitData(currentAllListings, currentFavoriteIds);
+                    skeletonNear.showOriginal();
+                    skeletonAll.showOriginal();
+
+                    adapterNear.submitData(currentAllListings, currentFavoriteIds);
+                    adapterAll.submitData(currentAllListings, currentFavoriteIds);
             }
         });
 
@@ -99,23 +128,37 @@ public class RentalsFragment extends Fragment {
                 for (Listing listing : favorites) {
                     currentFavoriteIds.add(listing.getId());
                 }
-                skeleton.showOriginal();
-                adapter.submitData(currentAllListings, currentFavoriteIds);
+
+                adapterNear.submitData(currentAllListings, currentFavoriteIds);
+                adapterAll.submitData(currentAllListings, currentFavoriteIds);
             }
         });
 
         homeViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
-                skeleton.showOriginal(); // Stop the shimmer
+                skeletonNear.showOriginal();
+                skeletonAll.showOriginal();
                 Toast.makeText(requireContext(), "Home Error: " + error, Toast.LENGTH_LONG).show();
             }
         });
 
-        // NEW: Listen for Favorite engine errors
         favoriteViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 Toast.makeText(requireContext(), "Favorites Error: " + error, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public void onLocationUpdated(String city, double lat, double lon) {
+        if (locationTitleView != null) {
+            locationTitleView.setText("Near " + city);
+        }
+
+        if (adapterNear != null) {
+            adapterNear.setUserLocation(lat, lon);
+        }
+        if (adapterAll != null) {
+            adapterAll.setUserLocation(lat, lon);
+        }
     }
 }

@@ -44,17 +44,32 @@ public class IslandCardAdapter extends RecyclerView.Adapter<IslandCardAdapter.Is
     }
 
     static class IslandViewHolder extends RecyclerView.ViewHolder {
-        TextView nameView, descriptionView;
+        TextView nameView, descriptionView, trendingChipView;
 
         IslandViewHolder(@NonNull View itemView) {
             super(itemView);
             nameView = itemView.findViewById(R.id.islandName);
             descriptionView = itemView.findViewById(R.id.islandDescription);
+            trendingChipView = itemView.findViewById(R.id.islandTrendingChip);
         }
 
         void bind(Island island) {
             if (nameView != null) nameView.setText(island.getIslandName());
             if (descriptionView != null) descriptionView.setText(island.getDescription());
+
+            if (trendingChipView != null) {
+                String category = "";
+
+                if (island.getCategory() != null) {
+                    category = island.getCategory().toString().toLowerCase();
+                }
+
+                if (category.contains("popular") || category.contains("trending")) {
+                    trendingChipView.setVisibility(View.VISIBLE);
+                } else {
+                    trendingChipView.setVisibility(View.GONE);
+                }
+            }
 
             itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(itemView.getContext(), IslandDetailsActivity.class);

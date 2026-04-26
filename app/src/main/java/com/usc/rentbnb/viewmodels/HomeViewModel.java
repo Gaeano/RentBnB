@@ -21,7 +21,6 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<List<Island>> islands = new MutableLiveData<>();
     private final MutableLiveData<List<Listing>> listings = new MutableLiveData<>();
 
-    // 1. Add the Error Engine
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
     private List<Island> allIslands = new ArrayList<>();
@@ -45,14 +44,12 @@ public class HomeViewModel extends ViewModel {
                     allIslands = response.body().getData();
                     islands.setValue(allIslands);
                 } else {
-                    // 2. Catch server errors (e.g., 404, 500)
                     errorMessage.setValue("Server Error fetching Islands: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<IslandResponse> call, Throwable t) {
-                // 3. Catch network/parsing errors (e.g., Timeout, Render waking up)
                 errorMessage.setValue("Network Error: " + t.getMessage());
             }
         });

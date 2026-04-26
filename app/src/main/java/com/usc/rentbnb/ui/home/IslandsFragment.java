@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +25,7 @@ import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
 
 public class IslandsFragment extends Fragment {
     private Skeleton skeleton;
+    private TextView locationTitleView;
 
     @Nullable
     @Override
@@ -36,9 +38,14 @@ public class IslandsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        locationTitleView = view.findViewById(R.id.tv_islands_location_title);
 
+        if (requireActivity() instanceof HomeActivity) {
+            String currentCity = ((HomeActivity) requireActivity()).userCity;
+            updateLocationTitle(currentCity);
+        }
 
-        RecyclerView rv = view.findViewById(R.id.rentalsRecyclerView);
+        RecyclerView rv = view.findViewById(R.id.islandsRecyclerView);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
         rv.setLayoutManager(layoutManager);
@@ -47,8 +54,7 @@ public class IslandsFragment extends Fragment {
         rv.setOnFlingListener(null);
         snapHelper.attachToRecyclerView(rv);
 
-        HomeViewModel viewModel = new ViewModelProvider(requireActivity())
-                .get(HomeViewModel.class);
+        HomeViewModel viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
 
         IslandCardAdapter adapter = new IslandCardAdapter();
         rv.setAdapter(adapter);
@@ -89,5 +95,11 @@ public class IslandsFragment extends Fragment {
             skeleton.showOriginal();
             rv.post(() -> rv.scrollBy(1, 0));
         });
+    }
+
+    public void updateLocationTitle(String city) {
+        if (locationTitleView != null) {
+            locationTitleView.setText("Islands near " + city);
+        }
     }
 }

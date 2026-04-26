@@ -3,7 +3,6 @@ package com.usc.rentbnb.models;
 import java.util.List;
 
 public class Listing {
-    //TODO: field names
     private String id;
     private String productName;
     private String description;
@@ -11,13 +10,15 @@ public class Listing {
     private String island;
     private double price;
     private String priceUnit;
+    private List<String> paymentMethods;
+    private List<String> suggestedActivities;
+    private List<String> imageUrls;
     private double rating;
     private int totalReviews;
-    private List<String> imageUrls;
-    private boolean isNew;
-    private boolean isTrending;
+    private int timesRented;
+    private String createdAt;
 
-    public Listing(String id, String productName, String description, String category, String island, double price, String priceUnit, double rating, int totalReviews, List<String> imageUrls, boolean isNew, boolean isTrending) {
+    public Listing(String id, String productName, String description, String category, String island, double price, String priceUnit, double rating, int totalReviews, List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls, String createdAt, int timesRented) {
         this.id = id;
         this.productName = productName;
         this.description = description;
@@ -27,9 +28,11 @@ public class Listing {
         this.priceUnit = priceUnit;
         this.rating = rating;
         this.totalReviews = totalReviews;
+        this.paymentMethods = paymentMethods;
+        this.suggestedActivities = suggestedActivities;
         this.imageUrls = imageUrls;
-        this.isNew = isNew;
-        this.isTrending = isTrending;
+        this.createdAt = createdAt;
+        this.timesRented = timesRented;
     }
 
     public Listing() {}
@@ -44,6 +47,8 @@ public class Listing {
     public double getRating() {return rating;}
     public int getTotalReviews() {return totalReviews;}
     public List<String> getImageUrls() {return imageUrls;}
-    public boolean isNew() {return isNew;}
-    public boolean isTrending() {return isTrending;}
+    public String getCreatedAt() {return createdAt;}
+    public int getTimesRented() {return timesRented;}
+    public List<String> getPaymentMethods() {return paymentMethods;}
+    public List<String> getSuggestedActivities() {return suggestedActivities;}
 }

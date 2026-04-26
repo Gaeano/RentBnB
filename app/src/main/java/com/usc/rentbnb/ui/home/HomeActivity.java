@@ -3,17 +3,14 @@ package com.usc.rentbnb.ui.home;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -43,7 +40,6 @@ import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private TextView feedTitleView;
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
 
@@ -53,6 +49,9 @@ public class HomeActivity extends AppCompatActivity {
     private WeatherResponse.WeatherData currentWeather;
     private int currentWeatherIconRes = R.drawable.ic_sun;
     private String currentWeatherMessage = "Checking the skies...";
+    public String userCity = "Cebu City";
+    public double userLat = 10.3157;
+    public double userLon = 123.8854;
 
     private NavigationHelper navigationHelper;
 
@@ -97,8 +96,7 @@ public class HomeActivity extends AppCompatActivity {
 
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
-        // TODO: Implement search bar logic
-        android.widget.EditText searchBar = findViewById(R.id.search_bar);
+        EditText searchBar = findViewById(R.id.search_bar);
         searchBar.addTextChangedListener(new android.text.TextWatcher() {
             private android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
             private Runnable searchRunnable;
@@ -111,10 +109,8 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(android.text.Editable s) {
-                // Remove previous pending search requests
                 handler.removeCallbacks(searchRunnable);
 
-                // Schedule a new search request after 500ms
                 searchRunnable = () -> {
                     String query = s.toString().trim();
                     if (showingRentals) {
@@ -224,7 +220,7 @@ public class HomeActivity extends AppCompatActivity {
                             currentWeatherMessage = "It's going to rain soon";
                             currentWeatherIconRes = R.drawable.ic_rain;
                             break;
-                        case "Snow":
+                        case "Snow": // useless pero pang chuy rani kay chuy manko
                             currentWeatherMessage = "Snow expected soon";
                             currentWeatherIconRes = R.drawable.ic_snow;
                             break;
@@ -232,7 +228,7 @@ public class HomeActivity extends AppCompatActivity {
                             currentWeatherMessage = "Nice and cool today";
                             currentWeatherIconRes = R.drawable.ic_cloud;
                             break;
-                        case "Foggy":
+                        case "Foggy": // busay raman tawn ni ey
                             currentWeatherMessage = "Low visibility, take care";
                             currentWeatherIconRes = R.drawable.ic_fog;
                             break;
@@ -295,33 +291,35 @@ public class HomeActivity extends AppCompatActivity {
 
         fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
             if (location != null) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-
-                fetchWeather(latitude, longitude);
+                userLat = location.getLatitude();
+                userLon = location.getLongitude();
+                fetchWeather(userLat, userLon);
 
                 try {
                     Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-                    List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                    List<Address> addresses = geocoder.getFromLocation(userLat, userLon, 1);
 
                     if (addresses != null && !addresses.isEmpty()) {
-                        String city = addresses.get(0).getLocality();
-                        String country = addresses.get(0).getCountryName();
-
-                        Log.d("LOCATION", "User is in: " + city + ", " + country);
-
-                        // TODO: update UI (e.g. set first row section title to "Near Cebu City")
-                        // TODO: send these coordinates to backend to fetch nearby rentals/islands
+                        userCity = addresses.get(0).getLocality();
+                        Log.d("LOCATION", "User is in: " + userCity);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.homeFeedContainer);
+                if (currentFragment instanceof RentalsFragment) {
+                    ((RentalsFragment) currentFragment).onLocationUpdated(userCity, userLat, userLon);
+                } else if (currentFragment instanceof IslandsFragment) {
+                    ((IslandsFragment) currentFragment).updateLocationTitle(userCity);
+                }
+
+                fetchNearbyIslands(userLat, userLon);
             } else {
-                Log.d("LOCATION", "Location null, defaulting to Cebu");
-                fetchWeather(10.3157, 123.8854);
+                fetchWeather(userLat, userLon);
             }
         }).addOnFailureListener(e -> {
-            fetchWeather(10.3157, 123.8854);
+            fetchWeather(userLat, userLon);
         });
     }
 
@@ -336,5 +334,15 @@ public class HomeActivity extends AppCompatActivity {
                 fetchWeather(10.3157, 123.8854);
             }
         }
+    }
+
+    private void fetchNearbyIslands(double lat, double lng) {
+        // TODO: pass 'lat' and 'lng' to backend to calculate distance puhon
+        // ApiClient.getApiService().getNearbyIslands(lat, lng)...
+
+        Log.d("DATA", "Preparing to fetch islands near " + lat + ", " + lng);
+
+        // fornow because db only has 6 islands, just fetch ALL islands
+        homeViewModel.fetchIslands();
     }
 }

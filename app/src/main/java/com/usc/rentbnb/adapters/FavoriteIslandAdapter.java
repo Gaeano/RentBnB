@@ -1,9 +1,11 @@
 package com.usc.rentbnb.adapters;
 
 import android.content.Intent;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,11 +22,22 @@ import java.util.List;
 
 public class FavoriteIslandAdapter extends RecyclerView.Adapter<FavoriteIslandAdapter.FavoriteIslandViewHolder> {
 
+    public interface onFavoriteClickListener{
+        void onHeartClicked(Island island, boolean isCurrentlyFavorite);
+    }
     private List<Island> islandList = new ArrayList<>();
+    private List<String> favoriteIslandIds = new ArrayList<>();
 
-    public void setIslands(List<Island> islands) {
-        this.islandList = islands;
+    public void submitData(List<Island> islands, List<String> favoriteIds){
+        this.islandList = (islands != null) ? islands : new ArrayList<>();
+        this.favoriteIslandIds = (favoriteIds != null) ? favoriteIds : new ArrayList<>();
         notifyDataSetChanged();
+    }
+
+    private onFavoriteClickListener listener;
+
+    public FavoriteIslandAdapter(onFavoriteClickListener listener){
+        this.listener = listener;
     }
 
     @NonNull
@@ -39,7 +52,42 @@ public class FavoriteIslandAdapter extends RecyclerView.Adapter<FavoriteIslandAd
     public void onBindViewHolder(@NonNull FavoriteIslandViewHolder holder, int position) {
         Island currentIsland = islandList.get(position);
 
+        boolean isFavorite = favoriteIslandIds.contains(currentIsland.getId());
+
+        if (isFavorite){
+            holder.heartIcon.setImageResource(R.drawable.ic_favorites_filled);
+        } else {
+            holder.heartIcon.setImageResource(R.drawable.ic_favorites);
+        }
+
+        holder.heartIcon.setOnClickListener(v -> {
+            holder.heartIcon.animate()
+                    .scaleX(0.7f)
+                    .scaleY(0.7f)
+                    .setDuration(150)
+                    .withEndAction(() -> {
+                        if (isFavorite){
+                            holder.heartIcon.setImageResource(R.drawable.ic_favorites);
+                        } else {
+                            holder.heartIcon.setImageResource(R.drawable.ic_favorites_filled);
+                        }
+
+                        holder.heartIcon.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(200)
+                                .setInterpolator(new OvershootInterpolator())
+                                .start();
+                        if (listener != null){
+                            listener.onHeartClicked(currentIsland, isFavorite);
+                        }
+
+                    })
+                    .start();
+
+        });
         holder.bind(currentIsland);
+
     }
 
     @Override
@@ -52,6 +100,7 @@ public class FavoriteIslandAdapter extends RecyclerView.Adapter<FavoriteIslandAd
         private final TextView islandLocation;
         private final TextView islandRating;
         private final ImageView islandImage;
+        private final ImageView heartIcon;
 
         public FavoriteIslandViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -59,6 +108,7 @@ public class FavoriteIslandAdapter extends RecyclerView.Adapter<FavoriteIslandAd
             islandLocation = itemView.findViewById(R.id.island_location);
             islandRating = itemView.findViewById(R.id.island_rating);
             islandImage = itemView.findViewById(R.id.island_image);
+            heartIcon = itemView.findViewById(R.id.favorite_heart_icon);
         }
         public void bind(Island island) {
             if (islandName != null) islandName.setText(island.getIslandName());

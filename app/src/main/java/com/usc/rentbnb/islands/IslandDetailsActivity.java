@@ -13,15 +13,18 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.home.HomeActivity;
+import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 
 import java.util.List;
 
@@ -37,6 +40,7 @@ public class IslandDetailsActivity extends AppCompatActivity {
     private String description;
 
     private FrameLayout btnBackWrapper;
+    private FavoriteViewModel favoriteViewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +52,9 @@ public class IslandDetailsActivity extends AppCompatActivity {
          rating = getIntent().getDoubleExtra("rating", 0.0);
          category = getIntent().getStringExtra("category"); // TODO: Add a chip next to island name showing the category of the island
          description = getIntent().getStringExtra("description");
+
+        favoriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavoriteViewModel.class);
+
 
         fetchListings();
 
@@ -76,6 +83,7 @@ public class IslandDetailsActivity extends AppCompatActivity {
         btnBackWrapper.setOnClickListener(v -> {
             finish();
         });
+
     }
 
     private void fetchListings() {
@@ -109,8 +117,18 @@ public class IslandDetailsActivity extends AppCompatActivity {
     private void displayListings(List<Listing> listings) {
         RecyclerView recyclerView = findViewById(R.id.rvIslandListings);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        String userId = auth.getCurrentUser().getUid();
 
-        ListingAdapter adapter = new ListingAdapter(listings);
+        ListingAdapter adapter = new ListingAdapter((listing, isCurrentlyFavorite) -> {
+            if (isCurrentlyFavorite) {
+                favoriteViewModel.deleteFavoriteListing(userId, listing.getId());
+                // Handle unfavorite action
+            } else {
+                favoriteViewModel.addFavoriteListing(userId, listing);
+                // Handle favorite action
+            }
+        });
         recyclerView.setAdapter(adapter);
     }
 }

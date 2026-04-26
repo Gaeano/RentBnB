@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,23 +12,32 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.ui.listing.ListingsDetailsActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingViewHolder> {
-    private List<Listing> listings;
+    private List<Listing> listings = new ArrayList<>();
+    private List<String> favoriteIds = new ArrayList<>();
 
-    public ListingAdapter(List<Listing> listings) {
-        this.listings = listings;
+    public interface onFavoriteClickListener{
+        void onHeartClicked(Listing listing, boolean isCurrentlyFavorite);
+    }
+    private onFavoriteClickListener listener;
+
+    public ListingAdapter(onFavoriteClickListener listener) {
+        this.listener = listener;
     }
 
-    public void updateListings(List<Listing> newListings) {
-        this.listings.clear();
-        this.listings.addAll(newListings);
+    public void submitData(List<Listing> listings, List<String> favoriteIds) {
+        this.listings = (listings != null) ? listings : new ArrayList<>();
+        this.favoriteIds = (favoriteIds != null) ? favoriteIds : new ArrayList<>();
         notifyDataSetChanged();
     }
+
 
     @Override
     public ListingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -38,6 +48,42 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
     @Override
     public void onBindViewHolder(ListingViewHolder holder, int position) {
         Listing listing = listings.get(position);
+        boolean isFavorite = favoriteIds.contains(listing.getId());
+
+        if (isFavorite){
+            holder.heartIcon.setImageResource(R.drawable.ic_favorites_filled);
+        } else {
+            holder.heartIcon.setImageResource(R.drawable.ic_favorites);
+        }
+
+        holder.heartIcon.setOnClickListener(v -> {
+            holder.heartIcon.animate()
+                    .scaleX(0.7f)
+                    .scaleY(0.7f)
+                    .setDuration(150)
+                    .withEndAction(() -> {
+                        if (isFavorite){
+                            holder.heartIcon.setImageResource(R.drawable.ic_favorites);
+                        } else {
+                            holder.heartIcon.setImageResource(R.drawable.ic_favorites_filled);
+                        }
+
+                        holder.heartIcon.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(200)
+                                .setInterpolator(new OvershootInterpolator())
+                                .start();
+                        if (listener != null){
+                            listener.onHeartClicked(listing, isFavorite);
+                        }
+
+                    })
+                    .start();
+
+        });
+
+
         holder.bind(listing);
     }
 
@@ -48,7 +94,7 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
 
     static class ListingViewHolder extends RecyclerView.ViewHolder {
         TextView tvProductName, tvPrice, tvReviewCount, tvCategory;
-        ImageView ivListingImage;
+        ImageView ivListingImage, heartIcon;
 
         public ListingViewHolder(View itemView) {
             super(itemView);
@@ -57,6 +103,7 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             tvReviewCount = itemView.findViewById(R.id.item_rent_count);
             tvCategory = itemView.findViewById(R.id.item_category);
             ivListingImage = itemView.findViewById(R.id.item_image);
+            heartIcon = itemView.findViewById(R.id.favorite_heart_icon);
         }
 
         public void bind(Listing listing) {

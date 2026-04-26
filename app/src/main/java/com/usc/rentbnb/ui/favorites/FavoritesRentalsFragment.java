@@ -6,18 +6,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.faltenreich.skeletonlayout.Skeleton;
 import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +31,10 @@ import java.util.List;
 public class FavoritesRentalsFragment extends Fragment {
     private RecyclerView rv;
     private Skeleton skeleton;
+    private FavoriteViewModel favoriteViewModel;
+    private ListingAdapter adapter;
+    private FirebaseAuth auth;
+    private FirebaseUser user;
 
     public FavoritesRentalsFragment() {
         // Required empty public constructor
@@ -41,88 +50,70 @@ public class FavoritesRentalsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() == null){
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        user = auth.getCurrentUser();
 
-        List<Listing> dummyListings = getDummyListings();
+        String userId = user.getUid();
 
-        rv = view.findViewById(R.id.islandsRecyclerView);
+        favoriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavoriteViewModel.class);
+
+        rv = view.findViewById(R.id.rentalsRecyclerView);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(),2);
+
+        rv.setLayoutManager(gridLayoutManager);
+
+        adapter = new ListingAdapter((listing, isCurrentlyFavorite) -> {
+           if (isCurrentlyFavorite){
+               favoriteViewModel.deleteFavoriteListing(userId, listing.getId());
+           } else {
+               favoriteViewModel.addFavoriteListing(userId, listing);
+           }
+        });
+
+        rv.setAdapter(adapter);
 
         skeleton = SkeletonLayoutUtils.applySkeleton(rv, R.layout.rentable_item_card, 3);
         skeleton.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
 
-
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(),2);
-
-        rv.setLayoutManager(gridLayoutManager);
-        ListingAdapter adapter = new ListingAdapter(dummyListings);
-        rv.setAdapter(adapter);
-
-
+        setUpObservers();
+        favoriteViewModel.loadListings(userId);
 
     }
 
-    private List<Listing> getDummyListings() {
-        List<Listing> list = new ArrayList<>();
+    public void setUpObservers(){
+        favoriteViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading){
+                skeleton.showSkeleton();
+            } else {
+                skeleton.showOriginal();
+            }
+        });
 
-        list.add(new Listing(
-                "rent_001",
-                "Standard Motorized Bangka (10 Pax)",
-                "Perfect for island hopping around the northern islands. Includes life jackets and a local guide.",
-                "Boat",
-                "Bantayan Island",
-                2500.00,
-                "/day",
-                4.8,
-                124,
-                new ArrayList<>(), // Empty list for images for now
-                false,
-                true // Trending
-        ));
+        favoriteViewModel.getFavoriteListings().observe(getViewLifecycleOwner(), listings -> {
+            if (listings != null){
+                if (listings.isEmpty()){
+                    Toast.makeText(requireContext(), "No favorite Listings available", Toast.LENGTH_LONG).show();
+                }
+                List<String> favoriteIds = new ArrayList<>();
+                for (Listing listing : listings){
+                    favoriteIds.add(listing.getId());
+                }
+                adapter.submitData(listings, favoriteIds);
+            }
+        });
 
-        list.add(new Listing(
-                "rent_002",
-                "Premium Snorkeling Gear Set",
-                "High-quality tempered glass mask and fins. Professionally sanitized after every use.",
-                "Equipment",
-                "Malapascua",
-                300.00,
-                "/day",
-                4.5,
-                89,
-                new ArrayList<>(),
-                false,
-                false
-        ));
 
-        list.add(new Listing(
-                "rent_003",
-                "Transparent Kayak (2-Seater)",
-                "Experience the crystal clear waters from above. Perfect for photos and sunset viewing.",
-                "Water Sports",
-                "Camotes Islands",
-                500.00,
-                "/hour",
-                4.9,
-                210,
-                new ArrayList<>(),
-                true, // New
-                true  // Trending
-        ));
-
-        list.add(new Listing(
-                "rent_004",
-                "Luxury Catamaran Charter",
-                "Full-day charter with a private captain, onboard grill, and lounging nets. Perfect for large groups.",
-                "Boat",
-                "Mactan",
-                15000.00,
-                "/day",
-                5.0,
-                32,
-                new ArrayList<>(),
-                true, // New
-                false
-        ));
-
-        return list;
+        favoriteViewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage -> {
+            if (errorMessage != null){
+                Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 }
+
+

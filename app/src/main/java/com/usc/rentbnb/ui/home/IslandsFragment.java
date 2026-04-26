@@ -38,7 +38,7 @@ public class IslandsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-        RecyclerView rv = view.findViewById(R.id.islandsRecyclerView);
+        RecyclerView rv = view.findViewById(R.id.rentalsRecyclerView);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
         rv.setLayoutManager(layoutManager);

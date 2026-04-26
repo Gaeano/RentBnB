@@ -19,6 +19,10 @@ import retrofit2.Response;
 public class HomeViewModel extends ViewModel {
     private final MutableLiveData<List<Island>> islands = new MutableLiveData<>();
     private final MutableLiveData<List<Listing>> listings = new MutableLiveData<>();
+
+    private List<Island> allIslands = new ArrayList<>();
+    private List<Listing> allListings = new ArrayList<>();
+
     public LiveData<List<Island>> getIslands() {
         return islands;
     }
@@ -29,7 +33,9 @@ public class HomeViewModel extends ViewModel {
             @Override
             public void onResponse(Call<IslandResponse> call, Response<IslandResponse> response) {
                 if (response.isSuccessful() && response.body() != null ) {
-                    islands.setValue(response.body().getData());
+                    // Update this line to save the data for searching
+                    allIslands = response.body().getData();
+                    islands.setValue(allIslands);
                 }
             }
 
@@ -45,7 +51,9 @@ public class HomeViewModel extends ViewModel {
             @Override
             public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    listings.setValue(response.body().getData());
+                    // Update this line to save the data for searching
+                    allListings = response.body().getData();
+                    listings.setValue(allListings);
                 }
             }
 
@@ -53,4 +61,37 @@ public class HomeViewModel extends ViewModel {
             public void onFailure(Call<ListingResponse> call, Throwable t) { }
         });
     }
-}
+    public void filterIslands(String query) {
+
+        if(query == null || query.isEmpty()){
+            islands.setValue(allIslands);
+            return;
+        }
+
+        List<Island> filtered = new ArrayList<>();
+        for(Island island : allIslands){
+            if(island.getIslandName() != null && island.getIslandName().toLowerCase().contains(query.toLowerCase())){
+                filtered.add(island);
+            }
+        }
+        islands.setValue(filtered);
+    }
+
+    public void filterRentals(String query) {
+        if (query == null || query.isEmpty()) {
+            listings.setValue(allListings);
+            return;
+        }
+
+        List<Listing> filtered = new ArrayList<>();
+        for (Listing listing : allListings) {
+
+            if (listing.getProductName() != null && listing.getProductName().toLowerCase().contains(query.toLowerCase())) {
+                filtered.add(listing);
+            }
+        }
+        listings.setValue(filtered);
+    }
+    }
+
+

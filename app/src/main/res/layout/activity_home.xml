@@ -165,12 +165,11 @@
                     android:id="@+id/search_bar"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@null"
-                    android:hint="Find islands, rentals..."
-                    android:textColorHint="@color/text_grey"
-                    android:textSize="16sp"
+                    android:background="@android:color/transparent"
+                    android:drawableStart="@drawable/ic_search"
+                    android:drawablePadding="12dp"
+                    android:hint="Search islands, rentals…"
+                    android:fontFamily="@font/inconsolata"
                     android:inputType="text"
                     android:fontFamily="@font/inconsolata" />
             </LinearLayout>

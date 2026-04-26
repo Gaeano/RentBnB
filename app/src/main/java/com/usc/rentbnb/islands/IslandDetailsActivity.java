@@ -16,6 +16,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+// ADDED: SmartRefreshLayout import
+import com.scwang.smart.refresh.layout.SmartRefreshLayout;
+
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.models.Listing;
@@ -37,17 +40,26 @@ public class IslandDetailsActivity extends AppCompatActivity {
     private String description;
 
     private FrameLayout btnBackWrapper;
+    private SmartRefreshLayout refreshLayout; // ADDED: Field variable
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_island_details);
 
-         island_name = getIntent().getStringExtra("island_name");
-         location = getIntent().getStringExtra("location");
-         rating = getIntent().getDoubleExtra("rating", 0.0);
-         category = getIntent().getStringExtra("category"); // TODO: Add a chip next to island name showing the category of the island
-         description = getIntent().getStringExtra("description");
+        island_name = getIntent().getStringExtra("island_name");
+        location = getIntent().getStringExtra("location");
+        rating = getIntent().getDoubleExtra("rating", 0.0);
+        category = getIntent().getStringExtra("category");
+        description = getIntent().getStringExtra("description");
+
+        refreshLayout = findViewById(R.id.smartRefreshLayoutIslandDetails);
+
+        // ADDED: Listen for the pull gesture
+        refreshLayout.setOnRefreshListener(layout -> {
+            fetchListings();
+        });
 
         fetchListings();
 
@@ -81,29 +93,40 @@ public class IslandDetailsActivity extends AppCompatActivity {
     private void fetchListings() {
         ApiClient.getApiService().getListings(island_name).enqueue(new Callback<ListingResponse>() {
 
-                    @Override
-                    public void onResponse(Call<ListingResponse> call,
-                                           Response<ListingResponse> response) {
-                        if (response.isSuccessful() && response.body() != null
-                                && response.body().isSuccess()) {
+            @Override
+            public void onResponse(Call<ListingResponse> call,
+                                   Response<ListingResponse> response) {
 
-                            List<Listing> listings = response.body().getData();
+                // ADDED: Stop the spinning animation on success!
+                if (refreshLayout != null) {
+                    refreshLayout.finishRefresh();
+                }
 
-                            displayListings(listings);
+                if (response.isSuccessful() && response.body() != null
+                        && response.body().isSuccess()) {
 
-                        } else {
-                            Toast.makeText(IslandDetailsActivity.this,
-                                    "Failed to load listings", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+                    List<Listing> listings = response.body().getData();
 
-                    @Override
-                    public void onFailure(Call<ListingResponse> call, Throwable t) {
-                        Toast.makeText(IslandDetailsActivity.this,
-                                "Network error: " + t.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
+                    displayListings(listings);
+
+                } else {
+                    Toast.makeText(IslandDetailsActivity.this,
+                            "Failed to load listings", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ListingResponse> call, Throwable t) {
+                // ADDED: Stop the spinning animation on failure!
+                if (refreshLayout != null) {
+                    refreshLayout.finishRefresh();
+                }
+
+                Toast.makeText(IslandDetailsActivity.this,
+                        "Network error: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void displayListings(List<Listing> listings) {

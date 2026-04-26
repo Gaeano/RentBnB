@@ -8,6 +8,15 @@ public class Island {
     private String category;
     private String description;
 
+    public Island(String id, String island_name, String location, double rating, String category, String description) {
+        this.id = id;
+        this.island_name = island_name;
+        this.location = location;
+        this.rating = rating;
+        this.category = category;
+        this.description = description;
+    }
+
     public Island(){}
 
     public String getId() { return id; }

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
     app:cardUseCompatPadding="true"
+    android:layout_margin="8dp"
     app:cardBackgroundColor="@android:color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,73 +17,89 @@
 
         <ImageView
             android:id="@+id/item_image"
-            android:layout_width="120dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="8dp"
-            android:scaleType="fitCenter"
-            android:background="@drawable/yamaha_nmax"
+            android:layout_width="0dp"
+            android:layout_height="140dp"
+            android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/ic_no_image_placeholder" />
 
         <TextView
             android:id="@+id/item_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Yamaha NMAX"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/jost_bold"
             android:textColor="@android:color/black"
-            android:textSize="14sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:fontFamily="@font/jost_bold"
+            android:maxLines="1"
+            android:ellipsize="end"
             app:layout_constraintEnd_toStartOf="@id/item_menu"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_image" />
+            app:layout_constraintTop_toBottomOf="@id/item_image"
+            tools:text="Product Name" />
 
         <ImageView
             android:id="@+id/item_menu"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:src="@drawable/ic_favorites"
-            app:tint="@android:color/black"
             app:layout_constraintBottom_toBottomOf="@id/item_title"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/item_title" />
+            app:layout_constraintTop_toTopOf="@id/item_title"
+            app:tint="@android:color/black" />
 
         <TextView
             android:id="@+id/item_category"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Motorcycle"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@font/inconsolata"
             android:textColor="#888888"
             android:fontFamily="@font/inconsolata"
             android:textSize="10sp"
+            android:textSize="12sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_title" />
+            app:layout_constraintTop_toBottomOf="@id/item_title"
+            tools:text="Category" />
 
         <TextView
             android:id="@+id/item_price"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="P150/hour"
-            android:textColor="#80A0DC"
-            android:textSize="12sp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/jost_bold"
+            android:textColor="@color/teal_primary"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:fontFamily="@font/jost_bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintEnd_toStartOf="@id/item_rent_count"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_category" />
+            app:layout_constraintTop_toBottomOf="@id/item_category"
+            tools:text="₱price/hr" />
 
         <TextView
             android:id="@+id/item_rent_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="20 rents"
-            android:textColor="#888888"
             android:fontFamily="@font/inconsolata"
-            android:textSize="9sp"
+            android:textColor="#888888"
+            android:textSize="11sp"
+            android:maxLines="1"
             app:layout_constraintBottom_toBottomOf="@id/item_price"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/item_price"
+            tools:text="20 rents" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

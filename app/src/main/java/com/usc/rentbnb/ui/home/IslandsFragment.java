@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,7 +19,11 @@ import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.IslandCardAdapter;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
 
+import com.faltenreich.skeletonlayout.Skeleton;
+import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
+
 public class IslandsFragment extends Fragment {
+    private Skeleton skeleton;
 
     @Nullable
     @Override
@@ -31,6 +36,7 @@ public class IslandsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
 
         RecyclerView rv = view.findViewById(R.id.islandsRecyclerView);
 
@@ -46,6 +52,12 @@ public class IslandsFragment extends Fragment {
 
         IslandCardAdapter adapter = new IslandCardAdapter();
         rv.setAdapter(adapter);
+
+        skeleton = SkeletonLayoutUtils.applySkeleton(rv, R.layout.card_island, 3);
+        skeleton.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
+        skeleton.setMaskCornerRadius(28);
+
+        skeleton.showSkeleton();
 
         rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -73,6 +85,8 @@ public class IslandsFragment extends Fragment {
 
         viewModel.getIslands().observe(getViewLifecycleOwner(), islands -> {
             adapter.setIslands(islands);
+
+            skeleton.showOriginal();
             rv.post(() -> rv.scrollBy(1, 0));
         });
     }

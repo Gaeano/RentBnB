@@ -1,5 +1,6 @@
 package com.usc.rentbnb.network;
 
+import com.google.gson.JsonObject;
 import com.usc.rentbnb.models.AuthResponse;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
@@ -8,12 +9,17 @@ import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.models.RegisterRequest;
 import com.usc.rentbnb.models.WeatherResponse;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 public interface ApiService {
     @GET("islands")
@@ -40,5 +46,13 @@ public interface ApiService {
     Call<WeatherResponse> getCurrentWeather(
         @Query("lat") double lat,
         @Query("lon") double lon
+    );
+
+    @Multipart
+    @POST
+    Call<JsonObject> uploadImageToCloudinary(
+            @Url String url,
+            @Part("upload_preset") RequestBody uploadPreset,
+            @Part MultipartBody.Part file
     );
 }

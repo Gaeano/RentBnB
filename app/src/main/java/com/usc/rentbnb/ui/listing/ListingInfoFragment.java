@@ -1,11 +1,14 @@
 package com.usc.rentbnb.ui.listing;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -33,6 +36,8 @@ public class ListingInfoFragment extends Fragment {
     private AddListingViewModel viewModel;
     private Spinner spinnerIsland;
     private ProgressBar islandLoadingProgress;
+    private EditText etProductName, etDescription, etAddress;
+    private Button btnContinue;
 
     private List<Island> islandList = new ArrayList<>();
     private String selectedIslandName = "";
@@ -47,13 +52,14 @@ public class ListingInfoFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        super.onViewCreated(super.getContext() != null ? view : view, savedInstanceState);
 
         viewModel = new ViewModelProvider(requireActivity()).get(AddListingViewModel.class);
 
-        EditText etProductName = view.findViewById(R.id.etProductName);
-        EditText etDescription = view.findViewById(R.id.etDescription);
-        EditText etAddress = view.findViewById(R.id.etAddress);
+        etProductName = view.findViewById(R.id.etProductName);
+        etDescription = view.findViewById(R.id.etDescription);
+        etAddress = view.findViewById(R.id.etAddress);
+        btnContinue = view.findViewById(R.id.btnContinue);
         spinnerIsland = view.findViewById(R.id.spinnerIsland);
         islandLoadingProgress = view.findViewById(R.id.islandLoadingProgress);
 
@@ -63,6 +69,34 @@ public class ListingInfoFragment extends Fragment {
 
         fetchIslands();
 
+        setupListeners();
+        updateContinueButtonState();
+
+        btnContinue.setOnClickListener(v -> {
+            viewModel.productName = etProductName.getText().toString();
+            viewModel.description = etDescription.getText().toString();
+            viewModel.address = etAddress.getText().toString();
+            viewModel.island = selectedIslandName;
+
+            if (getActivity() instanceof AddListingActivity) {
+                ((AddListingActivity) getActivity()).goNextStep();
+            }
+        });
+    }
+
+    private void setupListeners() {
+        TextWatcher validationWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateContinueButtonState();
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        };
+
+        etProductName.addTextChangedListener(validationWatcher);
+        etDescription.addTextChangedListener(validationWatcher);
+        etAddress.addTextChangedListener(validationWatcher);
+
         spinnerIsland.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -71,43 +105,32 @@ public class ListingInfoFragment extends Fragment {
                 } else {
                     selectedIslandName = islandList.get(position - 1).getIslandName();
                 }
+                updateContinueButtonState();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 selectedIslandName = "";
+                updateContinueButtonState();
             }
         });
+    }
 
-        view.findViewById(R.id.btnContinue).setOnClickListener(v -> {
-            String title = etProductName.getText().toString();
-            String description = etDescription.getText().toString();
-            String address = etAddress.getText().toString();
+    private void updateContinueButtonState() {
+        if (btnContinue == null) return;
 
-            if (title.isEmpty()) {
-                etProductName.setError("Product name is required!");
-                return;
-            }
+        String name = etProductName.getText().toString().trim();
+        String description = etDescription.getText().toString().trim();
+        String address = etAddress.getText().toString().trim();
 
-            if (description.isEmpty()) {
-                etDescription.setError("Description is required!");
-                return;
-            }
+        // The IF statement checking all 4 required fields
+        boolean isEnabled = !name.isEmpty() 
+                && !description.isEmpty() 
+                && !selectedIslandName.isEmpty() 
+                && !address.isEmpty();
 
-            if (selectedIslandName.isEmpty()) {
-                Toast.makeText(requireContext(), "Please select an island", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            viewModel.productName = title;
-            viewModel.description = description;
-            viewModel.address = address;
-            viewModel.island = selectedIslandName;
-
-            if (getActivity() instanceof AddListingActivity) {
-                ((AddListingActivity) getActivity()).goNextStep();
-            }
-        });
+        btnContinue.setEnabled(isEnabled);
+        btnContinue.setAlpha(isEnabled ? 1.0f : 0.5f);
     }
 
     private void fetchIslands() {
@@ -147,7 +170,7 @@ public class ListingInfoFragment extends Fragment {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_spinner_item, // TODO: Change to custom spinner layout
+                android.R.layout.simple_spinner_item,
                 displayNames
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -162,5 +185,6 @@ public class ListingInfoFragment extends Fragment {
                 }
             }
         }
+        updateContinueButtonState();
     }
 }

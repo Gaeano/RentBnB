@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.usc.rentbnb.models.FilterCriteria;
 import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.models.IslandResponse;
 import com.usc.rentbnb.models.Listing;
@@ -11,6 +12,7 @@ import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.network.ApiClient;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import retrofit2.Call;
@@ -102,5 +104,60 @@ public class HomeViewModel extends ViewModel {
             }
         }
         listings.setValue(filtered);
+    }
+
+    public void applyFilters(FilterCriteria criteria) {
+        if (allListings == null || allListings.isEmpty()) return;
+
+        List<Listing> result = new ArrayList<>();
+
+        for (Listing listing : allListings) {
+
+            if (listing.getPrice() < criteria.minPrice
+                    || listing.getPrice() > criteria.maxPrice) {
+                continue;
+            }
+
+            if (criteria.categories != null && !criteria.categories.isEmpty()) {
+                if (!criteria.categories.contains(listing.getCategory())) {
+                    continue;
+                }
+            }
+
+            if (criteria.priceUnit != null) {
+                if (!criteria.priceUnit.equals(listing.getPriceUnit())) {
+                    continue;
+                }
+            }
+
+            result.add(listing);
+        }
+
+        if (criteria.sortBy != null) {
+            switch (criteria.sortBy) {
+                case "most_rented":
+                    result.sort((a, b) ->
+                            Integer.compare(b.getTimesRented(), a.getTimesRented()));
+                    break;
+                case "newest":
+                    // createdAt is an ISO string — lexicographic sort works for ISO-8601
+                    result.sort((a, b) ->
+                            b.getCreatedAt().compareTo(a.getCreatedAt()));
+                    break;
+                case "price_asc":
+                    result.sort(Comparator.comparingDouble(Listing::getPrice));
+                    break;
+                case "price_desc":
+                    result.sort((a, b) ->
+                            Double.compare(b.getPrice(), a.getPrice()));
+                    break;
+            }
+        }
+
+        listings.setValue(result);
+    }
+
+    public void clearFilters() {
+        listings.setValue(new ArrayList<>(allListings));
     }
 }

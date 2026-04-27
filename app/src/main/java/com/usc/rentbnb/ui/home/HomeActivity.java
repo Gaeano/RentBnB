@@ -25,8 +25,10 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.FilterCriteria;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
+import com.usc.rentbnb.ui.filter.FilterBottomSheet;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.utils.NavigationHelper;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
@@ -38,7 +40,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements FilterBottomSheet.FilterListener {
 
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
@@ -56,6 +58,7 @@ public class HomeActivity extends AppCompatActivity {
     private NavigationHelper navigationHelper;
 
     private FusedLocationProviderClient fusedLocationClient;
+    private FilterCriteria lastCriteria = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +87,7 @@ public class HomeActivity extends AppCompatActivity {
         setupFilterChips();
         setupTitleToggle();
         setupBottomNavigation(homeHeader);
+        setupFilterButton();
 
         navigationHelper.setInitialState();
 
@@ -201,6 +205,29 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+    }
+
+    private void setupFilterButton() {
+        View filterButton = findViewById(R.id.filter_button);
+        if (filterButton == null) return;
+
+        filterButton.setOnClickListener(v -> {
+            FilterBottomSheet sheet = FilterBottomSheet.newInstance(lastCriteria);
+            sheet.setFilterListener(this);
+            sheet.show(getSupportFragmentManager(), FilterBottomSheet.TAG);
+        });
+    }
+
+    @Override
+    public void onFiltersApplied(com.usc.rentbnb.models.FilterCriteria criteria) {
+        lastCriteria = criteria;
+
+        View filterButton = findViewById(R.id.filter_button);
+        if (filterButton != null) {
+            filterButton.setActivated(!criteria.isEmpty());
+        }
+
+        homeViewModel.applyFilters(criteria);
     }
 
     private void fetchWeather(double userLat, double userLon) {

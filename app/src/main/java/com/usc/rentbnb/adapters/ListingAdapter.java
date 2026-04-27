@@ -189,14 +189,8 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             //TODO: instead of intents, fetch the entire data from db and pass it onto the next activity
             itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(itemView.getContext(), ListingsDetailsActivity.class);
-
-                intent.putExtra("listing_id", listing.getId());
-                intent.putExtra("product_name", listing.getProductName());
-                intent.putExtra("price", String.valueOf(listing.getPrice()));
-                intent.putExtra("price_unit", listing.getPriceUnit());
-                intent.putExtra("category", listing.getCategory());
-                intent.putExtra("island", listing.getIsland());
-                intent.putExtra("rating", listing.getRating());
+                // Pass the entire object in one move
+                intent.putExtra("listing_object", listing);
                 itemView.getContext().startActivity(intent);
             });
         }

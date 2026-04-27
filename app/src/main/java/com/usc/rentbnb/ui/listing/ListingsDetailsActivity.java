@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -13,8 +14,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +33,15 @@ public class ListingsDetailsActivity extends AppCompatActivity {
     private TextView btnRentNow;
     private ListView activitiesListView;
 
-    // New variables for the clickable placeholders
     private ImageView btnFavorite, btnChat;
     private TextView descriptionText, btnShowAllReviews;
+
+    // Architecture Variables
+    private FavoriteViewModel favoriteViewModel;
+    private boolean isFavorite = false;
+    private String currentListingId;
+    private Listing currentListing;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,68 +55,130 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back_wrapper);
         btnRentNow = findViewById(R.id.btn_rent_now);
         activitiesListView = findViewById(R.id.list_suggested_activities);
-        ImageView headerImage = findViewById(R.id.header_image);
 
-        // Initialize the new placeholder views
         btnFavorite = findViewById(R.id.btn_favorite);
         btnChat = findViewById(R.id.btn_chat);
         descriptionText = findViewById(R.id.listing_description);
         btnShowAllReviews = findViewById(R.id.btn_show_all_reviews);
 
-        // 2. Retrieve Data from Intent
+        // Handle Status Bar Padding
+        ViewCompat.setOnApplyWindowInsetsListener(btnBack, (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            params.topMargin = statusBarHeight + 16;
+            v.setLayoutParams(params);
+            return insets;
+        });
+
+        // 2. Retrieve Data & Reconstruct Object
         Intent intent = getIntent();
         if (intent != null) {
-            String productName = intent.getStringExtra("product_name");
-            String category = intent.getStringExtra("category");
-            String price = intent.getStringExtra("price");
+            currentListing = intent.getParcelableExtra("listing_object");
 
-            // ADD THIS to retrieve the unit
-            String priceUnit = intent.getStringExtra("price_unit");
+            if (currentListing != null) {
+                currentListingId = currentListing.getId();
 
-            if (productName != null) titleView.setText(productName);
-            if (category != null) categoryView.setText(category);
+                // Update your UI directly from the object
+                titleView.setText(currentListing.getProductName());
+                categoryView.setText(currentListing.getCategory());
+                priceView.setText("₱" + currentListing.getPrice() + " / " + currentListing.getPriceUnit());
 
-            // UPDATE THIS to show both price and unit
-            if (price != null) {
-                if (priceUnit != null && !priceUnit.isEmpty()) {
-                    priceView.setText("₱" + price + " / " + priceUnit);
-                } else {
-                    // Fallback just in case a listing doesn't have a unit
-                    priceView.setText("₱" + price);
-                }
             }
         }
 
-        // 3. Setup Suggested Activities List
+        // 3. Setup Architecture
+        setupFavoritesObserver();
         setupActivitiesList();
 
-        // 4. Setup Click Listeners (Navigation & Main Actions)
+        // 4. Setup Click Listeners
         btnBack.setOnClickListener(v -> finish());
 
         btnRentNow.setOnClickListener(v -> {
             Toast.makeText(ListingsDetailsActivity.this, "Proceeding to checkout...", Toast.LENGTH_SHORT).show();
         });
 
-        // 5. Setup Placeholder Click Listeners
+        // The Animated Favorite Button Logic
         btnFavorite.setOnClickListener(v -> {
-            Toast.makeText(ListingsDetailsActivity.this, "Added to favorites!", Toast.LENGTH_SHORT).show();
-            // TODO: Toggle favorite heart icon color/state here later
+            // Validate user is logged in
+            if (userId == null) {
+                Toast.makeText(this, "Please log in to save favorites.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // 1. Shrink animation
+            btnFavorite.animate()
+                    .scaleX(0.7f)
+                    .scaleY(0.7f)
+                    .setDuration(150)
+                    .withEndAction(() -> {
+                        // Toggle state locally for immediate visual feedback
+                        isFavorite = !isFavorite;
+                        updateHeartUI();
+
+                        // 2. Bounce back animation
+                        btnFavorite.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(200)
+                                .setInterpolator(new OvershootInterpolator())
+                                .start();
+
+                        // 3. Database operation
+                        if (isFavorite) {
+                            favoriteViewModel.addFavoriteListing(userId, currentListing);
+                        } else {
+                            favoriteViewModel.deleteFavoriteListing(userId, currentListingId);
+                        }
+                    })
+                    .start();
         });
 
         btnChat.setOnClickListener(v -> {
             Toast.makeText(ListingsDetailsActivity.this, "Opening chat with owner...", Toast.LENGTH_SHORT).show();
-            // TODO: Intent to chat activity here later
         });
 
         descriptionText.setOnClickListener(v -> {
             Toast.makeText(ListingsDetailsActivity.this, "Expanding description...", Toast.LENGTH_SHORT).show();
-            // TODO: Expand the TextView to show full text here later
         });
 
         btnShowAllReviews.setOnClickListener(v -> {
             Toast.makeText(ListingsDetailsActivity.this, "Opening all reviews...", Toast.LENGTH_SHORT).show();
-            // TODO: Open a bottom sheet or new activity with all reviews here later
         });
+    }
+
+    private void setupFavoritesObserver() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            return; // Exit early if user is not logged in
+        }
+
+        favoriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavoriteViewModel.class);
+
+        // Listen to the database
+        favoriteViewModel.getFavoriteListings().observe(this, favorites -> {
+            if (favorites != null) {
+                isFavorite = false; // reset before checking
+                for (Listing fav : favorites) {
+                    if (fav.getId() != null && fav.getId().equals(currentListingId)) {
+                        isFavorite = true;
+                        break;
+                    }
+                }
+                updateHeartUI(); // Paint the UI based on the truth
+            }
+        });
+
+        // Trigger the fetch
+        favoriteViewModel.loadListings(userId);
+    }
+
+    private void updateHeartUI() {
+        if (isFavorite) {
+            btnFavorite.setImageResource(R.drawable.ic_favorites_filled);
+        } else {
+            btnFavorite.setImageResource(R.drawable.ic_favorites);
+        }
     }
 
     private void setupActivitiesList() {

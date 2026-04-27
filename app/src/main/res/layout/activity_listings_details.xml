@@ -11,13 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@id/btn_rent_now"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="24dp">
+            android:paddingBottom="100dp"
+            android:clipToPadding="false">
 
             <ImageView
                 android:id="@+id/header_image"
@@ -104,19 +105,17 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:orientation="vertical">
-
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center_vertical">
-
                                 <ImageView
                                     android:layout_width="16dp"
                                     android:layout_height="16dp"
                                     android:src="@android:drawable/star_on"
                                     app:tint="#FFD700" />
-
                                 <TextView
+                                    android:id="@+id/island_rating"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="4dp"
@@ -125,7 +124,6 @@
                                     android:textSize="16sp"
                                     android:textStyle="bold" />
                             </LinearLayout>
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -141,7 +139,6 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:orientation="vertical">
-
                             <TextView
                                 android:id="@+id/listing_category"
                                 android:layout_width="wrap_content"
@@ -150,7 +147,6 @@
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -166,7 +162,6 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:orientation="vertical">
-
                             <TextView
                                 android:id="@+id/listing_price"
                                 android:layout_width="wrap_content"
@@ -175,7 +170,6 @@
                                 android:textColor="@android:color/black"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -207,7 +201,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:fontFamily="monospace"
-                        android:text="Small description of a small description, that is a small description. That is maybe a small description.. Show more"
+                        android:text="Small description text goes here..."
                         android:textColor="#555555"
                         android:textSize="12sp" />
 
@@ -222,13 +216,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical">
-
                         <ImageView
                             android:id="@+id/owner_avatar"
                             android:layout_width="36dp"
                             android:layout_height="36dp"
                             android:src="@drawable/ic_profile" />
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -239,15 +231,6 @@
                             android:textColor="#333333"
                             android:textSize="16sp"
                             android:textStyle="bold" />
-
-                        <ImageView
-                            android:id="@+id/btn_chat"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:src="@drawable/ic_chat"
-                            app:tint="#333333" />
                     </RelativeLayout>
 
                     <TextView
@@ -259,14 +242,15 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
-                    <ListView
-                        android:id="@+id/list_suggested_activities"
+                    <TextView
+                        android:id="@+id/text_suggested_activities"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:divider="@null"
-                        android:dividerHeight="4dp"
-                        tools:listitem="@layout/item_activity_list" />
+                        android:fontFamily="monospace"
+                        android:lineSpacingExtra="4dp"
+                        android:textColor="#555555"
+                        android:textSize="13sp" />
 
                     <View
                         android:layout_width="match_parent"
@@ -278,7 +262,6 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
-
                         <ImageView
                             android:id="@+id/review_star"
                             android:layout_width="20dp"
@@ -286,7 +269,6 @@
                             android:layout_centerVertical="true"
                             android:src="@android:drawable/star_on"
                             app:tint="#FFD700" />
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -297,7 +279,6 @@
                             android:textColor="#333333"
                             android:textSize="16sp"
                             android:textStyle="bold" />
-
                         <TextView
                             android:id="@+id/btn_show_all_reviews"
                             android:layout_width="wrap_content"
@@ -316,12 +297,10 @@
                         android:background="@drawable/review_bg"
                         android:gravity="center_vertical"
                         android:padding="16dp">
-
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_profile" />
-
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -337,22 +316,37 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
+    <ImageView
+        android:id="@+id/btn_chat"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/circular_teal_bg"
+        android:elevation="8dp"
+        android:padding="16dp"
+        android:src="@drawable/ic_chat"
+        app:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <TextView
         android:id="@+id/btn_rent_now"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:background="@drawable/pill_button_teal"
+        android:elevation="8dp"
         android:paddingStart="48dp"
         android:paddingTop="12dp"
         android:paddingEnd="48dp"
         android:paddingBottom="12dp"
         android:text="RENT NOW"
         android:textColor="@android:color/white"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

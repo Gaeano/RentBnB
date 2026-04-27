@@ -1,19 +1,24 @@
 package com.usc.rentbnb.ui.listing;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -23,16 +28,13 @@ import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ListingsDetailsActivity extends AppCompatActivity {
 
-    private TextView titleView, categoryView, priceView;
+    private TextView titleView, categoryView, priceView, activitiesView;
     private FrameLayout btnBack;
     private TextView btnRentNow;
-    private ListView activitiesListView;
-
     private ImageView btnFavorite, btnChat;
     private TextView descriptionText, btnShowAllReviews;
 
@@ -42,6 +44,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
     private String currentListingId;
     private Listing currentListing;
     private String userId;
+    private boolean isActivitiesExpanded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +57,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         priceView = findViewById(R.id.listing_price);
         btnBack = findViewById(R.id.btn_back_wrapper);
         btnRentNow = findViewById(R.id.btn_rent_now);
-        activitiesListView = findViewById(R.id.list_suggested_activities);
+        activitiesView = findViewById(R.id.text_suggested_activities);
 
         btnFavorite = findViewById(R.id.btn_favorite);
         btnChat = findViewById(R.id.btn_chat);
@@ -70,7 +73,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
             return insets;
         });
 
-        // 2. Retrieve Data & Reconstruct Object
+        // 2. Retrieve Data via Parcelable
         Intent intent = getIntent();
         if (intent != null) {
             currentListing = intent.getParcelableExtra("listing_object");
@@ -78,44 +81,46 @@ public class ListingsDetailsActivity extends AppCompatActivity {
             if (currentListing != null) {
                 currentListingId = currentListing.getId();
 
-                // Update your UI directly from the object
+                // Update UI from object
                 titleView.setText(currentListing.getProductName());
                 categoryView.setText(currentListing.getCategory());
                 priceView.setText("₱" + currentListing.getPrice() + " / " + currentListing.getPriceUnit());
+                descriptionText.setText(currentListing.getDescription());
 
+                // Populate activities dynamically
+                setupActivitiesList();
             }
         }
 
         // 3. Setup Architecture
         setupFavoritesObserver();
-        setupActivitiesList();
 
         // 4. Setup Click Listeners
         btnBack.setOnClickListener(v -> finish());
 
         btnRentNow.setOnClickListener(v -> {
-            Toast.makeText(ListingsDetailsActivity.this, "Proceeding to checkout...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Proceeding to checkout...", Toast.LENGTH_SHORT).show();
         });
 
-        // The Animated Favorite Button Logic
+        btnChat.setOnClickListener(v -> {
+            Toast.makeText(this, "Opening chat with owner...", Toast.LENGTH_SHORT).show();
+        });
+
+        // Animated Favorite Button
         btnFavorite.setOnClickListener(v -> {
-            // Validate user is logged in
             if (userId == null) {
                 Toast.makeText(this, "Please log in to save favorites.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // 1. Shrink animation
             btnFavorite.animate()
                     .scaleX(0.7f)
                     .scaleY(0.7f)
                     .setDuration(150)
                     .withEndAction(() -> {
-                        // Toggle state locally for immediate visual feedback
                         isFavorite = !isFavorite;
                         updateHeartUI();
 
-                        // 2. Bounce back animation
                         btnFavorite.animate()
                                 .scaleX(1.0f)
                                 .scaleY(1.0f)
@@ -123,7 +128,6 @@ public class ListingsDetailsActivity extends AppCompatActivity {
                                 .setInterpolator(new OvershootInterpolator())
                                 .start();
 
-                        // 3. Database operation
                         if (isFavorite) {
                             favoriteViewModel.addFavoriteListing(userId, currentListing);
                         } else {
@@ -132,44 +136,79 @@ public class ListingsDetailsActivity extends AppCompatActivity {
                     })
                     .start();
         });
+    }
 
-        btnChat.setOnClickListener(v -> {
-            Toast.makeText(ListingsDetailsActivity.this, "Opening chat with owner...", Toast.LENGTH_SHORT).show();
-        });
+    private void setupActivitiesList() {
+        List<String> activities = currentListing.getSuggestedActivities();
 
-        descriptionText.setOnClickListener(v -> {
-            Toast.makeText(ListingsDetailsActivity.this, "Expanding description...", Toast.LENGTH_SHORT).show();
-        });
+        if (activities == null || activities.isEmpty()) {
+            activitiesView.setText("No specific activities suggested.");
+            return;
+        }
 
-        btnShowAllReviews.setOnClickListener(v -> {
-            Toast.makeText(ListingsDetailsActivity.this, "Opening all reviews...", Toast.LENGTH_SHORT).show();
-        });
+        if (activities.size() <= 3) {
+            activitiesView.setText(String.join(", ", activities));
+            return;
+        }
+
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        if (!isActivitiesExpanded) {
+            String shortText = String.join(", ", activities.subList(0, 3));
+            builder.append(shortText).append("... ");
+            int start = builder.length();
+            builder.append("See More");
+            addClickableSpan(builder, start, true);
+        } else {
+            String fullText = String.join(", ", activities);
+            builder.append(fullText).append(" ");
+            int start = builder.length();
+            builder.append("See Less");
+            addClickableSpan(builder, start, false);
+        }
+
+        activitiesView.setText(builder);
+        activitiesView.setMovementMethod(LinkMovementMethod.getInstance());
+        activitiesView.setHighlightColor(Color.TRANSPARENT);
+    }
+
+    private void addClickableSpan(SpannableStringBuilder builder, int start, boolean expand) {
+        builder.setSpan(new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                isActivitiesExpanded = expand;
+                setupActivitiesList();
+            }
+
+            @Override
+            public void updateDrawState(@NonNull TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setUnderlineText(false);
+                ds.setColor(ContextCompat.getColor(ListingsDetailsActivity.this, R.color.teal_primary));
+                ds.setFakeBoldText(true);
+            }
+        }, start, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
     private void setupFavoritesObserver() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         } else {
-            return; // Exit early if user is not logged in
+            return;
         }
 
         favoriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavoriteViewModel.class);
-
-        // Listen to the database
         favoriteViewModel.getFavoriteListings().observe(this, favorites -> {
             if (favorites != null) {
-                isFavorite = false; // reset before checking
+                isFavorite = false;
                 for (Listing fav : favorites) {
                     if (fav.getId() != null && fav.getId().equals(currentListingId)) {
                         isFavorite = true;
                         break;
                     }
                 }
-                updateHeartUI(); // Paint the UI based on the truth
+                updateHeartUI();
             }
         });
-
-        // Trigger the fetch
         favoriteViewModel.loadListings(userId);
     }
 
@@ -179,43 +218,5 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         } else {
             btnFavorite.setImageResource(R.drawable.ic_favorites);
         }
-    }
-
-    private void setupActivitiesList() {
-        List<String> activities = new ArrayList<>();
-        activities.add("· Island Hopping");
-        activities.add("· Snorkeling");
-        activities.add("· Sunset Watching");
-        activities.add("· Deep Sea Fishing");
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                R.layout.item_activity_list,
-                R.id.activity_text,
-                activities
-        );
-
-        activitiesListView.setAdapter(adapter);
-        setListViewHeightBasedOnChildren(activitiesListView);
-    }
-
-    public static void setListViewHeightBasedOnChildren(ListView listView) {
-        ListAdapter listAdapter = listView.getAdapter();
-        if (listAdapter == null) return;
-
-        int totalHeight = 0;
-        for (int i = 0; i < listAdapter.getCount(); i++) {
-            View listItem = listAdapter.getView(i, null, listView);
-            listItem.measure(
-                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-            );
-            totalHeight += listItem.getMeasuredHeight();
-        }
-
-        ViewGroup.LayoutParams params = listView.getLayoutParams();
-        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
-        listView.setLayoutParams(params);
-        listView.requestLayout();
     }
 }

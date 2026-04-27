@@ -1,49 +1,19 @@
 package com.usc.rentbnb.models;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Immutable snapshot of every filter the user has set.
- * Passed from FilterBottomSheet → HomeActivity → HomeViewModel.
- */
-public class FilterCriteria {
+public class FilterCriteria implements Serializable {
+    public List<String> categories = new ArrayList<>();
+    public List<String> activities = new ArrayList<>();
+    public float minPrice = 0f;
+    public float maxPrice = 50000f; // Matches RangeSlider valueTo
+    public float minRating = 0f;
+    public String priceUnit = null;
+    public String sortBy = null;
 
-    // ── Price ────────────────────────────────────────────────────
-    public final float minPrice;
-    public final float maxPrice;
-
-    // ── Category (multi-select) ───────────────────────────────────
-    // Empty list == "all categories"
-    public final List<String> categories;
-
-    // ── Price unit (single-select, null == any) ───────────────────
-    // Values: "/day" | "/hour" | "/week" | null
-    public final String priceUnit;
-
-    // ── Sort (single-select, null == default) ─────────────────────
-    // Values: "most_rented" | "newest" | "price_asc" | "price_desc" | null
-    public final String sortBy;
-
-    public FilterCriteria(
-            float minPrice,
-            float maxPrice,
-            List<String> categories,
-            String priceUnit,
-            String sortBy
-    ) {
-        this.minPrice   = minPrice;
-        this.maxPrice   = maxPrice;
-        this.categories = categories;
-        this.priceUnit  = priceUnit;
-        this.sortBy     = sortBy;
-    }
-
-    /** True when no filter is active (sheet is in its default cleared state). */
     public boolean isEmpty() {
-        return minPrice == 0
-                && maxPrice == 10_000
-                && (categories == null || categories.isEmpty())
-                && priceUnit == null
-                && sortBy == null;
+        return categories.isEmpty() && activities.isEmpty() && minPrice == 0f && maxPrice == 50000f && minRating == 0f;
     }
 }

@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -28,7 +30,7 @@ import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.FilterCriteria;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
-import com.usc.rentbnb.ui.filter.FilterBottomSheet;
+import com.usc.rentbnb.ui.filter.FilterActivity;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.utils.NavigationHelper;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
@@ -40,7 +42,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeActivity extends AppCompatActivity implements FilterBottomSheet.FilterListener {
+public class HomeActivity extends AppCompatActivity {
 
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
@@ -212,22 +214,12 @@ public class HomeActivity extends AppCompatActivity implements FilterBottomSheet
         if (filterButton == null) return;
 
         filterButton.setOnClickListener(v -> {
-            FilterBottomSheet sheet = FilterBottomSheet.newInstance(lastCriteria);
-            sheet.setFilterListener(this);
-            sheet.show(getSupportFragmentManager(), FilterBottomSheet.TAG);
+            Intent intent = new Intent(HomeActivity.this, FilterActivity.class);
+            if (lastCriteria != null) {
+                intent.putExtra("current_criteria", lastCriteria);
+            }
+            filterLauncher.launch(intent);
         });
-    }
-
-    @Override
-    public void onFiltersApplied(com.usc.rentbnb.models.FilterCriteria criteria) {
-        lastCriteria = criteria;
-
-        View filterButton = findViewById(R.id.filter_button);
-        if (filterButton != null) {
-            filterButton.setActivated(!criteria.isEmpty());
-        }
-
-        homeViewModel.applyFilters(criteria);
     }
 
     private void fetchWeather(double userLat, double userLon) {
@@ -372,4 +364,24 @@ public class HomeActivity extends AppCompatActivity implements FilterBottomSheet
         // fornow because db only has 6 islands, just fetch ALL islands
         homeViewModel.fetchIslands();
     }
+
+    private final ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    FilterCriteria criteria = (FilterCriteria) result.getData().getSerializableExtra("updated_criteria");
+
+                    lastCriteria = criteria;
+
+                    // Highlight filter button if active
+                    View filterButton = findViewById(R.id.filter_button);
+                    if (filterButton != null) {
+                        filterButton.setActivated(!criteria.isEmpty());
+                    }
+
+                    // Apply logic
+                    homeViewModel.applyFilters(criteria);
+                }
+            }
+    );
 }

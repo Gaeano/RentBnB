@@ -39,9 +39,4 @@
     <string name="select_island">Select an Island</string>
 
     <string name="default_web_client_id">21228965617-758kckj5uqjieqi6gq2i62lmpfbe3j6b.apps.googleusercontent.com</string>
-
-    <array name="price_range_defaults">
-        <item>0.0</item>
-        <item>10000.0</item>
-    </array>
 </resources>

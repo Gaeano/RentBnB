@@ -113,17 +113,40 @@ public class HomeViewModel extends ViewModel {
 
         for (Listing listing : allListings) {
 
-            if (listing.getPrice() < criteria.minPrice
-                    || listing.getPrice() > criteria.maxPrice) {
+            // ── Price range ──────────────────────────────────────
+            if (listing.getPrice() < criteria.minPrice || listing.getPrice() > criteria.maxPrice) {
                 continue;
             }
 
+            // ── Rating ───────────────────────────────────────────
+            if (listing.getRating() < criteria.minRating) {
+                continue;
+            }
+
+            // ── Category ─────────────────────────────────────────
             if (criteria.categories != null && !criteria.categories.isEmpty()) {
                 if (!criteria.categories.contains(listing.getCategory())) {
                     continue;
                 }
             }
 
+            // ── Suggested Activities (Matches ANY selected) ──────
+            if (criteria.activities != null && !criteria.activities.isEmpty()) {
+                boolean hasMatchingActivity = false;
+                if (listing.getSuggestedActivities() != null) {
+                    for (String activity : criteria.activities) {
+                        if (listing.getSuggestedActivities().contains(activity)) {
+                            hasMatchingActivity = true;
+                            break;
+                        }
+                    }
+                }
+                if (!hasMatchingActivity) {
+                    continue;
+                }
+            }
+
+            // ── Price unit ───────────────────────────────────────
             if (criteria.priceUnit != null) {
                 if (!criteria.priceUnit.equals(listing.getPriceUnit())) {
                     continue;
@@ -133,26 +156,7 @@ public class HomeViewModel extends ViewModel {
             result.add(listing);
         }
 
-        if (criteria.sortBy != null) {
-            switch (criteria.sortBy) {
-                case "most_rented":
-                    result.sort((a, b) ->
-                            Integer.compare(b.getTimesRented(), a.getTimesRented()));
-                    break;
-                case "newest":
-                    // createdAt is an ISO string — lexicographic sort works for ISO-8601
-                    result.sort((a, b) ->
-                            b.getCreatedAt().compareTo(a.getCreatedAt()));
-                    break;
-                case "price_asc":
-                    result.sort(Comparator.comparingDouble(Listing::getPrice));
-                    break;
-                case "price_desc":
-                    result.sort((a, b) ->
-                            Double.compare(b.getPrice(), a.getPrice()));
-                    break;
-            }
-        }
+        // ... (Keep your existing sorting logic below here) ...
 
         listings.setValue(result);
     }

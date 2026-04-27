@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.viewmodels.AddListingViewModel;
+import com.usc.rentbnb.viewmodels.ListingDraft;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class ListingPricingFragment extends Fragment {
     private Button btnContinue;
     private EditText etBasePrice;
     private CheckBox cbCash, cbGcash, cbPaypal;
+    ListingDraft draft;
 
     @Nullable
     @Override
@@ -51,11 +53,10 @@ public class ListingPricingFragment extends Fragment {
         cbCash = view.findViewById(R.id.cbCash);
         cbGcash = view.findViewById(R.id.cbGcash);
         cbPaypal = view.findViewById(R.id.cbPaypal);
+        draft = viewModel.currentDraft();
 
         // Restore price if it exists
-        if (viewModel.price > 0) {
-            etBasePrice.setText(String.valueOf(viewModel.price));
-        }
+        if (draft.price > 0) { etBasePrice.setText(String.valueOf(draft.price)); }
 
         setupUnitButtons(view);
         setupValidationListeners();
@@ -66,14 +67,14 @@ public class ListingPricingFragment extends Fragment {
         btnContinue.setOnClickListener(v -> {
             String priceStr = etBasePrice.getText().toString();
             if (!priceStr.isEmpty()) {
-                viewModel.price = Double.parseDouble(priceStr);
+                draft.price = Double.parseDouble(priceStr);
             }
-            viewModel.priceUnit = selectedUnit;
+            draft.priceUnit = selectedUnit;
 
-            viewModel.paymentMethods.clear();
-            if (cbCash.isChecked()) viewModel.paymentMethods.add("Cash");
-            if (cbGcash.isChecked()) viewModel.paymentMethods.add("GCash");
-            if (cbPaypal.isChecked()) viewModel.paymentMethods.add("PayPal");
+            draft.paymentMethods.clear();
+            if (cbCash.isChecked()) draft.paymentMethods.add("Cash");
+            if (cbGcash.isChecked()) draft.paymentMethods.add("GCash");
+            if (cbPaypal.isChecked()) draft.paymentMethods.add("PayPal");
 
             if (getActivity() instanceof AddListingActivity) {
                 ((AddListingActivity) getActivity()).goNextStep();

@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.faltenreich.skeletonlayout.Skeleton;
 import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
 import com.google.firebase.auth.FirebaseAuth;
+import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.models.Listing;
@@ -51,6 +52,7 @@ public class IslandDetailsActivity extends AppCompatActivity {
     private Skeleton skeleton;
     private LinearLayout emptyStateLayout;
     private TextView islandName, islandLocation, islandRating, islandDescription;
+    private SmartRefreshLayout refreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +99,11 @@ public class IslandDetailsActivity extends AppCompatActivity {
 
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         favoriteViewModel.loadListings(userId);
+        refreshLayout = findViewById(R.id.smartRefreshLayoutIslandDetails);
+        refreshLayout.setOnRefreshListener(layout -> {
+            if (skeleton != null) skeleton.showSkeleton();
+            fetchListings();
+        });
     }
 
     private void setupRecyclerView() {
@@ -135,6 +142,7 @@ public class IslandDetailsActivity extends AppCompatActivity {
         ApiClient.getApiService().getListings(island_name).enqueue(new Callback<ListingResponse>() {
             @Override
             public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
+                if (refreshLayout != null) refreshLayout.finishRefresh();
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
 
                     // Save the fetched listings globally
@@ -165,6 +173,7 @@ public class IslandDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ListingResponse> call, Throwable t) {
+                if (refreshLayout != null) refreshLayout.finishRefresh();
                 Toast.makeText(IslandDetailsActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

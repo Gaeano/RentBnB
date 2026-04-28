@@ -28,20 +28,19 @@ public class SwipeRefreshHeader extends LinearLayout implements RefreshHeader {
     }
 
     private void initView(Context context) {
-        // Inflate your custom XML here
         LayoutInflater.from(context).inflate(R.layout.layout_custom_refresh_header, this, true);
     }
 
     @NonNull
     @Override
     public View getView() {
-        return this; // Return this view to the SmartRefreshLayout
+        return this;
     }
 
     @NonNull
     @Override
     public SpinnerStyle getSpinnerStyle() {
-        return SpinnerStyle.Translate; // Makes the header pull down smoothly
+        return SpinnerStyle.Translate;
     }
 
     @Override
@@ -54,7 +53,7 @@ public class SwipeRefreshHeader extends LinearLayout implements RefreshHeader {
 
     @Override
     public int onFinish(@NonNull RefreshLayout refreshLayout, boolean success) {
-        return 0; // Delay in milliseconds before closing
+        return 0;
     }
 
     @Override

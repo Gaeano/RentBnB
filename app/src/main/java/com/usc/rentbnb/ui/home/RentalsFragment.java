@@ -106,10 +106,12 @@ public class RentalsFragment extends Fragment {
 
         skeletonNear = SkeletonLayoutUtils.applySkeleton(rvNear, R.layout.rentable_item_card, 2);
         skeletonNear.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
+        skeletonNear.setMaskCornerRadius(16);
         skeletonNear.showSkeleton();
 
         skeletonAll = SkeletonLayoutUtils.applySkeleton(rvAll, R.layout.rentable_item_card, 4);
         skeletonAll.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
+        skeletonAll.setMaskCornerRadius(16);
         skeletonAll.showSkeleton();
 
         if (requireActivity() instanceof HomeActivity) {

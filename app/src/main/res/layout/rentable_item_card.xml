@@ -119,10 +119,11 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_favorites"
+            app:tint="@color/favorite_color"
             app:layout_constraintBottom_toBottomOf="@id/item_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/item_title"
-            app:tint="@android:color/black" />
+            />
 
         <TextView
             android:id="@+id/item_category"

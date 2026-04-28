@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,11 +21,28 @@ import java.util.List;
 public class IslandCardAdapter extends RecyclerView.Adapter<IslandCardAdapter.IslandViewHolder> {
 
     private List<Island> islands = new ArrayList<>();
+    private List<String> favoriteIds = new ArrayList<>();
+
+    public interface onFavoriteClickListener{
+        void onHeartClicked(Island island, boolean isCurrentlyFavorite);
+    }
+
+    private onFavoriteClickListener listener;
 
     public void setIslands(List<Island> islands) {
-        this.islands = islands;
+        this.islands = (islands != null) ? islands : new ArrayList<>();
         notifyDataSetChanged();
     }
+
+    public void setFavoriteIds(List<String> favoriteIds) {
+        this.favoriteIds = (favoriteIds != null) ? favoriteIds : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
+    public IslandCardAdapter(onFavoriteClickListener listener) {
+        this.listener = listener;
+    }
+
 
     @NonNull
     @Override
@@ -35,7 +54,41 @@ public class IslandCardAdapter extends RecyclerView.Adapter<IslandCardAdapter.Is
 
     @Override
     public void onBindViewHolder(@NonNull IslandViewHolder holder, int position) {
-        holder.bind(islands.get(position));
+        Island island = islands.get(position);
+        boolean isFavorite = favoriteIds.contains(island.getId());
+        if (isFavorite) {
+            holder.heartIcon.setImageResource(R.drawable.ic_favorites_filled);
+        } else {
+            holder.heartIcon.setImageResource(R.drawable.ic_favorites);
+        }
+
+        holder.heartIcon.setOnClickListener(v -> {
+            holder.heartIcon.animate()
+                    .scaleX(0.7f)
+                    .scaleY(0.7f)
+                    .setDuration(150)
+                    .withEndAction(() -> {
+                        if (isFavorite) {
+                            holder.heartIcon.setImageResource(R.drawable.ic_favorites);
+                        } else {
+                            holder.heartIcon.setImageResource(R.drawable.ic_favorites_filled);
+                        }
+
+                        holder.heartIcon.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(200)
+                                .setInterpolator(new OvershootInterpolator())
+                                .start();
+
+                        if (listener != null) {
+                            listener.onHeartClicked(island, isFavorite);
+                        }
+                    })
+                    .start();
+        });
+
+        holder.bind(island);
     }
 
     @Override
@@ -45,12 +98,14 @@ public class IslandCardAdapter extends RecyclerView.Adapter<IslandCardAdapter.Is
 
     static class IslandViewHolder extends RecyclerView.ViewHolder {
         TextView nameView, descriptionView, trendingChipView;
+        ImageView heartIcon;
 
         IslandViewHolder(@NonNull View itemView) {
             super(itemView);
             nameView = itemView.findViewById(R.id.islandName);
             descriptionView = itemView.findViewById(R.id.islandDescription);
             trendingChipView = itemView.findViewById(R.id.islandTrendingChip);
+            heartIcon = itemView.findViewById(R.id.icHeart);
         }
 
         void bind(Island island) {

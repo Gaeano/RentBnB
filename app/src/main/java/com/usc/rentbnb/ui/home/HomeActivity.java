@@ -128,6 +128,18 @@ public class HomeActivity extends AppCompatActivity {
                 handler.postDelayed(searchRunnable, 500);
             }
         });
+
+        getSupportFragmentManager().registerFragmentLifecycleCallbacks(new androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
+            @Override
+            public void onFragmentResumed(@NonNull androidx.fragment.app.FragmentManager fm, @NonNull Fragment f) {
+                super.onFragmentResumed(fm, f);
+                if (f instanceof RentalsFragment) {
+                    updateTabUI(true);
+                } else if (f instanceof IslandsFragment) {
+                    updateTabUI(false);
+                }
+            }
+        }, false);
     }
 
     private void setupTitleToggle() {
@@ -145,23 +157,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void switchFeed(boolean toRentals) {
-        showingRentals = toRentals;
-
-        if (toRentals) {
-            tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
-            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
-
-            tabIslands.setBackgroundResource(android.R.color.transparent);
-            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
-        } else {
-
-
-            tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
-            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
-
-            tabRentals.setBackgroundResource(android.R.color.transparent);
-            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
-        }
+        updateTabUI(toRentals);
 
         Fragment fragment = toRentals ? new RentalsFragment() : new IslandsFragment();
         getSupportFragmentManager()
@@ -169,6 +165,23 @@ public class HomeActivity extends AppCompatActivity {
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(R.id.homeFeedContainer, fragment)
                 .commit();
+    }
+    private void updateTabUI(boolean isRentals) {
+        showingRentals = isRentals;
+
+        if (isRentals) {
+            tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+
+            tabIslands.setBackgroundResource(android.R.color.transparent);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        } else {
+            tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+
+            tabRentals.setBackgroundResource(android.R.color.transparent);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        }
     }
 
     private void setupFilterChips() {

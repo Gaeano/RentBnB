@@ -1,11 +1,14 @@
 package com.usc.rentbnb.ui.listing;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -21,6 +24,7 @@ import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.models.IslandResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.viewmodels.AddListingViewModel;
+import com.usc.rentbnb.viewmodels.ListingDraft;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +35,11 @@ import retrofit2.Callback;
 
 public class ListingInfoFragment extends Fragment {
     private AddListingViewModel viewModel;
+    private ListingDraft draft;
     private Spinner spinnerIsland;
     private ProgressBar islandLoadingProgress;
+    private EditText etProductName, etDescription, etAddress;
+    private Button btnContinue;
 
     private List<Island> islandList = new ArrayList<>();
     private String selectedIslandName = "";
@@ -50,18 +57,47 @@ public class ListingInfoFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(requireActivity()).get(AddListingViewModel.class);
+        draft = viewModel.currentDraft();
 
-        EditText etProductName = view.findViewById(R.id.etProductName);
-        EditText etDescription = view.findViewById(R.id.etDescription);
-        EditText etAddress = view.findViewById(R.id.etAddress);
+        etProductName = view.findViewById(R.id.etProductName);
+        etDescription = view.findViewById(R.id.etDescription);
+        etAddress = view.findViewById(R.id.etAddress);
+        btnContinue = view.findViewById(R.id.btnContinue);
         spinnerIsland = view.findViewById(R.id.spinnerIsland);
         islandLoadingProgress = view.findViewById(R.id.islandLoadingProgress);
 
-        etProductName.setText(viewModel.productName);
-        etDescription.setText(viewModel.description);
-        etAddress.setText(viewModel.address);
+        etProductName.setText(draft.productName);
+        etDescription.setText(draft.description);
+        etAddress.setText(draft.address);
 
         fetchIslands();
+
+        setupListeners();
+        updateContinueButtonState();
+
+        btnContinue.setOnClickListener(v -> {
+            draft.productName = etProductName.getText().toString();
+            draft.description = etDescription.getText().toString();
+            draft.address = etAddress.getText().toString();
+            draft.island = selectedIslandName;
+
+            if (getActivity() instanceof AddListingActivity) {
+                ((AddListingActivity) getActivity()).goNextStep();
+            }
+        });
+    }
+
+    private void setupListeners() {
+        TextWatcher validationWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateContinueButtonState();
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        };
+
+        etProductName.addTextChangedListener(validationWatcher);
+        etDescription.addTextChangedListener(validationWatcher);
 
         spinnerIsland.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -71,43 +107,29 @@ public class ListingInfoFragment extends Fragment {
                 } else {
                     selectedIslandName = islandList.get(position - 1).getIslandName();
                 }
+                updateContinueButtonState();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 selectedIslandName = "";
+                updateContinueButtonState();
             }
         });
+    }
 
-        view.findViewById(R.id.btnContinue).setOnClickListener(v -> {
-            String title = etProductName.getText().toString();
-            String description = etDescription.getText().toString();
-            String address = etAddress.getText().toString();
+    private void updateContinueButtonState() {
+        if (btnContinue == null) return;
 
-            if (title.isEmpty()) {
-                etProductName.setError("Product name is required!");
-                return;
-            }
+        String name = etProductName.getText().toString().trim();
+        String description = etDescription.getText().toString().trim();
 
-            if (description.isEmpty()) {
-                etDescription.setError("Description is required!");
-                return;
-            }
+        boolean isEnabled = !name.isEmpty() 
+                && !description.isEmpty() 
+                && !selectedIslandName.isEmpty();
 
-            if (selectedIslandName.isEmpty()) {
-                Toast.makeText(requireContext(), "Please select an island", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            viewModel.productName = title;
-            viewModel.description = description;
-            viewModel.address = address;
-            viewModel.island = selectedIslandName;
-
-            if (getActivity() instanceof AddListingActivity) {
-                ((AddListingActivity) getActivity()).goNextStep();
-            }
-        });
+        btnContinue.setEnabled(isEnabled);
+        btnContinue.setAlpha(isEnabled ? 1.0f : 0.5f);
     }
 
     private void fetchIslands() {
@@ -117,6 +139,8 @@ public class ListingInfoFragment extends Fragment {
         ApiClient.getApiService().getIslands().enqueue(new Callback<IslandResponse>() {
             @Override
             public void onResponse(Call<IslandResponse> call, Response<IslandResponse> response) {
+                if (!isAdded()) return;
+                
                 islandLoadingProgress.setVisibility(View.GONE);
                 spinnerIsland.setVisibility(View.VISIBLE);
 
@@ -130,6 +154,8 @@ public class ListingInfoFragment extends Fragment {
 
             @Override
             public void onFailure(Call<IslandResponse> call, Throwable t) {
+                if (!isAdded()) return;
+                
                 islandLoadingProgress.setVisibility(View.GONE);
                 spinnerIsland.setVisibility(View.VISIBLE);
                 Toast.makeText(requireContext(), "Network error loading islands", Toast.LENGTH_SHORT).show();
@@ -138,6 +164,8 @@ public class ListingInfoFragment extends Fragment {
     }
 
     private void populateSpinner(List<Island> islands) {
+        if (!isAdded()) return;
+
         List<String> displayNames = new ArrayList<>();
         displayNames.add("Select an Island");
 
@@ -147,20 +175,21 @@ public class ListingInfoFragment extends Fragment {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_spinner_item, // TODO: Change to custom spinner layout
+                android.R.layout.simple_spinner_item,
                 displayNames
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerIsland.setAdapter(adapter);
 
-        if (!viewModel.island.isEmpty()) {
+        if (draft != null && draft.island != null && !draft.island.isEmpty()) {
             for (int i = 0; i < islands.size(); i++) {
-                if (islands.get(i).getIslandName().equals(viewModel.island)) {
+                if (islands.get(i).getIslandName().equals(draft.island)) {
                     spinnerIsland.setSelection(i + 1);
-                    selectedIslandName = viewModel.island;
+                    selectedIslandName = draft.island;
                     break;
                 }
             }
         }
+        updateContinueButtonState();
     }
 }

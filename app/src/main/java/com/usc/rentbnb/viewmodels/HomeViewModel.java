@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.usc.rentbnb.models.FilterCriteria;
 import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.models.IslandResponse;
 import com.usc.rentbnb.models.Listing;
@@ -11,6 +12,7 @@ import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.network.ApiClient;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import retrofit2.Call;
@@ -102,5 +104,64 @@ public class HomeViewModel extends ViewModel {
             }
         }
         listings.setValue(filtered);
+    }
+
+    public void applyFilters(FilterCriteria criteria) {
+        if (allListings == null || allListings.isEmpty()) return;
+
+        List<Listing> result = new ArrayList<>();
+
+        for (Listing listing : allListings) {
+
+            // ── Price range ──────────────────────────────────────
+            if (listing.getPrice() < criteria.minPrice || listing.getPrice() > criteria.maxPrice) {
+                continue;
+            }
+
+            // ── Rating ───────────────────────────────────────────
+            if (listing.getRating() < criteria.minRating) {
+                continue;
+            }
+
+            // ── Category ─────────────────────────────────────────
+            if (criteria.categories != null && !criteria.categories.isEmpty()) {
+                if (!criteria.categories.contains(listing.getCategory())) {
+                    continue;
+                }
+            }
+
+            // ── Suggested Activities (Matches ANY selected) ──────
+            if (criteria.activities != null && !criteria.activities.isEmpty()) {
+                boolean hasMatchingActivity = false;
+                if (listing.getSuggestedActivities() != null) {
+                    for (String activity : criteria.activities) {
+                        if (listing.getSuggestedActivities().contains(activity)) {
+                            hasMatchingActivity = true;
+                            break;
+                        }
+                    }
+                }
+                if (!hasMatchingActivity) {
+                    continue;
+                }
+            }
+
+            // ── Price unit ───────────────────────────────────────
+            if (criteria.priceUnit != null) {
+                if (!criteria.priceUnit.equals(listing.getPriceUnit())) {
+                    continue;
+                }
+            }
+
+            result.add(listing);
+        }
+
+        // ... (Keep your existing sorting logic below here) ...
+
+        listings.setValue(result);
+    }
+
+    public void clearFilters() {
+        listings.setValue(new ArrayList<>(allListings));
     }
 }

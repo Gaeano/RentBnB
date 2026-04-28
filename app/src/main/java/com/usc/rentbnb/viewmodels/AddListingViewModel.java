@@ -1,21 +1,37 @@
 package com.usc.rentbnb.viewmodels;
 
 import androidx.lifecycle.ViewModel;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class AddListingViewModel extends ViewModel {
-    public String productName ="";
-    public String description = "";
+    private final List<ListingDraft> drafts = new ArrayList<>();
+    private int currentDraftIndex = 0;
 
-    public String category = "";
-    public String address = "";
-    public double price = 0.0;
-    public String priceUnit = "hourly"; // hourly, daily, weekly, monthly
-    public List<String> paymentMethods = new ArrayList<>(); // gcash, paypal, or cash
-    public List<String> suggestedActivities = new ArrayList<>();
-    public String coverImageUrl = "";
-    public List<String> imageUris = new ArrayList<>();
-    public String island = "";
+    public AddListingViewModel() {
+        drafts.add(new ListingDraft());
+    }
+
+    public ListingDraft currentDraft() {
+        return drafts.get(currentDraftIndex);
+    }
+
+    public void queueCurrentAndStartNew() {
+        drafts.add(new ListingDraft());
+        currentDraftIndex = drafts.size() - 1;
+    }
+
+    public int getDraftCount() {
+        return drafts.size();
+    }
+
+    public List<ListingDraft> getAllDrafts() {
+        return drafts;
+    }
+
+    public void resetAll() {
+        drafts.clear();
+        drafts.add(new ListingDraft());
+        currentDraftIndex = 0;
+    }
 }

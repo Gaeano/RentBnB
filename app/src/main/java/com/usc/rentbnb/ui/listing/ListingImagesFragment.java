@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -23,11 +24,13 @@ import java.util.HashMap;
 public class ListingImagesFragment extends Fragment {
     private int currentSelectedSlotId = -1;
     private HashMap<Integer, Uri> selectedImages = new HashMap<>();
+    private Button btnContinue;
     private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
                 if (uri != null && currentSelectedSlotId != -1) {
                     selectedImages.put(currentSelectedSlotId, uri);
                     displaySelectedImage(currentSelectedSlotId, uri);
+                    updateContinueButtonState();
                 } else {
                     //
                 }
@@ -45,6 +48,8 @@ public class ListingImagesFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        btnContinue = view.findViewById(R.id.btnContinue);
 
         view.findViewById(R.id.coverPhotoSlot).setOnClickListener(v -> openImagePicker(R.id.coverPhotoSlot));
         view.findViewById(R.id.btnRemoveCover).setOnClickListener(v -> removeImage(R.id.coverPhotoSlot));
@@ -70,13 +75,14 @@ public class ListingImagesFragment extends Fragment {
         }
 
         restoreImagesFromViewModel();
+        updateContinueButtonState();
 
-        view.findViewById(R.id.btnContinue).setOnClickListener(v -> {
+        btnContinue.setOnClickListener(v -> {
             AddListingViewModel viewModel = new ViewModelProvider(requireActivity()).get(AddListingViewModel.class);
-            viewModel.imageUris.clear();
+            viewModel.currentDraft().imageUris.clear();
 
             if (selectedImages.containsKey(R.id.coverPhotoSlot)) {
-                viewModel.imageUris.add(selectedImages.get(R.id.coverPhotoSlot).toString());
+                viewModel.currentDraft().imageUris.add(selectedImages.get(R.id.coverPhotoSlot).toString());
             }
 
             int[] otherSlots = {
@@ -87,7 +93,7 @@ public class ListingImagesFragment extends Fragment {
 
             for (int slot : otherSlots) {
                 if (selectedImages.containsKey(slot)) {
-                    viewModel.imageUris.add(selectedImages.get(slot).toString());
+                    viewModel.currentDraft().imageUris.add(selectedImages.get(slot).toString());
                 }
             }
 
@@ -95,6 +101,14 @@ public class ListingImagesFragment extends Fragment {
                 ((AddListingActivity) getActivity()).goNextStep();
             }
         });
+    }
+
+    private void updateContinueButtonState() {
+        if (btnContinue != null) {
+            boolean hasCoverPhoto = selectedImages.containsKey(R.id.coverPhotoSlot);
+            btnContinue.setEnabled(hasCoverPhoto);
+            btnContinue.setAlpha(hasCoverPhoto ? 1.0f : 0.5f);
+        }
     }
 
     private void openImagePicker(int slotId) {
@@ -176,12 +190,13 @@ public class ListingImagesFragment extends Fragment {
             previewImage.setVisibility(View.GONE);
             removeBtn.setVisibility(View.GONE);
         }
+        updateContinueButtonState();
     }
 
     private void restoreImagesFromViewModel() {
         AddListingViewModel viewModel = new androidx.lifecycle.ViewModelProvider(requireActivity()).get(AddListingViewModel.class);
 
-        if (viewModel.imageUris == null || viewModel.imageUris.isEmpty()) {
+        if (viewModel.currentDraft().imageUris == null || viewModel.currentDraft().imageUris.isEmpty()) {
             return;
         }
 
@@ -192,13 +207,14 @@ public class ListingImagesFragment extends Fragment {
                 R.id.photoSlot5
         };
 
-        for (int i = 0; i < viewModel.imageUris.size() && i < allSlots.length; i++) {
-            Uri uri = Uri.parse(viewModel.imageUris.get(i));
+        for (int i = 0; i < viewModel.currentDraft().imageUris.size() && i < allSlots.length; i++) {
+            Uri uri = Uri.parse(viewModel.currentDraft().imageUris.get(i));
             int slotId = allSlots[i];
 
             selectedImages.put(slotId, uri);
 
             displaySelectedImage(slotId, uri);
         }
+        updateContinueButtonState();
     }
 }

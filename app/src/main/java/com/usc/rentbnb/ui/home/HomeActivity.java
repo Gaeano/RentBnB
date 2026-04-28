@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -25,8 +27,10 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.FilterCriteria;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
+import com.usc.rentbnb.ui.filter.FilterActivity;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.utils.NavigationHelper;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
@@ -56,6 +60,7 @@ public class HomeActivity extends AppCompatActivity {
     private NavigationHelper navigationHelper;
 
     private FusedLocationProviderClient fusedLocationClient;
+    private FilterCriteria lastCriteria = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +89,7 @@ public class HomeActivity extends AppCompatActivity {
         setupFilterChips();
         setupTitleToggle();
         setupBottomNavigation(homeHeader);
+        setupFilterButton();
 
         navigationHelper.setInitialState();
 
@@ -214,6 +220,19 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+    }
+
+    private void setupFilterButton() {
+        View filterButton = findViewById(R.id.filter_button);
+        if (filterButton == null) return;
+
+        filterButton.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, FilterActivity.class);
+            if (lastCriteria != null) {
+                intent.putExtra("current_criteria", lastCriteria);
+            }
+            filterLauncher.launch(intent);
+        });
     }
 
     private void fetchWeather(double userLat, double userLon) {
@@ -358,4 +377,24 @@ public class HomeActivity extends AppCompatActivity {
         // fornow because db only has 6 islands, just fetch ALL islands
         homeViewModel.fetchIslands();
     }
+
+    private final ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    FilterCriteria criteria = (FilterCriteria) result.getData().getSerializableExtra("updated_criteria");
+
+                    lastCriteria = criteria;
+
+                    // Highlight filter button if active
+                    View filterButton = findViewById(R.id.filter_button);
+                    if (filterButton != null) {
+                        filterButton.setActivated(!criteria.isEmpty());
+                    }
+
+                    // Apply logic
+                    homeViewModel.applyFilters(criteria);
+                }
+            }
+    );
 }

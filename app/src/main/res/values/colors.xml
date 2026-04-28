@@ -24,4 +24,10 @@
     <color name="colorPrimaryDark">#29AAAA</color>
     <color name="colorAccent">#3DCFCF</color>
 
+
+    <color name="card_background">#F8F8F8</color>
+    <color name="text_dark_grey">#616161</color>
+    <color name="divider_color">#E0E0E0</color>
+    <color name="receipt_bg">#F5F5F5</color>
+
 </resources>

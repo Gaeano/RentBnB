@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,16 +17,25 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
-import com.scwang.smart.refresh.layout.SmartRefreshLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.IslandCardAdapter;
+import com.usc.rentbnb.models.Island;
+import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
 
 import com.faltenreich.skeletonlayout.Skeleton;
 import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IslandsFragment extends Fragment {
     private Skeleton skeleton;
+    private TextView locationTitleView;
+    private IslandCardAdapter adapter;
+    private FavoriteViewModel favoriteViewModel;
 
     @Nullable
     @Override
@@ -37,9 +48,21 @@ public class IslandsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        locationTitleView = view.findViewById(R.id.tv_islands_location_title);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null){
+            return;
+        }
+        String userId = user.getUid();
+
+        if (requireActivity() instanceof HomeActivity) {
+            String currentCity = ((HomeActivity) requireActivity()).userCity;
+            updateLocationTitle(currentCity);
+        }
 
         RecyclerView rv = view.findViewById(R.id.islandsRecyclerView);
-        SmartRefreshLayout swipeRefreshLayout = view.findViewById(R.id.smartRefreshLayoutIslands);
+        favoriteViewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
         rv.setLayoutManager(layoutManager);
@@ -49,54 +72,81 @@ public class IslandsFragment extends Fragment {
         snapHelper.attachToRecyclerView(rv);
 
         HomeViewModel viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
-        IslandCardAdapter adapter = new IslandCardAdapter();
+
+        adapter = new IslandCardAdapter((island, isCurrentlyFavorite) -> {
+            if (isCurrentlyFavorite) {
+                favoriteViewModel.deleteFavoriteIsland(userId, island.getId());
+            } else {
+                favoriteViewModel.addFavoriteIsland(userId, island);
+            }
+        });
+
+        setUpObservers();
         rv.setAdapter(adapter);
 
         skeleton = SkeletonLayoutUtils.applySkeleton(rv, R.layout.card_island, 3);
         skeleton.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
         skeleton.setMaskCornerRadius(28);
+
         skeleton.showSkeleton();
 
-        // 1. Trigger the data fetch
-        swipeRefreshLayout.setOnRefreshListener(refreshLayout -> {
-            skeleton.showSkeleton();
-            viewModel.fetchIslands();
-        });
-
-        // 2. Watch for data and snap the custom layout back up
-        viewModel.getIslands().observe(getViewLifecycleOwner(), islands -> {
-            skeleton.showOriginal();
-            adapter.setIslands(islands);
-
-            // This tiny scroll trick ensures the 3D effect calculates properly on load
-            rv.post(() -> rv.scrollBy(1, 0));
-
-            // Stop the refresh animation
-            swipeRefreshLayout.finishRefresh();
-        });
-
-        // Scroll listener for the 3D effect
         rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
                 float centerX = recyclerView.getWidth() / 2f;
+
                 for (int i = 0; i < recyclerView.getChildCount(); i++) {
                     View child = recyclerView.getChildAt(i);
+
                     float childCenterX = (child.getLeft() + child.getRight()) / 2f;
+
                     float distanceFromCenter = Math.abs(centerX - childCenterX);
+
                     float scale = 1f - (distanceFromCenter / recyclerView.getWidth()) * 0.15f;
+
                     scale = Math.max(0.85f, scale);
+
                     child.setScaleX(scale);
                     child.setScaleY(scale);
                 }
             }
         });
-//        viewModel.getIslands().observe(getViewLifecycleOwner(), islands -> {
-//            adapter.setIslands(islands);
-//
-//            skeleton.showOriginal();
-//            rv.post(() -> rv.scrollBy(1, 0));
-//        });
+
+        viewModel.getIslands().observe(getViewLifecycleOwner(), islands -> {
+            adapter.setIslands(islands);
+
+            skeleton.showOriginal();
+            rv.post(() -> rv.scrollBy(1, 0));
+        });
+
+        favoriteViewModel.loadIslands(userId);
+    }
+
+    public void updateLocationTitle(String city) {
+        if (locationTitleView != null) {
+            locationTitleView.setText("Islands near " + city);
+        }
+    }
+
+    public void setUpObservers(){
+
+        favoriteViewModel.getFavoriteIslands().observe(getViewLifecycleOwner(), favorites -> {
+            if (favorites != null) {
+                List<String> favoriteIds = new ArrayList<>();
+                for (Island island : favorites) {
+                    favoriteIds.add(island.getId());
+                }
+                adapter.setFavoriteIds(favoriteIds);
+            }
+        });
+
+        favoriteViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(requireContext(), "Favorites Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 }

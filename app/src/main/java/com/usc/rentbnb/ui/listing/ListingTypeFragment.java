@@ -22,25 +22,15 @@ public class ListingTypeFragment extends Fragment {
     private AddListingViewModel viewModel;
 
     private static final String[] CATEGORIES = {
-            "Boat", "Kayak / Paddle Board", "Snorkel Set",
-            "Scuba Gear", "Bicycle", "Motorcycle",
-            "Surfboard", "Camera", "Camping Gear",
-            "ATV / Quad Bike", "Jet Ski", "Other"
+            "Wheels", "Water", "Outdoors", "Electronics", "Beach Leisure"
     };
 
     private static final int[] ICONS = {
-            R.drawable.ic_boat,
-            R.drawable.ic_kayak,
-            R.drawable.ic_snorkel,
-            R.drawable.ic_snorkel,
-            R.drawable.ic_bicycle,
-            R.drawable.ic_motorcycle,
-            R.drawable.ic_surf,
-            R.drawable.ic_camera,
-            R.drawable.ic_tent,
-            R.drawable.ic_atv,
-            R.drawable.ic_jetski,
-            R.drawable.ic_help
+            R.drawable.ic_wheels,
+            R.drawable.ic_water,
+            R.drawable.ic_outdoors,
+            R.drawable.ic_electronics,
+            R.drawable.ic_beach_leisure
     };
 
     private int selectedIndex = -1;
@@ -66,7 +56,7 @@ public class ListingTypeFragment extends Fragment {
                 Toast.makeText(requireContext(), "Please select a category", Toast.LENGTH_SHORT).show();
                 return;
             }
-            viewModel.category = CATEGORIES[selectedIndex];
+            viewModel.currentDraft().category = CATEGORIES[selectedIndex];
 
             if (getActivity() instanceof AddListingActivity) {
                 ((AddListingActivity) getActivity()).goNextStep();

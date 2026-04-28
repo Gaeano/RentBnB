@@ -3,19 +3,18 @@ package com.usc.rentbnb.ui.home;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -28,8 +27,10 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.FilterCriteria;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
+import com.usc.rentbnb.ui.filter.FilterActivity;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.utils.NavigationHelper;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
@@ -43,7 +44,6 @@ import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private TextView feedTitleView;
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
 
@@ -53,10 +53,14 @@ public class HomeActivity extends AppCompatActivity {
     private WeatherResponse.WeatherData currentWeather;
     private int currentWeatherIconRes = R.drawable.ic_sun;
     private String currentWeatherMessage = "Checking the skies...";
+    public String userCity = "Cebu City";
+    public double userLat = 10.3157;
+    public double userLon = 123.8854;
 
     private NavigationHelper navigationHelper;
 
     private FusedLocationProviderClient fusedLocationClient;
+    private FilterCriteria lastCriteria = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,7 @@ public class HomeActivity extends AppCompatActivity {
         setupFilterChips();
         setupTitleToggle();
         setupBottomNavigation(homeHeader);
+        setupFilterButton();
 
         navigationHelper.setInitialState();
 
@@ -97,7 +102,44 @@ public class HomeActivity extends AppCompatActivity {
 
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
-        // TODO: Implement search bar logic
+        EditText searchBar = findViewById(R.id.search_bar);
+        searchBar.addTextChangedListener(new android.text.TextWatcher() {
+            private android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+            private Runnable searchRunnable;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                handler.removeCallbacks(searchRunnable);
+
+                searchRunnable = () -> {
+                    String query = s.toString().trim();
+                    if (showingRentals) {
+                        homeViewModel.filterIslands(query);
+                    } else {
+                        homeViewModel.filterRentals(query);
+                    }
+                };
+                handler.postDelayed(searchRunnable, 500);
+            }
+        });
+
+        getSupportFragmentManager().registerFragmentLifecycleCallbacks(new androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
+            @Override
+            public void onFragmentResumed(@NonNull androidx.fragment.app.FragmentManager fm, @NonNull Fragment f) {
+                super.onFragmentResumed(fm, f);
+                if (f instanceof RentalsFragment) {
+                    updateTabUI(true);
+                } else if (f instanceof IslandsFragment) {
+                    updateTabUI(false);
+                }
+            }
+        }, false);
     }
 
     private void setupTitleToggle() {
@@ -115,23 +157,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void switchFeed(boolean toRentals) {
-        showingRentals = toRentals;
-
-        if (toRentals) {
-            tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
-            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
-
-            tabIslands.setBackgroundResource(android.R.color.transparent);
-            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
-        } else {
-
-
-            tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
-            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
-
-            tabRentals.setBackgroundResource(android.R.color.transparent);
-            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
-        }
+        updateTabUI(toRentals);
 
         Fragment fragment = toRentals ? new RentalsFragment() : new IslandsFragment();
         getSupportFragmentManager()
@@ -139,6 +165,23 @@ public class HomeActivity extends AppCompatActivity {
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(R.id.homeFeedContainer, fragment)
                 .commit();
+    }
+    private void updateTabUI(boolean isRentals) {
+        showingRentals = isRentals;
+
+        if (isRentals) {
+            tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+
+            tabIslands.setBackgroundResource(android.R.color.transparent);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        } else {
+            tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+
+            tabRentals.setBackgroundResource(android.R.color.transparent);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        }
     }
 
     private void setupFilterChips() {
@@ -179,6 +222,19 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void setupFilterButton() {
+        View filterButton = findViewById(R.id.filter_button);
+        if (filterButton == null) return;
+
+        filterButton.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, FilterActivity.class);
+            if (lastCriteria != null) {
+                intent.putExtra("current_criteria", lastCriteria);
+            }
+            filterLauncher.launch(intent);
+        });
+    }
+
     private void fetchWeather(double userLat, double userLon) {
         ApiClient.getApiService().getCurrentWeather(userLat, userLon).enqueue(new Callback<WeatherResponse>() {
             @Override
@@ -196,7 +252,7 @@ public class HomeActivity extends AppCompatActivity {
                             currentWeatherMessage = "It's going to rain soon";
                             currentWeatherIconRes = R.drawable.ic_rain;
                             break;
-                        case "Snow":
+                        case "Snow": // useless pero pang chuy rani kay chuy manko
                             currentWeatherMessage = "Snow expected soon";
                             currentWeatherIconRes = R.drawable.ic_snow;
                             break;
@@ -204,7 +260,7 @@ public class HomeActivity extends AppCompatActivity {
                             currentWeatherMessage = "Nice and cool today";
                             currentWeatherIconRes = R.drawable.ic_cloud;
                             break;
-                        case "Foggy":
+                        case "Foggy": // busay raman tawn ni ey
                             currentWeatherMessage = "Low visibility, take care";
                             currentWeatherIconRes = R.drawable.ic_fog;
                             break;
@@ -267,33 +323,35 @@ public class HomeActivity extends AppCompatActivity {
 
         fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
             if (location != null) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-
-                fetchWeather(latitude, longitude);
+                userLat = location.getLatitude();
+                userLon = location.getLongitude();
+                fetchWeather(userLat, userLon);
 
                 try {
                     Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-                    List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                    List<Address> addresses = geocoder.getFromLocation(userLat, userLon, 1);
 
                     if (addresses != null && !addresses.isEmpty()) {
-                        String city = addresses.get(0).getLocality();
-                        String country = addresses.get(0).getCountryName();
-
-                        Log.d("LOCATION", "User is in: " + city + ", " + country);
-
-                        // TODO: update UI (e.g. set first row section title to "Near Cebu City")
-                        // TODO: send these coordinates to backend to fetch nearby rentals/islands
+                        userCity = addresses.get(0).getLocality();
+                        Log.d("LOCATION", "User is in: " + userCity);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.homeFeedContainer);
+                if (currentFragment instanceof RentalsFragment) {
+                    ((RentalsFragment) currentFragment).onLocationUpdated(userCity, userLat, userLon);
+                } else if (currentFragment instanceof IslandsFragment) {
+                    ((IslandsFragment) currentFragment).updateLocationTitle(userCity);
+                }
+
+                fetchNearbyIslands(userLat, userLon);
             } else {
-                Log.d("LOCATION", "Location null, defaulting to Cebu");
-                fetchWeather(10.3157, 123.8854);
+                fetchWeather(userLat, userLon);
             }
         }).addOnFailureListener(e -> {
-            fetchWeather(10.3157, 123.8854);
+            fetchWeather(userLat, userLon);
         });
     }
 
@@ -309,4 +367,34 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void fetchNearbyIslands(double lat, double lng) {
+        // TODO: pass 'lat' and 'lng' to backend to calculate distance puhon
+        // ApiClient.getApiService().getNearbyIslands(lat, lng)...
+
+        Log.d("DATA", "Preparing to fetch islands near " + lat + ", " + lng);
+
+        // fornow because db only has 6 islands, just fetch ALL islands
+        homeViewModel.fetchIslands();
+    }
+
+    private final ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    FilterCriteria criteria = (FilterCriteria) result.getData().getSerializableExtra("updated_criteria");
+
+                    lastCriteria = criteria;
+
+                    // Highlight filter button if active
+                    View filterButton = findViewById(R.id.filter_button);
+                    if (filterButton != null) {
+                        filterButton.setActivated(!criteria.isEmpty());
+                    }
+
+                    // Apply logic
+                    homeViewModel.applyFilters(criteria);
+                }
+            }
+    );
 }

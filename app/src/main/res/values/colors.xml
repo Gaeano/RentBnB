@@ -12,6 +12,7 @@
     <color name="white">#FAFAFA</color>
     <color name="black">#000000</color>
     <color name="hint_color">#808080</color>
+    <color name="favorite_color">#FF6B81</color>
 
     <!-- Indicators -->
     <color name="indicator_active">#3DCFCF</color>

@@ -31,4 +31,28 @@
 
         <item name="android:textAllCaps">false</item>
     </style>
+
+    <style name="FilterChip" parent="Widget.MaterialComponents.Chip.Filter">
+        <!-- Shape -->
+        <item name="chipCornerRadius">20dp</item>
+        <item name="chipMinHeight">34dp</item>
+
+        <!-- Spacing -->
+        <item name="chipStartPadding">12dp</item>
+        <item name="chipEndPadding">12dp</item>
+
+        <!-- Text -->
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/inconsolata</item>
+
+        <!-- Default -->
+        <item name="chipBackgroundColor">@color/white</item>
+        <item name="chipStrokeColor">@color/black</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">@color/black</item>
+
+        <!-- No checkmark icon -->
+        <item name="checkedIconVisible">false</item>
+        <item name="chipIconVisible">false</item>
+    </style>
 </resources>

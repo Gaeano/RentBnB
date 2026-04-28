@@ -1,31 +1,35 @@
 package com.usc.rentbnb.islands;
 
-import android.content.Intent;
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-// ADDED: SmartRefreshLayout import
-import com.scwang.smart.refresh.layout.SmartRefreshLayout;
-
+import com.faltenreich.skeletonlayout.Skeleton;
+import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
+import com.google.firebase.auth.FirebaseAuth;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.network.ApiClient;
-import com.usc.rentbnb.ui.home.HomeActivity;
+import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -40,7 +44,13 @@ public class IslandDetailsActivity extends AppCompatActivity {
     private String description;
 
     private FrameLayout btnBackWrapper;
-    private SmartRefreshLayout refreshLayout; // ADDED: Field variable
+    private FavoriteViewModel favoriteViewModel;
+    private ListingAdapter adapter;
+    private List<Listing> currentListings = new ArrayList<>();
+    private RecyclerView rv;
+    private Skeleton skeleton;
+    private LinearLayout emptyStateLayout;
+    private TextView islandName, islandLocation, islandRating, islandDescription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,86 +64,109 @@ public class IslandDetailsActivity extends AppCompatActivity {
         category = getIntent().getStringExtra("category");
         description = getIntent().getStringExtra("description");
 
-        refreshLayout = findViewById(R.id.smartRefreshLayoutIslandDetails);
-
-        // ADDED: Listen for the pull gesture
-        refreshLayout.setOnRefreshListener(layout -> {
-            fetchListings();
-        });
-
-        fetchListings();
-
-        TextView islandName = findViewById(R.id.island_title);
-        TextView islandLocation = findViewById(R.id.island_location);
-        TextView islandRating = findViewById(R.id.island_rating);
-        TextView islandDescription = findViewById(R.id.island_description);
+        islandName = findViewById(R.id.island_title);
+        islandLocation = findViewById(R.id.island_location);
+        islandRating = findViewById(R.id.island_rating);
+        islandDescription = findViewById(R.id.island_description);
+        emptyStateLayout = findViewById(R.id.empty_state_layout);
 
         islandName.setText(island_name);
         islandRating.setText(String.valueOf(rating));
         islandDescription.setText(description);
 
         btnBackWrapper = findViewById(R.id.btn_back_wrapper);
-
         ViewCompat.setOnApplyWindowInsetsListener(btnBackWrapper, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-
             params.topMargin = statusBarHeight + 16;
             v.setLayoutParams(params);
-
             return insets;
         });
 
-        btnBackWrapper.setOnClickListener(v -> {
-            finish();
+        btnBackWrapper.setOnClickListener(v -> finish());
+
+
+        setupRecyclerView();
+        skeleton = SkeletonLayoutUtils.applySkeleton(rv, R.layout.rentable_item_card, 3);
+        skeleton.setMaskColor(ContextCompat.getColor(this, R.color.text_grey));
+        skeleton.setMaskCornerRadius(16);
+        skeleton.showSkeleton();
+
+        setupFavoritesObserver();
+        fetchListings();
+
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        favoriteViewModel.loadListings(userId);
+    }
+
+    private void setupRecyclerView() {
+        rv = findViewById(R.id.rvIslandListings);
+        rv.setLayoutManager(new GridLayoutManager(this, 2));
+
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        adapter = new ListingAdapter((listing, isCurrentlyFavorite) -> {
+            if (isCurrentlyFavorite) {
+                favoriteViewModel.deleteFavoriteListing(userId, listing.getId());
+            } else {
+                favoriteViewModel.addFavoriteListing(userId, listing);
+            }
+        });
+
+        rv.setAdapter(adapter);
+    }
+
+    private void setupFavoritesObserver() {
+        favoriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavoriteViewModel.class);
+
+        favoriteViewModel.getFavoriteListings().observe(this, favoriteListings -> {
+            if (favoriteListings != null) {
+                List<String> favoriteIds = new ArrayList<>();
+                for (Listing favorite : favoriteListings) {
+                    favoriteIds.add(favorite.getId());
+                }
+                // Update adapter with existing listings and new favorite states
+                adapter.submitData(currentListings, favoriteIds);
+            }
         });
     }
 
     private void fetchListings() {
         ApiClient.getApiService().getListings(island_name).enqueue(new Callback<ListingResponse>() {
-
             @Override
-            public void onResponse(Call<ListingResponse> call,
-                                   Response<ListingResponse> response) {
+            public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
 
-                // ADDED: Stop the spinning animation on success!
-                if (refreshLayout != null) {
-                    refreshLayout.finishRefresh();
-                }
+                    // Save the fetched listings globally
+                    currentListings = response.body().getData();
 
-                if (response.isSuccessful() && response.body() != null
-                        && response.body().isSuccess()) {
+                    if (currentListings.isEmpty()) {
+                        emptyStateLayout.setVisibility(View.VISIBLE);
+                        rv.setVisibility(View.GONE);
+                    } else {
+                        emptyStateLayout.setVisibility(View.GONE);
+                        rv.setVisibility(View.VISIBLE);
+                    }
 
-                    List<Listing> listings = response.body().getData();
+                    List<String> favoriteIds = new ArrayList<>();
+                    if (favoriteViewModel.getFavoriteListings().getValue() != null) {
+                        for (Listing fav : favoriteViewModel.getFavoriteListings().getValue()) {
+                            favoriteIds.add(fav.getId());
+                        }
+                    }
 
-                    displayListings(listings);
+                    adapter.submitData(currentListings, favoriteIds);
+                    skeleton.showOriginal();
 
                 } else {
-                    Toast.makeText(IslandDetailsActivity.this,
-                            "Failed to load listings", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(IslandDetailsActivity.this, "Failed to load listings", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ListingResponse> call, Throwable t) {
-                // ADDED: Stop the spinning animation on failure!
-                if (refreshLayout != null) {
-                    refreshLayout.finishRefresh();
-                }
-
-                Toast.makeText(IslandDetailsActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(IslandDetailsActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void displayListings(List<Listing> listings) {
-        RecyclerView recyclerView = findViewById(R.id.rvIslandListings);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-
-        ListingAdapter adapter = new ListingAdapter(listings);
-        recyclerView.setAdapter(adapter);
     }
 }

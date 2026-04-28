@@ -1,15 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.scwang.smart.refresh.layout.SmartRefreshLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/smartRefreshLayoutIslands"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:srlEnableHeaderTranslationContent="false"> <com.usc.rentbnb.utils.SwipeRefreshHeader
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" />
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:paddingTop="16dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="24dp">
+
+        <TextView
+            android:id="@+id/tv_islands_location_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="Islands near you"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/jost_bold" />
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_arrow_next"
+            app:tint="@color/black"
+            android:layout_centerVertical="true" />
+
+    </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/islandsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -19,4 +44,25 @@
         android:clipToPadding="false"
         android:scrollbars="none" />
 
-</com.scwang.smart.refresh.layout.SmartRefreshLayout>
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/islandsRecyclerView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_weight="1"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:paddingHorizontal="16dp"-->
+<!--        android:clipToPadding="false"-->
+<!--        android:scrollbars="none" />-->
+
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--        android:id="@+id/islandsRecyclerView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:paddingHorizontal="48dp"-->
+<!--        android:paddingTop="12dp"-->
+<!--        android:paddingBottom="0dp"-->
+<!--        android:clipToPadding="false"-->
+<!--        android:scrollbars="none" />-->
+
+</LinearLayout>

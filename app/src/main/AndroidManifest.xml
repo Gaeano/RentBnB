@@ -17,6 +17,24 @@
         android:theme="@style/Theme.RentBnb"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.signup.IndividualSignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.signup.CompanySignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.signup.SignupAs"
+            android:exported="false" />
+        <activity
+            android:name=".ui.booking.ThankYouPage"
+            android:exported="false" />
+        <activity
+            android:name=".ui.booking.DigitalReceipt"
+            android:exported="false" />
+        <activity
+            android:name=".ui.booking.RentForm"
+            android:exported="false" />
+        <activity
             android:name=".ui.listing.ListingsDetailsActivity"
             android:exported="false" />
         <activity

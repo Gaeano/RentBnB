@@ -7,11 +7,14 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.faltenreich.skeletonlayout.Skeleton;
+import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 
 public class RentalsFragment extends Fragment {
 
+    private Skeleton skeleton;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -42,8 +46,16 @@ public class RentalsFragment extends Fragment {
         ListingAdapter adapter = new ListingAdapter(new ArrayList<>());
         rv.setAdapter(adapter);
 
+        skeleton = SkeletonLayoutUtils.applySkeleton(rv, R.layout.rentable_item_card, 4);
+        skeleton.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
+        skeleton.showSkeleton();
+
         viewModel.getListings().observe(getViewLifecycleOwner(), listings -> {
+
+            skeleton.showOriginal();
+
             adapter.updateListings(listings);
+
         });
     }
 }

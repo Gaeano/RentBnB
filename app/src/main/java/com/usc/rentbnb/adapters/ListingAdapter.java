@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.ui.listing.ListingsDetailsActivity;
@@ -46,6 +48,7 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
 
     static class ListingViewHolder extends RecyclerView.ViewHolder {
         TextView tvProductName, tvPrice, tvReviewCount, tvCategory;
+        ImageView ivListingImage;
 
         public ListingViewHolder(View itemView) {
             super(itemView);
@@ -53,30 +56,42 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             tvPrice = itemView.findViewById(R.id.item_price);
             tvReviewCount = itemView.findViewById(R.id.item_rent_count);
             tvCategory = itemView.findViewById(R.id.item_category);
+            ivListingImage = itemView.findViewById(R.id.item_image);
         }
 
         public void bind(Listing listing) {
+            /// TODO: Add to Favorites button functional
+            ///  TODO: onClickListener on card and redirects to listing details
             tvProductName.setText(listing.getProductName());
-            tvPrice.setText("₱" + listing.getPrice() + " / " + listing.getPriceUnit());
-            tvReviewCount.setText(listing.getTotalReviews() + " reviews");
+            tvPrice.setText("₱" + listing.getPrice() + "/" + listing.getPriceUnit());
+            tvReviewCount.setText(listing.getTotalReviews() + " rents");
             tvCategory.setText(listing.getCategory());
 
-            // --- THIS IS THE NEW INTENT LOGIC ---
+            if (listing.getImageUrls() != null && !listing.getImageUrls().isEmpty()) {
+                String coverPhotoUrl = listing.getImageUrls().get(0);
+
+                Glide.with(itemView.getContext())
+                        .load(coverPhotoUrl)
+                        .centerCrop()
+                        .into(ivListingImage);
+            } else {
+                Glide.with(itemView.getContext())
+                        .load(R.drawable.ic_no_image_placeholder)
+                        .centerCrop()
+                        .into(ivListingImage);
+            }
+
+            //TODO: instead of intents, fetch the entire data from db and pass it onto the next activity
             itemView.setOnClickListener(v -> {
-                // Note: Make sure the class name matches exactly what you named it
-                // (ListingDetailsActivity vs ListingsDetailsActivity)
                 Intent intent = new Intent(itemView.getContext(), ListingsDetailsActivity.class);
 
                 intent.putExtra("product_name", listing.getProductName());
-                intent.putExtra("price", String.valueOf(listing.getPrice())); // Ensure it's passed as a String
-
-                // ADD THIS NEW LINE to pass the unit
+                intent.putExtra("price", String.valueOf(listing.getPrice()));
                 intent.putExtra("price_unit", listing.getPriceUnit());
-
                 intent.putExtra("category", listing.getCategory());
-
                 itemView.getContext().startActivity(intent);
             });
         }
     }
+
 }

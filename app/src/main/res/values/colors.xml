@@ -16,6 +16,7 @@
     <!-- Indicators -->
     <color name="indicator_active">#3DCFCF</color>
     <color name="indicator_inactive">#C8E6E6</color>
+    <color name="tab_indicator">#CCFCFC</color>
 
     <!-- System -->
     <color name="colorPrimary">#3DCFCF</color>

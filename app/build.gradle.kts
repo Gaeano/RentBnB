@@ -46,11 +46,13 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-storage:20.3.0")
 
     // Google
     implementation("androidx.credentials:credentials:1.2.2")
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // styles and animations
     implementation("com.google.android.flexbox:flexbox:3.0.0")
@@ -61,4 +63,10 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+
+    // skeleton loading
+    implementation("com.faltenreich:skeletonlayout:4.0.0")
+
+    // image
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

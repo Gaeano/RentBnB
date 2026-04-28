@@ -1,7 +1,11 @@
 package com.usc.rentbnb.ui.home;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -12,18 +16,26 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.utils.NavigationHelper;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
+
+import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,13 +47,16 @@ public class HomeActivity extends AppCompatActivity {
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
 
-    private boolean showingIslands = true;
+    private boolean showingRentals = true;
+    private TextView tabIslands, tabRentals;
 
     private WeatherResponse.WeatherData currentWeather;
     private int currentWeatherIconRes = R.drawable.ic_sun;
     private String currentWeatherMessage = "Checking the skies...";
 
     private NavigationHelper navigationHelper;
+
+    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +75,11 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-
+        tabIslands = findViewById(R.id.tab_islands);
+        tabRentals = findViewById(R.id.tab_rentals);
 
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        feedTitleView = findViewById(R.id.feed_title);
-
 
 
         setupFilterChips();
@@ -79,48 +93,47 @@ public class HomeActivity extends AppCompatActivity {
 
         switchFeed(true);
 
-        fetchWeather(10.3157, 123.8854); // TODO: Use user's location (lat, lng)
+        fetchUserLocation();
+
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
         // TODO: Implement search bar logic
-        android.widget.EditText searchBar = findViewById(R.id.search_bar);
-        searchBar.addTextChangedListener(new android.text.TextWatcher() {
-            private android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
-            private Runnable searchRunnable;
+    }
 
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(android.text.Editable s) {
-                // Remove previous pending search requests
-                handler.removeCallbacks(searchRunnable);
-
-                // Schedule a new search request after 500ms
-                searchRunnable = () -> {
-                    String query = s.toString().trim();
-                    if (showingIslands) {
-                        homeViewModel.filterIslands(query);
-                    } else {
-                        homeViewModel.filterRentals(query);
-                    }
-                };
-                handler.postDelayed(searchRunnable, 500);
+    private void setupTitleToggle() {
+        tabRentals.setOnClickListener(v -> {
+            if (!showingRentals) {
+                switchFeed(true);
             }
         });
 
+        tabIslands.setOnClickListener(v -> {
+            if (showingRentals) {
+                switchFeed(false);
+            }
+        });
     }
 
-    private void switchFeed(boolean toIslands) {
-        showingIslands = toIslands;
+    private void switchFeed(boolean toRentals) {
+        showingRentals = toRentals;
 
-        String label = toIslands ? "Islands" : "Rentals";
-        feedTitleView.setText(label);
+        if (toRentals) {
+            tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
 
-        Fragment fragment = toIslands ? new IslandsFragment() : new RentalsFragment();
+            tabIslands.setBackgroundResource(android.R.color.transparent);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        } else {
+
+
+            tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+
+            tabRentals.setBackgroundResource(android.R.color.transparent);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        }
+
+        Fragment fragment = toRentals ? new RentalsFragment() : new IslandsFragment();
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
@@ -128,60 +141,31 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void setupTitleToggle() {
-        LinearLayout titleRow = findViewById(R.id.feed_title_row);
-        titleRow.setOnClickListener(this::showFeedDropdown);
-    }
-
-    private void showFeedDropdown(View anchor) {
-        View dropdownView = LayoutInflater.from(this)
-                .inflate(R.layout.dropdown_feed_menu, null);
-
-        PopupWindow popup = new PopupWindow(
-                dropdownView,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                true
-        );
-        popup.setElevation(12f);
-
-        dropdownView.findViewById(R.id.menuIslands).setOnClickListener(v -> {
-            switchFeed(true);
-            popup.dismiss();
-        });
-
-        dropdownView.findViewById(R.id.menuRentals).setOnClickListener(v -> {
-            switchFeed(false);
-            popup.dismiss();
-        });
-
-        popup.showAsDropDown(anchor, 0, 4, Gravity.START);
-    }
-
     private void setupFilterChips() {
-        TextView chipPopular = findViewById(R.id.chip_popular);
+        TextView chipNearYou = findViewById(R.id.chip_near_you);
         TextView chipTrending = findViewById(R.id.chip_trending);
         TextView chipNew = findViewById(R.id.chip_new);
-        TextView chipLabel1 = findViewById(R.id.chip_label1);
-        TextView chipLabel2 = findViewById(R.id.chip_label2);
+        TextView chipTopRated = findViewById(R.id.chip_top_rated);
 
-        filterChips = new TextView[]{chipPopular, chipTrending, chipNew, chipLabel1, chipLabel2};
+        filterChips = new TextView[]{chipNearYou, chipTrending, chipNew, chipTopRated};
 
         for (TextView chip : filterChips) {
             if (chip != null) {
-                chip.setOnClickListener(v -> handleChipSelection((TextView) v));
+                chip.setSelected(false);
+                chip.setOnClickListener(v -> handleChipToggle((TextView) v));
             }
         }
     }
 
-    private void handleChipSelection(TextView selectedChip) {
-        for (TextView chip : filterChips) {
-            chip.setBackgroundResource(R.drawable.chip_background);
-            chip.setTextColor(Color.parseColor("#5F5F5F"));
-        }
+    private void handleChipToggle(TextView selectedChip) {
+        boolean isNowSelected = !selectedChip.isSelected();
+        selectedChip.setSelected(isNowSelected);
 
-        selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
-        selectedChip.setTextColor(Color.WHITE);
+        if (isNowSelected) {
+            selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
+        } else {
+            selectedChip.setBackgroundResource(R.drawable.chip_background);
+        }
     }
 
     private void setupBottomNavigation(View homeHeader) {
@@ -269,5 +253,60 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         dialog.show();
+    }
+
+    private void fetchUserLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // check if user granted permission
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // no permission = ask permission; show pop-up
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+            return;
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+
+                fetchWeather(latitude, longitude);
+
+                try {
+                    Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                    List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+
+                    if (addresses != null && !addresses.isEmpty()) {
+                        String city = addresses.get(0).getLocality();
+                        String country = addresses.get(0).getCountryName();
+
+                        Log.d("LOCATION", "User is in: " + city + ", " + country);
+
+                        // TODO: update UI (e.g. set first row section title to "Near Cebu City")
+                        // TODO: send these coordinates to backend to fetch nearby rentals/islands
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.d("LOCATION", "Location null, defaulting to Cebu");
+                fetchWeather(10.3157, 123.8854);
+            }
+        }).addOnFailureListener(e -> {
+            fetchWeather(10.3157, 123.8854);
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchUserLocation();
+            } else {
+                Log.d("LOCATION", "Permission denied, defaulting to Cebu");
+                fetchWeather(10.3157, 123.8854);
+            }
+        }
     }
 }

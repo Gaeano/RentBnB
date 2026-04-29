@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.swiperefreshlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -69,4 +70,8 @@ dependencies {
 
     // image
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // SmartRefreshLayout
+    implementation("io.github.scwang90:refresh-layout-kernel:2.1.1")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

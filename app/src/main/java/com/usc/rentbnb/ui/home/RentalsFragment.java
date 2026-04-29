@@ -21,6 +21,7 @@ import com.faltenreich.skeletonlayout.Skeleton;
 import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.models.Listing;
@@ -53,6 +54,7 @@ public class RentalsFragment extends Fragment {
     private List<String> currentFavoriteIds = new ArrayList<>();
 
     private FirebaseUser currentUser;
+    private SmartRefreshLayout swipeRefreshLayout;
 
     @Nullable
     @Override
@@ -65,6 +67,8 @@ public class RentalsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        swipeRefreshLayout = view.findViewById(R.id.smartRefreshLayoutRentals);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
@@ -124,6 +128,14 @@ public class RentalsFragment extends Fragment {
 
         setupObservers();
         favoriteViewModel.loadListings(userId);
+
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setOnRefreshListener(layout -> {
+                skeletonNear.showSkeleton();
+                skeletonAll.showSkeleton();
+                homeViewModel.fetchListings();
+            });
+        }
     }
 
     private ListingAdapter setupHorizontalList(RecyclerView rv, ListingAdapter.onFavoriteClickListener listener) {
@@ -140,6 +152,10 @@ public class RentalsFragment extends Fragment {
                 currentAllListings = listings;
                 skeletonNear.showOriginal();
                 skeletonAll.showOriginal();
+
+                if (swipeRefreshLayout != null) {
+                    swipeRefreshLayout.finishRefresh();
+                }
 
                 adapterNear.submitData(currentAllListings, currentFavoriteIds);
                 adapterAll.submitData(currentAllListings, currentFavoriteIds);
@@ -167,6 +183,11 @@ public class RentalsFragment extends Fragment {
             if (error != null) {
                 skeletonNear.showOriginal();
                 skeletonAll.showOriginal();
+
+                if (swipeRefreshLayout != null) {
+                    swipeRefreshLayout.finishRefresh();
+                }
+
                 Toast.makeText(requireContext(), "Home Error: " + error, Toast.LENGTH_LONG).show();
             }
         });

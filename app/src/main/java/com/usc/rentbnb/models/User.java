@@ -10,7 +10,7 @@ import java.util.TimeZone;
 
 public class User {
     private String uid;
-    private String displayName;
+    private String displayName; // For individuals, this is their name. For companies, it can be the rep's name or company name.
     private String email;
     private String photoUrl;
     private String phone;
@@ -39,8 +39,12 @@ public class User {
         }
     }
 
+    private String userType; // Use constants like "INDIVIDUAL" or "COMPANY"
+    private CompanyDetails companyDetails; // Will be null for Individual users
+
     public User() {}
 
+    // Existing getters and setters
     public String getUid() {
         return uid;
     }
@@ -121,6 +125,24 @@ public class User {
         this.createdAt = createdAt;
     }
 
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
+    }
+
+    public CompanyDetails getCompanyDetails() {
+        return companyDetails;
+    }
+
+    public void setCompanyDetails(CompanyDetails companyDetails) {
+        this.companyDetails = companyDetails;
+    }
+
+    // --- EXISTING NESTED CLASS ---
     public static class UserLocation {
         private String island;
         private String province;
@@ -128,5 +150,30 @@ public class User {
         public UserLocation() {}
         public String getIsland() { return island; }
         public String getProvince() { return province; }
+        public void setIsland(String island) { this.island = island; }
+        public void setProvince(String province) { this.province = province; }
+    }
+
+    public static class CompanyDetails {
+        private String companyName;
+        private String permitNumber;
+        private boolean isVerified;
+
+        public CompanyDetails() {}
+
+        public CompanyDetails(String companyName, String permitNumber) {
+            this.companyName = companyName;
+            this.permitNumber = permitNumber;
+            this.isVerified = false;
+        }
+
+        public String getCompanyName() { return companyName; }
+        public void setCompanyName(String companyName) { this.companyName = companyName; }
+
+        public String getPermitNumber() { return permitNumber; }
+        public void setPermitNumber(String permitNumber) { this.permitNumber = permitNumber; }
+
+        public boolean isVerified() { return isVerified; }
+        public void setVerified(boolean verified) { isVerified = verified; }
     }
 }

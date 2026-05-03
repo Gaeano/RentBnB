@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    item_chat_ai.xml
-    Inquilino AI message bubble — left-aligned, branded amber/golden background
-    to clearly distinguish from human messages.
--->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -22,7 +17,6 @@
         android:paddingHorizontal="12dp"
         android:paddingVertical="8dp">
 
-        <!-- "Inquilino" label with bot emoji prefix -->
         <TextView
             android:id="@+id/tvAiLabel"
             android:layout_width="wrap_content"

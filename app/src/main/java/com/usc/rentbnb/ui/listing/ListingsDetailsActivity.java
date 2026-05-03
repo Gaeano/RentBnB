@@ -293,12 +293,10 @@ public class ListingsDetailsActivity extends AppCompatActivity {
                 currentListing.getOwnerFaq()
         );
 
-        // Fetch the Firebase ID Token
         FirebaseAuth.getInstance().getCurrentUser().getIdToken(true)
                 .addOnSuccessListener(result -> {
                     String token = "Bearer " + result.getToken();
 
-                    // Pass the token into the API call
                     ApiClient.getApiService().generateInquilinoOpening(token, request).enqueue(new Callback<InquilinoResponse>() {
                         @Override
                         public void onResponse(@NonNull Call<InquilinoResponse> call, @NonNull Response<InquilinoResponse> response) { }

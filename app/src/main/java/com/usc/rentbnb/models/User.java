@@ -1,5 +1,13 @@
 package com.usc.rentbnb.models;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.PropertyName;
+
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
+
 public class User {
     private String uid;
     private String displayName;
@@ -10,7 +18,26 @@ public class User {
     private double rating;
     private double totalRatings;
     private double totalEarnings;
+
+    @Exclude
     private String createdAt;
+
+    @PropertyName("createdAt")
+    public Object getFirestoreCreatedAt() {
+        return null;
+    }
+
+    @PropertyName("createdAt")
+    public void setFirestoreCreatedAt(Object value) {
+        if (value instanceof Timestamp) {
+            Timestamp ts = (Timestamp) value;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            this.createdAt = sdf.format(ts.toDate());
+        } else if (value instanceof String) {
+            this.createdAt = (String) value;
+        }
+    }
 
     public User() {}
 

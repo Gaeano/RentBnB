@@ -1,21 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    activity_chat_room.xml
-    The individual chat conversation screen.
-
-    Structure (top to bottom):
-      ┌───────────────────────────────────────────────────┐
-      │  [←]  [Avatar]  Name / Status     [Header Bar]   │
-      │         Listing subtitle                          │
-      │───────────────────────────────────────────────────│
-      │                                                   │
-      │         RecyclerView (messages)                   │
-      │                                                   │
-      │───────────────────────────────────────────────────│
-      │    [FAB: Switch Mode]                             │  ← Renter only, above input
-      │  [EditText message input]  [Send]                 │
-      └───────────────────────────────────────────────────┘
--->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -23,9 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <!-- ════════════════════════════════════════════════════════════════════ -->
-    <!-- HEADER BAR                                                          -->
-    <!-- ════════════════════════════════════════════════════════════════════ -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerBar"
         android:layout_width="0dp"
@@ -38,7 +18,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Back Button -->
         <ImageButton
             android:id="@+id/btnBack"
             android:layout_width="40dp"
@@ -50,7 +29,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Avatar -->
         <ImageView
             android:id="@+id/ivChatAvatar"
             android:layout_width="40dp"
@@ -62,7 +40,6 @@
             app:layout_constraintStart_toEndOf="@id/btnBack"
             android:layout_marginStart="8dp" />
 
-        <!-- Name + Status column -->
         <LinearLayout
             android:id="@+id/llNameStatus"
             android:layout_width="0dp"
@@ -109,7 +86,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- ── Divider below header ────────────────────────────────────────────── -->
     <View
         android:id="@+id/dividerHeader"
         android:layout_width="0dp"
@@ -119,9 +95,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ════════════════════════════════════════════════════════════════════ -->
-    <!-- MESSAGE LIST                                                        -->
-    <!-- ════════════════════════════════════════════════════════════════════ -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewChat"
         android:layout_width="0dp"
@@ -135,7 +108,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ── Divider above input bar ────────────────────────────────────────── -->
     <View
         android:id="@+id/dividerInput"
         android:layout_width="0dp"
@@ -145,9 +117,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ════════════════════════════════════════════════════════════════════ -->
-    <!-- FAB: Toggle Chat Mode (Renter only, floats above input bar)         -->
-    <!-- ════════════════════════════════════════════════════════════════════ -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabToggleChatMode"
         android:layout_width="wrap_content"
@@ -163,9 +132,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ════════════════════════════════════════════════════════════════════ -->
-    <!-- INPUT BAR                                                           -->
-    <!-- ════════════════════════════════════════════════════════════════════ -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/inputBar"
         android:layout_width="0dp"
@@ -177,7 +143,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Message input field -->
         <EditText
             android:id="@+id/etMessage"
             android:layout_width="0dp"
@@ -196,7 +161,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnSend" />
 
-        <!-- Send button -->
         <ImageButton
             android:id="@+id/btnSend"
             android:layout_width="44dp"

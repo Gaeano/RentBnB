@@ -43,12 +43,12 @@ import retrofit2.Response;
 
 public class ChatRoomActivity extends AppCompatActivity {
 
-    public static final String EXTRA_CHAT_ROOM_ID   = "extra_chat_room_id";
-    public static final String EXTRA_LISTING_ID     = "extra_listing_id";
-    public static final String EXTRA_LISTING_TITLE  = "extra_listing_title";
-    public static final String EXTRA_OWNER_ID       = "extra_owner_id";
-    public static final String EXTRA_RENTER_ID      = "extra_renter_id";
-    public static final String EXTRA_CURRENT_MODE   = "extra_current_mode";
+    public static final String EXTRA_CHAT_ROOM_ID = "extra_chat_room_id";
+    public static final String EXTRA_LISTING_ID= "extra_listing_id";
+    public static final String EXTRA_LISTING_TITLE = "extra_listing_title";
+    public static final String EXTRA_OWNER_ID = "extra_owner_id";
+    public static final String EXTRA_RENTER_ID= "extra_renter_id";
+    public static final String EXTRA_CURRENT_MODE = "extra_current_mode";
 
     private TextView tvUserName, tvUserStatus;
     private EditText etMessage;
@@ -95,12 +95,12 @@ public class ChatRoomActivity extends AppCompatActivity {
     }
 
     private void extractIntentExtras() {
-        chatRoomId   = getIntent().getStringExtra(EXTRA_CHAT_ROOM_ID);
-        listingId    = getIntent().getStringExtra(EXTRA_LISTING_ID);
+        chatRoomId= getIntent().getStringExtra(EXTRA_CHAT_ROOM_ID);
+        listingId= getIntent().getStringExtra(EXTRA_LISTING_ID);
         listingTitle = getIntent().getStringExtra(EXTRA_LISTING_TITLE);
-        ownerId      = getIntent().getStringExtra(EXTRA_OWNER_ID);
-        renterId     = getIntent().getStringExtra(EXTRA_RENTER_ID);
-        currentMode  = getIntent().getStringExtra(EXTRA_CURRENT_MODE);
+        ownerId = getIntent().getStringExtra(EXTRA_OWNER_ID);
+        renterId = getIntent().getStringExtra(EXTRA_RENTER_ID);
+        currentMode = getIntent().getStringExtra(EXTRA_CURRENT_MODE);
         if (currentMode == null) currentMode = ChatRoom.MODE_AI;
     }
 
@@ -112,13 +112,13 @@ public class ChatRoomActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        tvUserName       = findViewById(R.id.tvUserName);
-        tvUserStatus     = findViewById(R.id.tvUserStatus);
-        etMessage        = findViewById(R.id.etMessage);
-        fabToggleMode    = findViewById(R.id.fabToggleChatMode);
+        tvUserName = findViewById(R.id.tvUserName);
+        tvUserStatus = findViewById(R.id.tvUserStatus);
+        etMessage = findViewById(R.id.etMessage);
+        fabToggleMode = findViewById(R.id.fabToggleChatMode);
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
-        btnBack          = findViewById(R.id.btnBack);
-        btnSend          = findViewById(R.id.btnSend);
+        btnBack = findViewById(R.id.btnBack);
+        btnSend = findViewById(R.id.btnSend);
 
         chatAdapter = new ChatAdapter(currentUserId);
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));

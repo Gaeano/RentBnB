@@ -26,6 +26,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.usc.rentbnb.repositories.ChatRepository;
+import com.usc.rentbnb.models.ChatRoom;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.FilterCriteria;
 import com.usc.rentbnb.models.Listing;
@@ -66,6 +70,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient fusedLocationClient;
     private FilterCriteria lastCriteria = null;
+    private ListenerRegistration chatListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +126,7 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         checkUnreadNotifications();
+        listenToUnreadChat();
 
         EditText searchBar = findViewById(R.id.search_bar);
         searchBar.addTextChangedListener(new android.text.TextWatcher() {
@@ -418,7 +424,6 @@ public class HomeActivity extends AppCompatActivity {
                 if (hasUnread) {
                     updateNotificationBadge(true);
                 } else {
-                    // Check for new listings if no unread server notifications
                     checkNewListingsForBadge();
                 }
             }
@@ -456,6 +461,39 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (chatListener != null) {
+            chatListener.remove();
+        }
+    }
+
+    private void listenToUnreadChat() {
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) return;
+
+        ChatRepository chatRepo = new ChatRepository();
+        chatListener = chatRepo.listenToChatRoomsForUser(currentUserId, new ChatRepository.ChatRoomsListCallback() {
+            @Override
+            public void onUpdate(List<ChatRoom> chatRooms) {
+                boolean hasUnreadChat = false;
+                for (ChatRoom room : chatRooms) {
+                    if (room.getUnreadCountForUser(currentUserId) > 0) {
+                        hasUnreadChat = true;
+                        break;
+                    }
+                }
+                if (hasUnreadChat) {
+                    updateNotificationBadge(true);
+                }
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {}
+        });
+    }
+
     private void updateNotificationBadge(boolean visible) {
         View badge = findViewById(R.id.notification_badge);
         if (badge != null) {
@@ -471,13 +509,11 @@ public class HomeActivity extends AppCompatActivity {
 
                     lastCriteria = criteria;
 
-                    // Highlight filter button if active
                     View filterButton = findViewById(R.id.filter_button);
                     if (filterButton != null) {
                         filterButton.setActivated(!criteria.isEmpty());
                     }
 
-                    // Apply logic
                     homeViewModel.applyFilters(criteria);
                 }
             }

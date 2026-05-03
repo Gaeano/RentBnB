@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.PropertyName;
 
 public class Listing implements Parcelable {
     private String id;
@@ -28,10 +29,29 @@ public class Listing implements Parcelable {
     private double rating;
     private int totalReviews;
     private int timesRented;
+
+    @Exclude
     private String createdAt;
     private String ownerId;
     private String ownerName;
     private String ownerFaq;
+
+    @PropertyName("createdAt")
+    public Object getFirestoreCreatedAt() {
+        return null;
+    }
+
+    @PropertyName("createdAt")
+    public void setFirestoreCreatedAt(Object value) {
+        if (value instanceof Timestamp) {
+            Timestamp ts = (Timestamp) value;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            this.createdAt = sdf.format(ts.toDate());
+        } else if (value instanceof String) {
+            this.createdAt = (String) value;
+        }
+    }
 
     public Listing(String id, String productName, String description, String category, String island, double price, String priceUnit, double rating, int totalReviews, List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls, String createdAt, int timesRented, String ownerId, String ownerName, String ownerFaq) {
         this.id = id;

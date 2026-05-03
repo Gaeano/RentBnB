@@ -1,17 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    fragment_chat.xml
-    Chat inbox screen with two tabs (As Renter / As Owner).
-
-    Structure:
-      ┌─────────────────────────────────┐
-      │  "Inbox" header                 │  ← tvInboxHeader (status bar aware)
-      │  [As Renter] [As Owner]         │  ← TabLayout
-      │─────────────────────────────────│
-      │  RecyclerView (chat room list)  │
-      │  OR empty state text            │
-      └─────────────────────────────────┘
--->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -19,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <!-- ── Header ─────────────────────────────────────────────────────────── -->
     <TextView
         android:id="@+id/tvInboxHeader"
         android:layout_width="0dp"
@@ -34,7 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ── Tab Layout ─────────────────────────────────────────────────────── -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayoutChats"
         android:layout_width="0dp"
@@ -49,7 +34,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ── Divider ─────────────────────────────────────────────────────────── -->
     <View
         android:id="@+id/dividerChats"
         android:layout_width="0dp"
@@ -59,7 +43,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ── Chat Room List ─────────────────────────────────────────────────── -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewChats"
         android:layout_width="0dp"
@@ -71,7 +54,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ── Empty State ────────────────────────────────────────────────────── -->
     <TextView
         android:id="@+id/tvEmptyChats"
         android:layout_width="wrap_content"

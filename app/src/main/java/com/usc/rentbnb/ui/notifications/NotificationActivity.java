@@ -21,6 +21,12 @@ import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.listing.ListingsDetailsActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.usc.rentbnb.repositories.ChatRepository;
+import com.usc.rentbnb.models.ChatRoom;
+import com.usc.rentbnb.ui.chat.ChatRoomActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +41,7 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
     private TextView tvEmpty;
     private NotificationAdapter adapter;
     private List<Notification> notificationList = new ArrayList<>();
+    private ListenerRegistration chatListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +67,15 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
 
         setupRecyclerView();
         fetchNotifications();
+        fetchChatNotifications();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (chatListener != null) {
+            chatListener.remove();
+        }
     }
 
     private void setupRecyclerView() {
@@ -73,23 +89,6 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             @Override
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
                 notificationList = new ArrayList<>();
-
-                // ADD MOCK NOTIFICATIONS FOR RENTER UI
-                notificationList.add(new Notification(
-                        "mock_rent_1",
-                        "rent",
-                        "Yamaha NMAX",
-                        "Motorcycle",
-                        "yamaha_nmax",
-                        "150",
-                        "day"
-                ));
-
-                notificationList.add(new Notification(
-                        "mock_chat_1",
-                        "chat",
-                        "Username"
-                ));
 
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> serverList = response.body().getData();
@@ -106,21 +105,55 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
                 notificationList = new ArrayList<>();
-                notificationList.add(new Notification(
-                        "mock_rent_1",
-                        "rent",
-                        "Yamaha NMAX",
-                        "Motorcycle",
-                        "yamaha_nmax",
-                        "150",
-                        "day"
-                ));
-                notificationList.add(new Notification(
-                        "mock_chat_1",
-                        "chat",
-                        "Username"
-                ));
                 fetchNewListingsAsNotifications();
+            }
+        });
+    }
+
+    private void fetchChatNotifications() {
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) return;
+
+        ChatRepository chatRepo = new ChatRepository();
+        chatListener = chatRepo.listenToChatRoomsForUser(currentUserId, new ChatRepository.ChatRoomsListCallback() {
+            @Override
+            public void onUpdate(List<ChatRoom> chatRooms) {
+                for (ChatRoom room : chatRooms) {
+                    if (room.getUnreadCountForUser(currentUserId) > 0) {
+                        Notification n = new Notification(
+                                room.getId(),
+                                "chat",
+                                room.getId(),
+                                room.getListingId(),
+                                room.getListingTitle(),
+                                room.getListingImageUrl(),
+                                room.getLastMessage(),
+                                "New Message",
+                                room.getOwnerId(),
+                                room.getRenterId(),
+                                false
+                        );
+
+                        // Update or add
+                        boolean found = false;
+                        for (int i = 0; i < notificationList.size(); i++) {
+                            Notification existing = notificationList.get(i);
+                            if (existing.getId().equals(n.getId())) {
+                                notificationList.set(i, n);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            notificationList.add(0, n);
+                        }
+                    }
+                }
+                updateUI();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
             }
         });
     }
@@ -143,7 +176,7 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                                         String.valueOf(listing.getPrice()),
                                         listing.getPriceUnit()
                                 );
-                                // Check if already exists by message to avoid duplicates if called multiple times
+
                                 boolean exists = false;
                                 for (Notification existing : notificationList) {
                                     if (listing.getProductName().equals(existing.getProductName())) {
@@ -183,7 +216,6 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
     public void onNotificationClick(Notification notification) {
         String type = notification.getType();
 
-        // Navigation Logic
         if ("rent".equals(type) || "listing".equals(type)) {
             Intent intent = new Intent(this, ListingsDetailsActivity.class);
             intent.putExtra("product_name", notification.getProductName() != null ? notification.getProductName() : "Product");
@@ -192,15 +224,17 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             intent.putExtra("price_unit", notification.getPriceUnit() != null ? notification.getPriceUnit() : "day");
             startActivity(intent);
         } else if ("chat".equals(type)) {
-            Intent intent = new Intent(this, HomeActivity.class);
-            intent.putExtra("navigate_to_chat", true);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            Intent intent = new Intent(this, ChatRoomActivity.class);
+            intent.putExtra(ChatRoomActivity.EXTRA_CHAT_ROOM_ID, notification.getChatRoomId());
+            intent.putExtra(ChatRoomActivity.EXTRA_LISTING_ID, notification.getListingId());
+            intent.putExtra(ChatRoomActivity.EXTRA_LISTING_TITLE, notification.getProductName());
+            intent.putExtra(ChatRoomActivity.EXTRA_OWNER_ID, notification.getOwnerId());
+            intent.putExtra(ChatRoomActivity.EXTRA_RENTER_ID, notification.getRenterId());
             startActivity(intent);
         }
 
         if (!notification.isRead()) {
             if ("listing".equals(type) || "rent".equals(type) || "chat".equals(type)) {
-                // Local-only notification for now
                 notification.setRead(true);
                 adapter.notifyDataSetChanged();
                 return;
@@ -213,7 +247,6 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                         notification.setRead(true);
                         adapter.notifyDataSetChanged();
                     } else {
-                        // Fallback: mark as read locally anyway if server fails
                         notification.setRead(true);
                         adapter.notifyDataSetChanged();
                     }
@@ -221,7 +254,6 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    // Fallback: mark as read locally anyway
                     notification.setRead(true);
                     adapter.notifyDataSetChanged();
                 }

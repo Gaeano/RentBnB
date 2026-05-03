@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.Notification;
 
@@ -39,7 +40,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
         Notification notification = notifications.get(position);
 
-        // Handle different notification types
         if ("rent".equals(notification.getType())) {
             holder.tvTitle.setText("Someone rented your product!");
             holder.tvSubtitle.setText(notification.getProductName());
@@ -47,7 +47,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.tvExtra.setVisibility(View.VISIBLE);
             holder.tvDetailsLink.setVisibility(View.VISIBLE);
 
-            // Hardcoded example image for demo, in real app use Glide/Picasso with notification.getProductImage()
             holder.ivIcon.setImageResource(R.drawable.yamaha_nmax);
             holder.ivIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
         } else if ("listing".equals(notification.getType())) {
@@ -60,15 +59,23 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.ivIcon.setImageResource(R.drawable.ic_discover);
             holder.ivIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
         } else if ("chat".equals(notification.getType())) {
-            holder.tvTitle.setText("Someone chatted you!");
-            holder.tvSubtitle.setText(notification.getUsername());
-            holder.tvExtra.setVisibility(View.GONE);
+            holder.tvTitle.setText("New message");
+            holder.tvSubtitle.setText(notification.getProductName());
+            holder.tvExtra.setText(notification.getMessage());
+            holder.tvExtra.setVisibility(View.VISIBLE);
             holder.tvDetailsLink.setVisibility(View.GONE);
 
-            holder.ivIcon.setImageResource(R.drawable.ic_user_placeholder);
-            holder.ivIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            if (notification.getProductImage() != null && !notification.getProductImage().isEmpty()) {
+                Glide.with(holder.itemView.getContext())
+                        .load(notification.getProductImage())
+                        .placeholder(R.drawable.ic_user_placeholder)
+                        .circleCrop()
+                        .into(holder.ivIcon);
+            } else {
+                holder.ivIcon.setImageResource(R.drawable.ic_user_placeholder);
+            }
+            holder.ivIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
         } else {
-            // Default/Existing style
             holder.tvTitle.setText(notification.getMessage());
             holder.tvSubtitle.setText(notification.getTimestamp());
             holder.tvExtra.setVisibility(View.GONE);
@@ -76,7 +83,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.ivIcon.setImageResource(R.drawable.ic_notifications);
         }
 
-        // Show indicator if unread
         holder.viewUnreadIndicator.setVisibility(notification.isRead() ? View.GONE : View.VISIBLE);
 
         holder.itemView.setOnClickListener(v -> listener.onNotificationClick(notification));

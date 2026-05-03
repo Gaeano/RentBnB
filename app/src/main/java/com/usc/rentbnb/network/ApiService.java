@@ -2,6 +2,7 @@ package com.usc.rentbnb.network;
 
 import com.google.gson.JsonObject;
 import com.usc.rentbnb.models.AuthResponse;
+import com.usc.rentbnb.models.BookingResponse;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
 import com.usc.rentbnb.models.Island;
@@ -100,5 +101,11 @@ public interface ApiService {
             @Path("userId") String userId,
             @Path("islandId") String islandId
     );
+
+    @GET("users/{userId}/history")
+    Call<BookingResponse> getMyBookings(@Path("userId") String userId);
+
+    @GET("users/{userId}/lent-history")
+    Call<BookingResponse> getMyLentItems(@Path("userId") String userId);
 
 }

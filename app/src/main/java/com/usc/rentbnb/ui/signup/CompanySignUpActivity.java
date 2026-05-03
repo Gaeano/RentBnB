@@ -1,38 +1,56 @@
 package com.usc.rentbnb.ui.signup;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.CompanyRegistrationData;
+import com.usc.rentbnb.ui.auth.GoogleAuthHelper;
+import com.usc.rentbnb.ui.home.HomeActivity;
+import com.usc.rentbnb.viewmodels.AuthViewModel;
 
 public class CompanySignUpActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
-    private ImageView step1Icon, step2Icon, step3Icon;
-    private TextView step1Label, step2Label, step3Label;
+    private ImageView step1Icon, step2Icon, step3Icon, googleBtn;
+    private TextView step1Label, step2Label, step3Label, resendBtn;
+
+    private EditText etCompanyName, etEmail, etPassword, etConfirmPassword;
+    private EditText etPrimaryMobile, etOptionalMobile1, etOptionalMobile2, etOptionalMobile3;
+    private EditText etBusinessType, etYears, etCity, etProvince, etBusinessAddress;
+    private EditText etRadius, etCoverage, etSpecificAreas;
+
+    private CompanyRegistrationData regData = new CompanyRegistrationData();
+    private boolean isGoogleAuth = false;
+    private AuthViewModel authViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_company_sign_up);
 
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        setUpObservers();
+
         viewFlipper = findViewById(R.id.viewFlipper);
 
-        // Stepper UI components
         step1Icon = findViewById(R.id.step1Icon);
         step2Icon = findViewById(R.id.step2Icon);
         step3Icon = findViewById(R.id.step3Icon);
-
         step1Label = findViewById(R.id.step1Label);
         step2Label = findViewById(R.id.step2Label);
         step3Label = findViewById(R.id.step3Label);
@@ -44,39 +62,145 @@ public class CompanySignUpActivity extends AppCompatActivity {
         Button btnFinish = findViewById(R.id.btnFinish);
         ImageView btnBack = findViewById(R.id.btnBack);
 
+        googleBtn = findViewById(R.id.google_btn);
+        resendBtn = findViewById(R.id.btn_resend);
+
+        // Map EditTexts
+        etCompanyName = findViewById(R.id.etCompanyName);
+        etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
+        etConfirmPassword = findViewById(R.id.etConfirmPassword);
+
+        etPrimaryMobile = findViewById(R.id.etPrimaryMobile);
+        etOptionalMobile1 = findViewById(R.id.etOptionalMobile1);
+        etOptionalMobile2 = findViewById(R.id.etOptionalMobile2);
+        etOptionalMobile3 = findViewById(R.id.etOptionalMobile3);
+
+        etBusinessType = findViewById(R.id.etBusinessType);
+        etYears = findViewById(R.id.etYears);
+        etCity = findViewById(R.id.etCity);
+        etProvince = findViewById(R.id.etProvince);
+        etBusinessAddress = findViewById(R.id.etBusinessAddress);
+        etRadius = findViewById(R.id.etRadius);
+        etCoverage = findViewById(R.id.etCoverage);
+        etSpecificAreas = findViewById(R.id.etSpecificAreas);
+
         ViewCompat.setOnApplyWindowInsetsListener(btnBack, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
             params.topMargin = statusBarHeight + 16;
             v.setLayoutParams(params);
-
             return insets;
         });
 
+        GoogleAuthHelper googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback() {
+            @Override
+            public void onSuccess(String idToken) {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if(user != null){
+                    isGoogleAuth = true;
+                    regData.setCompanyName(user.getDisplayName() != null ? user.getDisplayName() : "");
+                    regData.setEmail(user.getEmail());
+
+                    viewFlipper.setDisplayedChild(1);
+                    updateStepper(1);
+                }
+            }
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(CompanySignUpActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        googleBtn.setOnClickListener(v -> googleAuthHelper.launchGoogleSignIn());
+
+        // --- STEP 1: Basic Info ---
         btnNext1.setOnClickListener(v -> {
+            String password = etPassword.getText().toString().trim();
+            String confirmPassword = etConfirmPassword.getText().toString().trim();
+
+            if (password.isEmpty() || !password.equals(confirmPassword)) {
+                etConfirmPassword.setError("Passwords do not match");
+                return;
+            }
+            regData.setCompanyName(etCompanyName.getText().toString().trim());
+            regData.setEmail(etEmail.getText().toString().trim());
+            regData.setPassword(password);
+
             viewFlipper.showNext();
-            updateStepper(1); // Moving to Verification (Mobile)
+            updateStepper(1);
         });
 
+        // --- STEP 2: Mobile Number ---
         btnNext2.setOnClickListener(v -> {
-            viewFlipper.showNext();
-            updateStepper(2); // Still in Verification (Email)
+            String mobile = etPrimaryMobile.getText().toString().trim();
+            if (mobile.isEmpty()) {
+                etPrimaryMobile.setError("Required");
+                return;
+            }
+            regData.setPrimaryMobile(mobile);
+            regData.setOptionalMobile1(etOptionalMobile1.getText().toString().trim());
+            regData.setOptionalMobile2(etOptionalMobile2.getText().toString().trim());
+            regData.setOptionalMobile3(etOptionalMobile3.getText().toString().trim());
+
+            if(isGoogleAuth){
+                viewFlipper.setDisplayedChild(3);
+                updateStepper(3);
+            } else {
+                authViewModel.createAccountAndVerifyEmail(regData.getEmail(), regData.getPassword());
+            }
         });
 
+        // --- STEP 3: Verify Email ---
         btnNext3.setOnClickListener(v -> {
-            viewFlipper.showNext();
-            updateStepper(3); // Moving to You're in! (Details)
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                user.reload().addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && user.isEmailVerified()) {
+                        Toast.makeText(this, "Verification successful!", Toast.LENGTH_SHORT).show();
+                        viewFlipper.showNext();
+                        updateStepper(3);
+                    } else {
+                        Toast.makeText(this, "Please verify your email first.", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
         });
 
+        resendBtn.setOnClickListener(v -> {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null){
+                resendBtn.setEnabled(false);
+                resendBtn.setText("Sending...");
+                user.sendEmailVerification().addOnCompleteListener(task -> {
+                    resendBtn.setEnabled(true);
+                    resendBtn.setText("Send Email Again");
+                    if (task.isSuccessful()) {
+                        Toast.makeText(this, "New verification link sent!", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+
+        // --- STEP 4: Details & Service Area ---
         btnNext4.setOnClickListener(v -> {
+            regData.setBusinessType(etBusinessType.getText().toString().trim());
+            regData.setYearsOfOperation(etYears.getText().toString().trim());
+            regData.setCity(etCity.getText().toString().trim());
+            regData.setProvince(etProvince.getText().toString().trim());
+            regData.setBusinessAddress(etBusinessAddress.getText().toString().trim());
+            regData.setRadius(etRadius.getText().toString().trim());
+            regData.setCoverage(etCoverage.getText().toString().trim());
+            regData.setSpecificAreas(etSpecificAreas.getText().toString().trim());
+
             viewFlipper.showNext();
-            updateStepper(4); // Still in You're in! (Permits)
+            updateStepper(4);
         });
 
+        // --- STEP 5: Permits ---
         btnFinish.setOnClickListener(v -> {
-            // Handle completion
-            finish();
+            // Pass the entire object to the ViewModel
+            authViewModel.finalizeCompanyRegistration(regData);
         });
 
         btnBack.setOnClickListener(v -> {
@@ -88,26 +212,45 @@ public class CompanySignUpActivity extends AppCompatActivity {
             }
         });
 
-        // Initialize first step
         updateStepper(0);
     }
 
     private void updateStepper(int stepIndex) {
-        // Reset all
         step1Icon.setAlpha(0.5f);
         step2Icon.setAlpha(0.5f);
         step3Icon.setAlpha(0.5f);
 
-        // Logic mapping ViewFlipper child index to Stepper UI
         if (stepIndex == 0) {
-            // Basic Info child
             step1Icon.setAlpha(1.0f);
         } else if (stepIndex == 1 || stepIndex == 2) {
-            // Mobile Number or Email Verification children
             step2Icon.setAlpha(1.0f);
         } else if (stepIndex == 3 || stepIndex == 4) {
-            // Details or Business Permits children
             step3Icon.setAlpha(1.0f);
         }
+    }
+
+    private void setUpObservers(){
+        authViewModel.getAuthStepCompletedLiveData().observe(this, isCompleted -> {
+            if (isCompleted != null && isCompleted){
+                Toast.makeText(this, "Verification email sent to " + regData.getEmail(), Toast.LENGTH_LONG).show();
+                viewFlipper.setDisplayedChild(2);
+                updateStepper(2);
+            }
+        });
+
+        authViewModel.getUserLiveData().observe(this, user -> {
+            if (user != null){
+                Toast.makeText(this, "Company Sign Up successful!", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(CompanySignUpActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        authViewModel.getErrorLiveData().observe(this, errorMessage -> {
+            if(errorMessage != null){
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

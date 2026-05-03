@@ -12,6 +12,7 @@ import com.usc.rentbnb.models.RegisterRequest;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.network.ApiService;
 import com.usc.rentbnb.repositories.AuthRepository;
+import com.usc.rentbnb.models.CompanyRegistrationData;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -108,6 +109,49 @@ public class AuthViewModel extends ViewModel {
 
         });
 
+    }
+
+    public void finalizeCompanyRegistration(CompanyRegistrationData regData) {
+        loadingLiveData.setValue(true);
+
+        authRepository.updateProfile(regData.getCompanyName()).addOnCompleteListener(updateTask -> {
+            if (!updateTask.isSuccessful()) {
+                handleError("Profile update failed", updateTask.getException());
+                return;
+            }
+
+            RegisterRequest requestData = new RegisterRequest();
+            requestData.setDisplayName(regData.getCompanyName());
+            requestData.setPhone(regData.getPrimaryMobile());
+            requestData.setCity(regData.getCity());
+            requestData.setProvince(regData.getProvince());
+            requestData.setCompleteAddress(regData.getBusinessAddress());
+            requestData.setUserType("COMPANY");
+
+            RegisterRequest.CompanyDetails details = new RegisterRequest.CompanyDetails(
+                    regData.getCompanyName(),
+                    "PENDING_UPLOAD"
+            );
+            requestData.setCompanyDetails(details);
+
+            apiService.registerUser(requestData).enqueue(new Callback<AuthResponse>() {
+                @Override
+                public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                    loadingLiveData.setValue(false);
+                    if (response.isSuccessful()) {
+                        userLiveData.setValue(authRepository.getCurrentUser());
+                    } else {
+                        errorLiveData.setValue("Backend Error: " + response.code());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<AuthResponse> call, Throwable t) {
+                    loadingLiveData.setValue(false);
+                    errorLiveData.setValue("Network Failure: " + t.getMessage());
+                }
+            });
+        });
     }
 
     private void handleError(String message, Exception e) {

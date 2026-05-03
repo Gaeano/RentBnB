@@ -169,37 +169,59 @@
                 </LinearLayout>
             </HorizontalScrollView>
 
-            <LinearLayout
-                android:id="@+id/history_list"
+            <!-- REPLACE your <LinearLayout id="@+id/history_list"> entirely with this: -->
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@id/filter_chips_teal">
+                app:layout_constraintTop_toBottomOf="@id/filter_chips_teal"
+                app:layout_constraintBottom_toBottomOf="parent">
 
-                <include layout="@layout/history_item_card" />
-                <include layout="@layout/history_item_card"
+                <!-- The Dynamic List -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvHistory"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="-12dp"/>
-                <include layout="@layout/history_item_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-4dp"/>
-                <include layout="@layout/history_item_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-4dp"/>
-                <include layout="@layout/history_item_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-4dp"/>
-                <include layout="@layout/history_item_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-4dp"/>
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false" />
 
-            </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/empty_state_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="48dp"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone">
+
+                    <com.airbnb.lottie.LottieAnimationView
+                        android:id="@+id/empty_animation"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        app:lottie_rawRes="@raw/no_data_found"
+                        app:lottie_autoPlay="true"
+                        app:lottie_loop="true"
+                        android:alpha="0.8" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="No bookings found"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#9E9E9E" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="You haven't rented any items yet."
+                        android:textSize="14sp"
+                        android:textColor="#9E9E9E" />
+                </LinearLayout>
+
+            </FrameLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

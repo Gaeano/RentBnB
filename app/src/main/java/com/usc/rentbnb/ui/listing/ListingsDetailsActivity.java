@@ -25,10 +25,20 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.ChatRoom;
+import com.usc.rentbnb.models.InquilinoOpeningRequest;
+import com.usc.rentbnb.models.InquilinoResponse;
 import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.network.ApiClient;
+import com.usc.rentbnb.repositories.ChatRepository;
+import com.usc.rentbnb.ui.chat.ChatRoomActivity;
 import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ListingsDetailsActivity extends AppCompatActivity {
 
@@ -103,7 +113,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         });
 
         btnChat.setOnClickListener(v -> {
-            Toast.makeText(this, "Opening chat with owner...", Toast.LENGTH_SHORT).show();
+            handleChatButtonClick();
         });
 
         // Animated Favorite Button
@@ -218,5 +228,94 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         } else {
             btnFavorite.setImageResource(R.drawable.ic_favorites);
         }
+    }
+
+    private void handleChatButtonClick() {
+        if (userId == null) {
+            Toast.makeText(this, "Please log in to chat with owners.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (currentListing == null) return;
+
+        String ownerId = currentListing.getOwnerId();
+        if (ownerId == null || ownerId.isEmpty()) {
+            Toast.makeText(this, "Owner information unavailable.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (ownerId.equals(userId)) {
+            Toast.makeText(this, "This is your own listing!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ChatRepository chatRepo = new ChatRepository();
+
+        chatRepo.findExistingChatRoom(userId, ownerId, currentListingId, existingRoom -> {
+            if (existingRoom != null) {
+                openChatRoom(existingRoom.getId(), ownerId);
+            } else {
+                generateAndCreateChatRoom(chatRepo, ownerId);
+            }
+        });
+    }
+
+    private void generateAndCreateChatRoom(ChatRepository chatRepo, String ownerId) {
+        String imageUrl = (currentListing.getImageUrls() != null && !currentListing.getImageUrls().isEmpty())
+                ? currentListing.getImageUrls().get(0) : "";
+
+        chatRepo.createChatRoom(
+                userId,
+                ownerId,
+                currentListingId,
+                currentListing.getProductName(),
+                imageUrl,
+                new ChatRepository.ChatRoomCallback() {
+                    @Override
+                    public void onSuccess(ChatRoom chatRoom) {
+                        triggerInquilinoOpening(chatRoom.getId(), ownerId);
+                        openChatRoom(chatRoom.getId(), ownerId);
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(ListingsDetailsActivity.this, "Failed to start chat: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+    }
+
+    private void triggerInquilinoOpening(String chatRoomId, String ownerId) {
+        InquilinoOpeningRequest request = new InquilinoOpeningRequest(
+                chatRoomId, userId, ownerId, currentListing.getProductName(),
+                currentListing.getCategory(), currentListing.getIsland(),
+                String.valueOf(currentListing.getPrice()), currentListing.getDescription(),
+                currentListing.getOwnerFaq()
+        );
+
+        // Fetch the Firebase ID Token
+        FirebaseAuth.getInstance().getCurrentUser().getIdToken(true)
+                .addOnSuccessListener(result -> {
+                    String token = "Bearer " + result.getToken();
+
+                    // Pass the token into the API call
+                    ApiClient.getApiService().generateInquilinoOpening(token, request).enqueue(new Callback<InquilinoResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<InquilinoResponse> call, @NonNull Response<InquilinoResponse> response) { }
+                        @Override
+                        public void onFailure(@NonNull Call<InquilinoResponse> call, @NonNull Throwable t) { }
+                    });
+                });
+    }
+
+    private void openChatRoom(String roomId, String ownerId) {
+        Intent intent = new Intent(this, ChatRoomActivity.class);
+        intent.putExtra(ChatRoomActivity.EXTRA_CHAT_ROOM_ID, roomId);
+        intent.putExtra(ChatRoomActivity.EXTRA_LISTING_ID, currentListingId);
+        intent.putExtra(ChatRoomActivity.EXTRA_LISTING_TITLE, currentListing.getProductName());
+        intent.putExtra(ChatRoomActivity.EXTRA_OWNER_ID, ownerId);
+        intent.putExtra(ChatRoomActivity.EXTRA_RENTER_ID, userId);
+        intent.putExtra(ChatRoomActivity.EXTRA_CURRENT_MODE, ChatRoom.MODE_AI);
+        startActivity(intent);
     }
 }

@@ -15,20 +15,13 @@ import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.ui.listing.ListingsDetailsActivity;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
 public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingViewHolder> {
     private static final int TRENDING_THRESHOLD = 20;
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
-    static {
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
     private List<Listing> listings = new ArrayList<>();
     private List<String> favoriteIds = new ArrayList<>();
     private double userLat = 10.3157;
@@ -151,23 +144,7 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             }
 
             // new chip
-            boolean showNewChip = false;
-            String createdAt = listing.getCreatedAt();
-            if (createdAt != null && !createdAt.isEmpty()) {
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
-                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    Date dateCreated = sdf.parse(createdAt);
-
-                    if (dateCreated != null) {
-                        long diffInMillis = System.currentTimeMillis() - dateCreated.getTime();
-                        long hoursDiff = diffInMillis / (1000 * 60 * 60);
-                        showNewChip = hoursDiff <= 48;
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
+            boolean showNewChip = listing.isNew();
             chipNew.setVisibility(showNewChip ? View.VISIBLE : View.GONE);
 
             boolean showTrendingChip = listing.getTimesRented() > TRENDING_THRESHOLD;

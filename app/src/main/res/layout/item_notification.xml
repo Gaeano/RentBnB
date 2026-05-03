@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardNotification"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:id="@+id/layoutNotification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/notification_item_bg">
+
+        <ImageView
+            android:id="@+id/ivNotificationIcon"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_user_placeholder"
+            android:layout_marginEnd="16dp"
+            android:background="#F9F9F9"
+            android:padding="4dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvNotificationTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Someone rented your product!"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                android:fontFamily="@font/jost_bold" />
+
+            <TextView
+                android:id="@+id/tvNotificationSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yamaha NMAX"
+                android:textColor="#555555"
+                android:textSize="15sp"
+                android:fontFamily="@font/jost" />
+
+            <TextView
+                android:id="@+id/tvNotificationExtra"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Motorcycle"
+                android:textColor="#777777"
+                android:textSize="14sp"
+                android:fontFamily="@font/inconsolata" />
+
+            <TextView
+                android:id="@+id/tvDetailsLink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Details..."
+                android:textColor="#BCBCBC"
+                android:textSize="13sp"
+                android:fontFamily="@font/inconsolata" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/viewUnreadIndicator"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/badge_dot"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -1,46 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    fragment_chat.xml
+    Chat inbox screen with two tabs (As Renter / As Owner).
+
+    Structure:
+      ┌─────────────────────────────────┐
+      │  "Inbox" header                 │  ← tvInboxHeader (status bar aware)
+      │  [As Renter] [As Owner]         │  ← TabLayout
+      │─────────────────────────────────│
+      │  RecyclerView (chat room list)  │
+      │  OR empty state text            │
+      └─────────────────────────────────┘
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/white">
 
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
     <TextView
         android:id="@+id/tvInboxHeader"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Inbox"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ── Tab Layout ─────────────────────────────────────────────────────── -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutChats"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabSelectedTextColor="@color/teal_primary"
+        app:tabTextColor="@color/text_grey"
+        app:tabIndicatorColor="@color/teal_primary"
+        app:tabIndicatorHeight="3dp"
+        app:layout_constraintTop_toBottomOf="@id/tvInboxHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ── Divider ─────────────────────────────────────────────────────────── -->
+    <View
+        android:id="@+id/dividerChats"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        app:layout_constraintTop_toBottomOf="@id/tabLayoutChats"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ── Chat Room List ─────────────────────────────────────────────────── -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewChats"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/dividerChats"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ── Empty State ────────────────────────────────────────────────────── -->
+    <TextView
+        android:id="@+id/tvEmptyChats"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="25dp"
-        android:layout_marginTop="35dp"
-        android:text="Messages"
-        android:textColor="#5BC8D3"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/etSearchInbox"
-        android:layout_width="0dp"
-        android:layout_height="45dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/bg_chat_input"
-        android:hint="Search conversations..."
-        android:paddingHorizontal="16dp"
+        android:text="No conversations yet.\nStart by tapping 'Chat' on a listing."
+        android:textAlignment="center"
+        android:textColor="@color/text_grey"
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvInboxHeader" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvChatInbox"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="12dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/dividerChats"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etSearchInbox"
-        tools:listitem="@layout/item_chat_inbox" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

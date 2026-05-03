@@ -28,6 +28,11 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.FilterCriteria;
+import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.models.ListingResponse;
+import com.usc.rentbnb.models.Notification;
+import com.usc.rentbnb.ui.notifications.NotificationActivity;
+import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.filter.FilterActivity;
@@ -91,7 +96,12 @@ public class HomeActivity extends AppCompatActivity {
         setupBottomNavigation(homeHeader);
         setupFilterButton();
 
-        navigationHelper.setInitialState();
+        if (getIntent().getBooleanExtra("navigate_to_chat", false)) {
+            navigationHelper.navigateToChat();
+        } else {
+            navigationHelper.setInitialState();
+        }
+
 
         homeViewModel.fetchIslands();
         homeViewModel.fetchListings();
@@ -101,6 +111,16 @@ public class HomeActivity extends AppCompatActivity {
         fetchUserLocation();
 
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
+
+        View notificationBtn = findViewById(R.id.notification_button);
+        if (notificationBtn != null) {
+            notificationBtn.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        checkUnreadNotifications();
 
         EditText searchBar = findViewById(R.id.search_bar);
         searchBar.addTextChangedListener(new android.text.TextWatcher() {
@@ -376,6 +396,71 @@ public class HomeActivity extends AppCompatActivity {
 
         // fornow because db only has 6 islands, just fetch ALL islands
         homeViewModel.fetchIslands();
+    }
+
+    private void checkUnreadNotifications() {
+        ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
+            @Override
+            public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
+                boolean hasUnread = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Notification> notifications = response.body().getData();
+                    if (notifications != null) {
+                        for (Notification n : notifications) {
+                            if (!n.isRead()) {
+                                hasUnread = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (hasUnread) {
+                    updateNotificationBadge(true);
+                } else {
+                    // Check for new listings if no unread server notifications
+                    checkNewListingsForBadge();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                checkNewListingsForBadge();
+            }
+        });
+    }
+
+    private void checkNewListingsForBadge() {
+        ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
+            @Override
+            public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
+                boolean hasNew = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Listing> listings = response.body().getData();
+                    if (listings != null) {
+                        for (Listing l : listings) {
+                            if (l.isNew()) {
+                                hasNew = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                updateNotificationBadge(hasNew);
+            }
+
+            @Override
+            public void onFailure(Call<ListingResponse> call, Throwable t) {
+                updateNotificationBadge(false);
+            }
+        });
+    }
+
+    private void updateNotificationBadge(boolean visible) {
+        View badge = findViewById(R.id.notification_badge);
+        if (badge != null) {
+            badge.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
     }
 
     private final ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(

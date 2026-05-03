@@ -1,18 +1,21 @@
 package com.usc.rentbnb.ui.signup;
 
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
-
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -23,20 +26,17 @@ import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.lifecycle.ViewModelProvider;
-
 public class IndividualSignUpActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
+    private FrameLayout loadingOverlay;
     private ImageView step1Icon, step2Icon, step3Icon, googleBtn;
     private TextView step1Label, step2Label, step3Label, resendBtn, loginBtn;
 
     private EditText etFirstName, etLastName, etEmail, etPassword, etConfirmPassword;
     private EditText etMobile;
     private EditText etAge, etGender, etCity, etProvince, etCompleteAddress;
+
     private IndividualRegistrationData regData = new IndividualRegistrationData();
     private boolean isGoogleAuth = false;
     private AuthViewModel authViewModel;
@@ -46,17 +46,13 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_individual_sign_up);
 
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
-        setUpObservers();
-
-
+        // 1. Link ALL Views First
         viewFlipper = findViewById(R.id.viewFlipper);
+        loadingOverlay = findViewById(R.id.loadingOverlay); // The new Loading Spinner
 
-        // Stepper UI components
         step1Icon = findViewById(R.id.step1Icon);
         step2Icon = findViewById(R.id.step2Icon);
         step3Icon = findViewById(R.id.step3Icon);
-
         step1Label = findViewById(R.id.step1Label);
         step2Label = findViewById(R.id.step2Label);
         step3Label = findViewById(R.id.step3Label);
@@ -66,6 +62,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         Button btnNext3 = findViewById(R.id.btnNext3);
         Button btnFinish = findViewById(R.id.btnFinish);
         ImageView btnBack = findViewById(R.id.btnBack);
+
         googleBtn = findViewById(R.id.google_btn);
         resendBtn = findViewById(R.id.btn_resend);
         loginBtn = findViewById(R.id.login_btn);
@@ -82,16 +79,19 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         etProvince = findViewById(R.id.etProvince);
         etCompleteAddress = findViewById(R.id.etCompleteAddress);
 
+        // 2. Initialize ViewModel and Observers AFTER views are linked
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        setUpObservers();
+
         ViewCompat.setOnApplyWindowInsetsListener(btnBack, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
             params.topMargin = statusBarHeight + 16;
             v.setLayoutParams(params);
-
             return insets;
         });
 
+        // 3. Logic & Listeners
         GoogleAuthHelper googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback() {
             @Override
             public void onSuccess(String idToken) {
@@ -123,19 +123,15 @@ public class IndividualSignUpActivity extends AppCompatActivity {
             }
         });
 
+        googleBtn.setOnClickListener(v -> googleAuthHelper.launchGoogleSignIn());
 
-        googleBtn.setOnClickListener(v -> {
-            googleAuthHelper.launchGoogleSignIn();
-        });
-
-        loginBtn.setOnClickListener(v->{
+        loginBtn.setOnClickListener(v -> {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
 
         btnNext1.setOnClickListener(v -> {
-
             String password = etPassword.getText().toString().trim();
             String confirmPassword = etConfirmPassword.getText().toString().trim();
 
@@ -146,7 +142,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
             regData.setFirstName(etFirstName.getText().toString().trim());
             regData.setLastName(etLastName.getText().toString().trim());
             regData.setEmail(etEmail.getText().toString().trim());
-            regData.setPassword(etPassword.getText().toString().trim());
+            regData.setPassword(password);
 
             viewFlipper.showNext();
             updateStepper(1);
@@ -155,7 +151,6 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         btnNext2.setOnClickListener(v -> {
             regData.setMobileNumber(etMobile.getText().toString().trim());
 
-            //create account
             if (isGoogleAuth) {
                 viewFlipper.setDisplayedChild(3);
                 updateStepper(3);
@@ -167,7 +162,10 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         btnNext3.setOnClickListener(v -> {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
+                // Manually trigger the loading spinner during the reload task
+                loadingOverlay.setVisibility(View.VISIBLE);
                 user.reload().addOnCompleteListener(task -> {
+                    loadingOverlay.setVisibility(View.GONE);
                     if (task.isSuccessful() && user.isEmailVerified()) {
                         Toast.makeText(this, "Verification successful!", Toast.LENGTH_SHORT).show();
                         viewFlipper.showNext();
@@ -200,11 +198,9 @@ public class IndividualSignUpActivity extends AppCompatActivity {
             regData.setCity(etCity.getText().toString().trim());
             regData.setProvince(etProvince.getText().toString().trim());
             regData.setCompleteAddress(etCompleteAddress.getText().toString().trim());
-            String firstName = regData.getFirstName();
-            String lastName = regData.getLastName();
 
-            String fullName = firstName + " " + lastName;
-            // Handle completion
+            String fullName = regData.getFirstName() + " " + regData.getLastName();
+
             authViewModel.finalizeUserRegistration(
                     fullName,
                     regData.getMobileNumber(),
@@ -227,12 +223,10 @@ public class IndividualSignUpActivity extends AppCompatActivity {
     }
 
     private void updateStepper(int stepIndex) {
-        // Reset all
         step1Icon.setAlpha(0.5f);
         step2Icon.setAlpha(0.5f);
         step3Icon.setAlpha(0.5f);
 
-        // Update based on current view
         switch (stepIndex) {
             case 0:
                 step1Icon.setAlpha(1.0f);
@@ -242,8 +236,6 @@ public class IndividualSignUpActivity extends AppCompatActivity {
                 break;
             case 1:
                 step2Icon.setAlpha(1.0f);
-                // Note: The image shows labels changing slightly or icons changing.
-                // For simplicity, we just change alpha to indicate active step.
                 break;
             case 2:
             case 3:
@@ -253,6 +245,15 @@ public class IndividualSignUpActivity extends AppCompatActivity {
     }
 
     private void setUpObservers() {
+        // --- NEW LOADING OBSERVER ---
+        authViewModel.getLiveLoadingData().observe(this, isLoading -> {
+            if (isLoading != null && isLoading) {
+                loadingOverlay.setVisibility(View.VISIBLE);
+            } else {
+                loadingOverlay.setVisibility(View.GONE);
+            }
+        });
+
         authViewModel.getAuthStepCompletedLiveData().observe(this, isCompleted -> {
             if (isCompleted != null && isCompleted) {
                 Toast.makeText(this, "Verification email sent to " + regData.getEmail(), Toast.LENGTH_LONG).show();

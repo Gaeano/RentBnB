@@ -191,11 +191,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
                     android:hint="First Name"
+                    app:boxStrokeColor="@color/teal_primary"
+                    app:hintTextColor="@color/teal_primary"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
-                    app:boxCornerRadiusTopStart="8dp"
-                    app:boxStrokeColor="@color/teal_primary">
+                    app:boxCornerRadiusTopStart="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etFirstName"
@@ -210,6 +211,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Last Name"
+                    app:boxStrokeColor="@color/teal_primary"
+                    app:hintTextColor="@color/teal_primary"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -228,6 +231,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Email"
+                    app:boxStrokeColor="@color/teal_primary"
+                    app:hintTextColor="@color/teal_primary"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -246,6 +251,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Password"
+                    app:boxStrokeColor="@color/teal_primary"
+                    app:hintTextColor="@color/teal_primary"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -265,6 +272,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Confirm Password"
+                    app:boxStrokeColor="@color/teal_primary"
+                    app:hintTextColor="@color/teal_primary"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -380,6 +389,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="32dp"
                     android:hint="Mobile Number"
+                    app:boxStrokeColor="@color/teal_primary"
+                    app:hintTextColor="@color/teal_primary"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -433,7 +444,6 @@
                     android:textColor="@color/text_grey"
                     android:textSize="14sp" />
 
-                <!-- Standardized Button Design -->
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btnNext3"
                     android:layout_width="match_parent"
@@ -446,7 +456,6 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <!-- Standardized Link Design -->
                 <TextView
                     android:id="@+id/btn_resend"
                     android:layout_width="wrap_content"
@@ -496,6 +505,8 @@
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
                         android:hint="Age"
+                        app:boxStrokeColor="@color/teal_primary"
+                        app:hintTextColor="@color/teal_primary"
                         app:boxCornerRadiusBottomEnd="8dp"
                         app:boxCornerRadiusBottomStart="8dp"
                         app:boxCornerRadiusTopEnd="8dp"
@@ -515,6 +526,8 @@
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
                         android:hint="Gender"
+                        app:boxStrokeColor="@color/teal_primary"
+                        app:hintTextColor="@color/teal_primary"
                         app:boxCornerRadiusBottomEnd="8dp"
                         app:boxCornerRadiusBottomStart="8dp"
                         app:boxCornerRadiusTopEnd="8dp"
@@ -534,6 +547,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="City"
+                    app:boxStrokeColor="@color/teal_primary"
+                    app:hintTextColor="@color/teal_primary"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -552,6 +567,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Province"
+                    app:boxStrokeColor="@color/teal_primary"
+                    app:hintTextColor="@color/teal_primary"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -570,6 +587,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Complete Address"
+                    app:boxStrokeColor="@color/teal_primary"
+                    app:hintTextColor="@color/teal_primary"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -596,4 +615,27 @@
             </LinearLayout>
         </ViewFlipper>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Loading Overlay -->
+    <FrameLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#80000000"
+        android:elevation="10dp"
+        android:translationZ="10dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/teal_primary" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,9 +2,11 @@ package com.usc.rentbnb.ui.signup;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +29,7 @@ import com.usc.rentbnb.viewmodels.AuthViewModel;
 public class CompanySignUpActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
+    private FrameLayout loadingOverlay;
     private ImageView step1Icon, step2Icon, step3Icon, googleBtn;
     private TextView step1Label, step2Label, step3Label, resendBtn, loginBtn;
 
@@ -44,10 +47,9 @@ public class CompanySignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_company_sign_up);
 
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
-        setUpObservers();
-
+        // 1. Link ALL Views First
         viewFlipper = findViewById(R.id.viewFlipper);
+        loadingOverlay = findViewById(R.id.loadingOverlay); // The new Loading Spinner
 
         step1Icon = findViewById(R.id.step1Icon);
         step2Icon = findViewById(R.id.step2Icon);
@@ -67,7 +69,6 @@ public class CompanySignUpActivity extends AppCompatActivity {
         resendBtn = findViewById(R.id.btn_resend);
         loginBtn = findViewById(R.id.login_btn);
 
-        // Map EditTexts
         etCompanyName = findViewById(R.id.etCompanyName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
@@ -87,6 +88,10 @@ public class CompanySignUpActivity extends AppCompatActivity {
         etCoverage = findViewById(R.id.etCoverage);
         etSpecificAreas = findViewById(R.id.etSpecificAreas);
 
+        // 2. Initialize ViewModel and Observers AFTER views are linked
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        setUpObservers();
+
         ViewCompat.setOnApplyWindowInsetsListener(btnBack, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
@@ -95,6 +100,7 @@ public class CompanySignUpActivity extends AppCompatActivity {
             return insets;
         });
 
+        // 3. Logic & Listeners
         GoogleAuthHelper googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.GoogleAuthCallback() {
             @Override
             public void onSuccess(String idToken) {
@@ -106,6 +112,8 @@ public class CompanySignUpActivity extends AppCompatActivity {
 
                     viewFlipper.setDisplayedChild(1);
                     updateStepper(1);
+                } else {
+                    Toast.makeText(CompanySignUpActivity.this, "Authentication failed: Firebase user is null.", Toast.LENGTH_LONG).show();
                 }
             }
             @Override
@@ -122,8 +130,6 @@ public class CompanySignUpActivity extends AppCompatActivity {
             finish();
         });
 
-
-        // --- STEP 1: Basic Info ---
         btnNext1.setOnClickListener(v -> {
             String password = etPassword.getText().toString().trim();
             String confirmPassword = etConfirmPassword.getText().toString().trim();
@@ -140,7 +146,6 @@ public class CompanySignUpActivity extends AppCompatActivity {
             updateStepper(1);
         });
 
-        // --- STEP 2: Mobile Number ---
         btnNext2.setOnClickListener(v -> {
             String mobile = etPrimaryMobile.getText().toString().trim();
             if (mobile.isEmpty()) {
@@ -160,11 +165,13 @@ public class CompanySignUpActivity extends AppCompatActivity {
             }
         });
 
-        // --- STEP 3: Verify Email ---
         btnNext3.setOnClickListener(v -> {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
+                // Manually trigger loading spinner for Firebase reload task
+                loadingOverlay.setVisibility(View.VISIBLE);
                 user.reload().addOnCompleteListener(task -> {
+                    loadingOverlay.setVisibility(View.GONE);
                     if (task.isSuccessful() && user.isEmailVerified()) {
                         Toast.makeText(this, "Verification successful!", Toast.LENGTH_SHORT).show();
                         viewFlipper.showNext();
@@ -191,7 +198,6 @@ public class CompanySignUpActivity extends AppCompatActivity {
             }
         });
 
-        // --- STEP 4: Details & Service Area ---
         btnNext4.setOnClickListener(v -> {
             regData.setBusinessType(etBusinessType.getText().toString().trim());
             regData.setYearsOfOperation(etYears.getText().toString().trim());
@@ -206,9 +212,7 @@ public class CompanySignUpActivity extends AppCompatActivity {
             updateStepper(4);
         });
 
-        // --- STEP 5: Permits ---
         btnFinish.setOnClickListener(v -> {
-            // Pass the entire object to the ViewModel
             authViewModel.finalizeCompanyRegistration(regData);
         });
 
@@ -239,6 +243,15 @@ public class CompanySignUpActivity extends AppCompatActivity {
     }
 
     private void setUpObservers(){
+        // --- NEW LOADING OBSERVER ---
+        authViewModel.getLiveLoadingData().observe(this, isLoading -> {
+            if (isLoading != null && isLoading) {
+                loadingOverlay.setVisibility(View.VISIBLE);
+            } else {
+                loadingOverlay.setVisibility(View.GONE);
+            }
+        });
+
         authViewModel.getAuthStepCompletedLiveData().observe(this, isCompleted -> {
             if (isCompleted != null && isCompleted){
                 Toast.makeText(this, "Verification email sent to " + regData.getEmail(), Toast.LENGTH_LONG).show();

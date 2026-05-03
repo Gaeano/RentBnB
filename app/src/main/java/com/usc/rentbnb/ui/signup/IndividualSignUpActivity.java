@@ -38,6 +38,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
     private IndividualRegistrationData regData = new IndividualRegistrationData();
     private boolean isGoogleAuth = false;
     private AuthViewModel authViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,20 +93,25 @@ public class IndividualSignUpActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String idToken) {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if(user != null){
+                if (user != null) {
                     isGoogleAuth = true;
 
                     String fullName = user.getDisplayName();
-                    if (fullName != null && fullName.contains(" ")){
-                        regData.setFirstName(fullName.substring(0, fullName.lastIndexOf(' ')));
-                        regData.setLastName(fullName.substring(1, fullName.lastIndexOf(' ') + 1));
+                    if (fullName != null && fullName.contains(" ")) {
+                        int lastSpaceIndex = fullName.lastIndexOf(' ');
+                        regData.setFirstName(fullName.substring(0, lastSpaceIndex));
+                        regData.setLastName(fullName.substring(lastSpaceIndex + 1));
                     } else {
-                        regData.setFirstName(fullName);
+                        regData.setFirstName(fullName != null ? fullName : "");
+                        regData.setLastName("");
                     }
                     regData.setEmail(user.getEmail());
 
                     viewFlipper.setDisplayedChild(1);
-                    updateStepper(1);                }
+                    updateStepper(1);
+                } else {
+                    Toast.makeText(IndividualSignUpActivity.this, "Authentication failed: Firebase user is null.", Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
@@ -141,7 +147,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
             regData.setMobileNumber(etMobile.getText().toString().trim());
 
             //create account
-            if(isGoogleAuth){
+            if (isGoogleAuth) {
                 viewFlipper.setDisplayedChild(3);
                 updateStepper(3);
             } else {
@@ -166,7 +172,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
 
         resendBtn.setOnClickListener(v -> {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            if (user != null){
+            if (user != null) {
                 resendBtn.setEnabled(false);
                 resendBtn.setText("Sending...");
                 user.sendEmailVerification().addOnCompleteListener(task -> {
@@ -231,14 +237,15 @@ public class IndividualSignUpActivity extends AppCompatActivity {
                 // For simplicity, we just change alpha to indicate active step.
                 break;
             case 2:
+            case 3:
                 step3Icon.setAlpha(1.0f);
                 break;
         }
     }
 
-    private void setUpObservers(){
+    private void setUpObservers() {
         authViewModel.getAuthStepCompletedLiveData().observe(this, isCompleted -> {
-            if (isCompleted != null && isCompleted){
+            if (isCompleted != null && isCompleted) {
                 Toast.makeText(this, "Verification email sent to " + regData.getEmail(), Toast.LENGTH_LONG).show();
                 viewFlipper.setDisplayedChild(2);
                 updateStepper(2);
@@ -246,16 +253,16 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         });
 
         authViewModel.getUserLiveData().observe(this, user -> {
-            if (user != null){
+            if (user != null) {
                 Toast.makeText(this, "Sign up completely successful", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent (IndividualSignUpActivity.this, HomeActivity.class);
+                Intent intent = new Intent(IndividualSignUpActivity.this, HomeActivity.class);
                 startActivity(intent);
                 finish();
             }
         });
 
         authViewModel.getErrorLiveData().observe(this, errorMessage -> {
-            if(errorMessage != null){
+            if (errorMessage != null) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
             }
         });

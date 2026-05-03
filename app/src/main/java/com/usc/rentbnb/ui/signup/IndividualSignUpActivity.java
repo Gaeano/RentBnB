@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -18,6 +19,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.IndividualRegistrationData;
 import com.usc.rentbnb.ui.auth.GoogleAuthHelper;
+import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 
@@ -30,7 +32,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
     private ImageView step1Icon, step2Icon, step3Icon, googleBtn;
-    private TextView step1Label, step2Label, step3Label, resendBtn;
+    private TextView step1Label, step2Label, step3Label, resendBtn, loginBtn;
 
     private EditText etFirstName, etLastName, etEmail, etPassword, etConfirmPassword;
     private EditText etMobile;
@@ -66,6 +68,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBack);
         googleBtn = findViewById(R.id.google_btn);
         resendBtn = findViewById(R.id.btn_resend);
+        loginBtn = findViewById(R.id.login_btn);
 
         etFirstName = findViewById(R.id.etFirstName);
         etLastName = findViewById(R.id.etLastName);
@@ -123,6 +126,12 @@ public class IndividualSignUpActivity extends AppCompatActivity {
 
         googleBtn.setOnClickListener(v -> {
             googleAuthHelper.launchGoogleSignIn();
+        });
+
+        loginBtn.setOnClickListener(v->{
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         });
 
         btnNext1.setOnClickListener(v -> {

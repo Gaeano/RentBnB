@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.CompanyRegistrationData;
 import com.usc.rentbnb.ui.auth.GoogleAuthHelper;
+import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 
@@ -27,7 +28,7 @@ public class CompanySignUpActivity extends AppCompatActivity {
 
     private ViewFlipper viewFlipper;
     private ImageView step1Icon, step2Icon, step3Icon, googleBtn;
-    private TextView step1Label, step2Label, step3Label, resendBtn;
+    private TextView step1Label, step2Label, step3Label, resendBtn, loginBtn;
 
     private EditText etCompanyName, etEmail, etPassword, etConfirmPassword;
     private EditText etPrimaryMobile, etOptionalMobile1, etOptionalMobile2, etOptionalMobile3;
@@ -64,6 +65,7 @@ public class CompanySignUpActivity extends AppCompatActivity {
 
         googleBtn = findViewById(R.id.google_btn);
         resendBtn = findViewById(R.id.btn_resend);
+        loginBtn = findViewById(R.id.login_btn);
 
         // Map EditTexts
         etCompanyName = findViewById(R.id.etCompanyName);
@@ -113,6 +115,13 @@ public class CompanySignUpActivity extends AppCompatActivity {
         });
 
         googleBtn.setOnClickListener(v -> googleAuthHelper.launchGoogleSignIn());
+
+        loginBtn.setOnClickListener(v->{
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
 
         // --- STEP 1: Basic Info ---
         btnNext1.setOnClickListener(v -> {

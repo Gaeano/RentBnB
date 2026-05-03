@@ -2,6 +2,8 @@ package com.usc.rentbnb.ui.signup;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,6 +37,8 @@ public class IndividualSignUpActivity extends AppCompatActivity {
     private TextView step1Label, step2Label, step3Label, resendBtn, loginBtn;
 
     private EditText etFirstName, etLastName, etEmail, etPassword, etConfirmPassword;
+    private View strengthIndicator, strengthBar1, strengthBar2, strengthBar3, strengthBar4;
+    private TextView tvStrengthLabel;
     private EditText etMobile;
     private EditText etAge, etGender, etCity, etProvince, etCompleteAddress;
 
@@ -72,6 +77,14 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
+
+        strengthIndicator = findViewById(R.id.strengthIndicator);
+        strengthBar1 = findViewById(R.id.strengthBar1);
+        strengthBar2 = findViewById(R.id.strengthBar2);
+        strengthBar3 = findViewById(R.id.strengthBar3);
+        strengthBar4 = findViewById(R.id.strengthBar4);
+        tvStrengthLabel = findViewById(R.id.tvStrengthLabel);
+
         etMobile = findViewById(R.id.etMobile);
         etAge = findViewById(R.id.etAge);
         etGender = findViewById(R.id.etGender);
@@ -220,6 +233,45 @@ public class IndividualSignUpActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        setupPasswordStrengthWatcher();
+    }
+
+    private void setupPasswordStrengthWatcher() {
+        etPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updatePasswordStrength(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void updatePasswordStrength(String password) {
+        if (password.isEmpty()) {
+            strengthIndicator.setVisibility(View.GONE);
+            return;
+        }
+
+        strengthIndicator.setVisibility(View.VISIBLE);
+        com.usc.rentbnb.utils.PasswordStrengthHelper.Strength strength = 
+                com.usc.rentbnb.utils.PasswordStrengthHelper.calculateStrength(password);
+
+        tvStrengthLabel.setText("Strength: " + strength.label);
+        tvStrengthLabel.setTextColor(ContextCompat.getColor(this, strength.colorRes));
+
+        int color = ContextCompat.getColor(this, strength.colorRes);
+        int defaultColor = ContextCompat.getColor(this, R.color.divider_color);
+
+        strengthBar1.setBackgroundColor(strength.score >= 1 ? color : defaultColor);
+        strengthBar2.setBackgroundColor(strength.score >= 2 ? color : defaultColor);
+        strengthBar3.setBackgroundColor(strength.score >= 3 ? color : defaultColor);
+        strengthBar4.setBackgroundColor(strength.score >= 4 ? color : defaultColor);
     }
 
     private void updateStepper(int stepIndex) {

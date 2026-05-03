@@ -7,7 +7,7 @@
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
     app:cardUseCompatPadding="true"
-    android:layout_margin="8dp"
+    android:layout_margin="4dp"
     app:cardBackgroundColor="@android:color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,15 +15,87 @@
         android:layout_height="wrap_content"
         android:padding="12dp">
 
-        <ImageView
-            android:id="@+id/item_image"
+        <FrameLayout
+            android:id="@+id/image_container"
             android:layout_width="0dp"
             android:layout_height="140dp"
-            android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/ic_no_image_placeholder" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/item_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tools:src="@drawable/ic_no_image_placeholder" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_margin="6dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chip_new"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/chip_background_teal"
+                    android:fontFamily="@font/jost_bold"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="New"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/chip_trending"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_trending_chip"
+                    android:fontFamily="@font/jost_bold"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="Trending"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/chip_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="6dp"
+                android:background="@drawable/circular_light_bg"
+                android:text="4.9"
+                android:textColor="@android:color/black"
+                android:textSize="11sp"
+                android:fontFamily="@font/jost_bold"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                app:drawableStartCompat="@drawable/ic_top_rated"
+                android:drawablePadding="4dp"
+                app:drawableTint="#FFC107" />
+
+
+            <TextView
+                android:id="@+id/chip_island"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="6dp"
+                android:background="@drawable/chip_background_selected"
+                android:text="Moalboal"
+                android:textColor="@color/teal_primary"
+                android:textSize="10sp"
+                android:fontFamily="@font/jost_bold"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp" />
+        </FrameLayout>
 
         <TextView
             android:id="@+id/item_title"
@@ -31,26 +103,27 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:fontFamily="@font/jost_bold"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
+            android:fontFamily="@font/jost_bold"
             android:maxLines="1"
             android:ellipsize="end"
-            app:layout_constraintEnd_toStartOf="@id/item_menu"
+            app:layout_constraintEnd_toStartOf="@id/favorite_heart_icon"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_image"
+            app:layout_constraintTop_toBottomOf="@id/image_container"
             tools:text="Product Name" />
 
         <ImageView
-            android:id="@+id/item_menu"
+            android:id="@+id/favorite_heart_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_favorites"
+            app:tint="@color/favorite_color"
             app:layout_constraintBottom_toBottomOf="@id/item_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/item_title"
-            app:tint="@android:color/black" />
+            />
 
         <TextView
             android:id="@+id/item_category"
@@ -72,17 +145,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:layout_marginEnd="8dp"
             android:fontFamily="@font/jost_bold"
             android:textColor="@color/teal_primary"
             android:textSize="15sp"
             android:textStyle="bold"
             android:maxLines="1"
-            android:ellipsize="end"
-            app:layout_constraintEnd_toStartOf="@id/item_rent_count"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_category"
-            tools:text="₱price/hr" />
+            tools:text="₱300/day" />
 
         <TextView
             android:id="@+id/item_rent_count"
@@ -95,7 +165,7 @@
             app:layout_constraintBottom_toBottomOf="@id/item_price"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/item_price"
-            tools:text="20 rents" />
+            tools:text="14 rents" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,15 +17,27 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.IslandCardAdapter;
+import com.usc.rentbnb.models.Island;
+import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
 
 import com.faltenreich.skeletonlayout.Skeleton;
 import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IslandsFragment extends Fragment {
     private Skeleton skeleton;
+    private TextView locationTitleView;
+    private IslandCardAdapter adapter;
+    private FavoriteViewModel favoriteViewModel;
+    private SmartRefreshLayout swipeRefreshLayout;
 
     @Nullable
     @Override
@@ -37,8 +51,23 @@ public class IslandsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        swipeRefreshLayout = view.findViewById(R.id.smartRefreshLayoutIslands);
+
+        locationTitleView = view.findViewById(R.id.tv_islands_location_title);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null){
+            return;
+        }
+        String userId = user.getUid();
+
+        if (requireActivity() instanceof HomeActivity) {
+            String currentCity = ((HomeActivity) requireActivity()).userCity;
+            updateLocationTitle(currentCity);
+        }
 
         RecyclerView rv = view.findViewById(R.id.islandsRecyclerView);
+        favoriteViewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
         rv.setLayoutManager(layoutManager);
@@ -47,10 +76,17 @@ public class IslandsFragment extends Fragment {
         rv.setOnFlingListener(null);
         snapHelper.attachToRecyclerView(rv);
 
-        HomeViewModel viewModel = new ViewModelProvider(requireActivity())
-                .get(HomeViewModel.class);
+        HomeViewModel viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
 
-        IslandCardAdapter adapter = new IslandCardAdapter();
+        adapter = new IslandCardAdapter((island, isCurrentlyFavorite) -> {
+            if (isCurrentlyFavorite) {
+                favoriteViewModel.deleteFavoriteIsland(userId, island.getId());
+            } else {
+                favoriteViewModel.addFavoriteIsland(userId, island);
+            }
+        });
+
+        setUpObservers();
         rv.setAdapter(adapter);
 
         skeleton = SkeletonLayoutUtils.applySkeleton(rv, R.layout.card_island, 3);
@@ -68,15 +104,10 @@ public class IslandsFragment extends Fragment {
 
                 for (int i = 0; i < recyclerView.getChildCount(); i++) {
                     View child = recyclerView.getChildAt(i);
-
                     float childCenterX = (child.getLeft() + child.getRight()) / 2f;
-
                     float distanceFromCenter = Math.abs(centerX - childCenterX);
-
                     float scale = 1f - (distanceFromCenter / recyclerView.getWidth()) * 0.15f;
-
                     scale = Math.max(0.85f, scale);
-
                     child.setScaleX(scale);
                     child.setScaleY(scale);
                 }
@@ -85,9 +116,48 @@ public class IslandsFragment extends Fragment {
 
         viewModel.getIslands().observe(getViewLifecycleOwner(), islands -> {
             adapter.setIslands(islands);
-
             skeleton.showOriginal();
+
+            if (swipeRefreshLayout != null) {
+                swipeRefreshLayout.finishRefresh();
+            }
+
             rv.post(() -> rv.scrollBy(1, 0));
         });
+
+        favoriteViewModel.loadIslands(userId);
+
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setOnRefreshListener(layout -> {
+                skeleton.showSkeleton();
+                viewModel.fetchIslands();
+            });
+        }
+    }
+
+    public void updateLocationTitle(String city) {
+        if (locationTitleView != null) {
+            locationTitleView.setText("Islands near " + city);
+        }
+    }
+
+    public void setUpObservers(){
+
+        favoriteViewModel.getFavoriteIslands().observe(getViewLifecycleOwner(), favorites -> {
+            if (favorites != null) {
+                List<String> favoriteIds = new ArrayList<>();
+                for (Island island : favorites) {
+                    favoriteIds.add(island.getId());
+                }
+                adapter.setFavoriteIds(favoriteIds);
+            }
+        });
+
+        favoriteViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(requireContext(), "Favorites Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 }

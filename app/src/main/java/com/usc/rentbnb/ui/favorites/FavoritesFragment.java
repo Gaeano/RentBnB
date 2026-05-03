@@ -57,13 +57,13 @@ public class FavoritesFragment extends Fragment {
         if (savedInstanceState == null) {
             getChildFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.favorites_fragment_container, islandFragment)
+                    .replace(R.id.favorites_fragment_container, rentalFragment)
                     .commit();
         }
 
         favoritesIsland = view.findViewById(R.id.tab_islands);
         favoritesRentals = view.findViewById(R.id.tab_rentals);
-        isActiveIslands = true;
+        isActiveIslands = false;
 
         setOnClickListeners();
 

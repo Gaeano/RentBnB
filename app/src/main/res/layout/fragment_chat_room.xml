@@ -93,14 +93,6 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_add_circle" />
 
-            <ImageButton
-                android:id="@+id/btnCamera"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_camera" />
-
             <EditText
                 android:id="@+id/etMessage"
                 android:layout_width="0dp"

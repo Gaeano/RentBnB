@@ -1,11 +1,9 @@
 package com.usc.rentbnb.ui.profile;
 
 import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.LinkAddress;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.history.HistoryActivity;
+import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 
 public class ProfileFragment extends Fragment {
@@ -63,10 +62,16 @@ public class ProfileFragment extends Fragment {
 
         setClickListenersMenu(view);
 
+        TextView btnAddNewListing = view.findViewById(R.id.btn_add_new_listing);
+        if (btnAddNewListing != null) {
+            btnAddNewListing.setOnClickListener(v -> {
+                Intent intent = new Intent(requireActivity(), AddListingActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void setupFilterChips(View view) {
-        // Notice we are calling view.findViewById() now
         TextView chipCamera = view.findViewById(R.id.chip_camera);
         TextView chipSnorkel = view.findViewById(R.id.chip_snorkel);
         TextView chipMotorcycle = view.findViewById(R.id.chip_motorcycle);
@@ -142,12 +147,13 @@ public class ProfileFragment extends Fragment {
         });
 
         menuFavorites.setOnClickListener(v -> {
-            //replace with navigation logic (prob fragment again)
-            Log.d("ProfileFragment", "Favorites button clicked");
+            View navFavorites = requireActivity().findViewById(R.id.navFavorites);
+            if (navFavorites != null) {
+                navFavorites.performClick();
+            }
         });
 
         menuHistory.setOnClickListener(v -> {
-            //replace with navigation logic (prob fragment again)
             Intent intent = new Intent(requireActivity(), HistoryActivity.class);
             startActivity(intent);
         });

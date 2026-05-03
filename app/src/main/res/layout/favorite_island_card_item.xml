@@ -38,7 +38,7 @@
             android:layout_marginTop="14dp"
             android:padding="4dp"
             android:src="@drawable/ic_favorites_filled"
-            app:tint="#FF6B81"
+            app:tint="@color/favorite_color"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"

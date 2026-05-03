@@ -225,7 +225,7 @@ public class RentalsFragment extends Fragment {
         if (!uniqueIslands.isEmpty()) {
             List<String> islandList = new ArrayList<>(uniqueIslands);
             String randomIsland = islandList.get(new Random().nextInt(islandList.size()));
-            tvSpotlightTitle.setText("Spotlight: " + randomIsland);
+            tvSpotlightTitle.setText("Heading to " + randomIsland +"?");
 
             for (Listing listing : allListings) {
                 if (randomIsland.equals(listing.getIsland())) {

@@ -257,6 +257,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:id="@+id/btn_add_new_listing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/chip_background_teal"
@@ -268,6 +269,9 @@
                 android:textColor="@android:color/black"
                 android:textSize="10sp"
                 android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -457,7 +461,8 @@
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_keyboard_arrow_down" />
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="#A0A0A0" />
                 </LinearLayout>
 
                 <View
@@ -491,7 +496,8 @@
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_keyboard_arrow_down" />
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="#A0A0A0" />
                 </LinearLayout>
 
                 <View
@@ -525,7 +531,8 @@
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_keyboard_arrow_down" />
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="#A0A0A0" />
                 </LinearLayout>
 
                 <View
@@ -559,7 +566,8 @@
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_keyboard_arrow_down" />
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="#A0A0A0" />
                 </LinearLayout>
 
                 <View
@@ -593,7 +601,8 @@
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_keyboard_arrow_down" />
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="#A0A0A0" />
                 </LinearLayout>
 
                 <View
@@ -624,10 +633,6 @@
                         android:text="Logout"
                         android:textColor="@android:color/black"
                         android:textStyle="bold" />
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_keyboard_arrow_down" />
                 </LinearLayout>
 
             </LinearLayout>

@@ -37,7 +37,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Booking booking = bookings.get(position);
 
-        holder.title.setText(booking.getTitle());
+        holder.title.setText(booking.getProductName());
         holder.category.setText(booking.getCategory());
         holder.ownerName.setText(booking.getOwnerName());
         holder.price.setText(booking.getPrice());

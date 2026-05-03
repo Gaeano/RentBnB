@@ -19,11 +19,18 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.models.ListingResponse;
+import com.usc.rentbnb.models.Notification;
+import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
+import com.usc.rentbnb.ui.notifications.NotificationActivity;
 import com.usc.rentbnb.utils.NavigationHelper;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -60,19 +67,18 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-
-
-
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         feedTitleView = findViewById(R.id.feed_title);
-
-
 
         setupFilterChips();
         setupTitleToggle();
         setupBottomNavigation(homeHeader);
 
-        navigationHelper.setInitialState();
+        if (getIntent().getBooleanExtra("navigate_to_chat", false)) {
+            navigationHelper.navigateToChat();
+        } else {
+            navigationHelper.setInitialState();
+        }
 
         homeViewModel.fetchIslands();
         homeViewModel.fetchListings();
@@ -82,7 +88,89 @@ public class HomeActivity extends AppCompatActivity {
         fetchWeather(10.3157, 123.8854); // TODO: Use user's location (lat, lng)
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
-        // TODO: Implement search bar logic
+        // Notification button logic
+        View notificationBtn = findViewById(R.id.notification_button);
+        if (notificationBtn != null) {
+            notificationBtn.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        checkUnreadNotifications();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Re-check unread status whenever returning to Home
+        checkUnreadNotifications();
+    }
+
+    private void checkUnreadNotifications() {
+        ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
+            @Override
+            public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
+                boolean hasUnread = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Notification> notifications = response.body().getData();
+                    if (notifications != null) {
+                        for (Notification n : notifications) {
+                            if (!n.isRead()) {
+                                hasUnread = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (hasUnread) {
+                    updateNotificationBadge(true);
+                } else {
+                    // Check for new listings if no unread server notifications
+                    checkNewListingsForBadge();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                // Check listings even if server fails
+                checkNewListingsForBadge();
+            }
+        });
+    }
+
+    private void checkNewListingsForBadge() {
+        ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
+            @Override
+            public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
+                boolean hasNew = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Listing> listings = response.body().getData();
+                    if (listings != null) {
+                        for (Listing l : listings) {
+                            if (l.isNew()) {
+                                hasNew = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                updateNotificationBadge(hasNew);
+            }
+
+            @Override
+            public void onFailure(Call<ListingResponse> call, Throwable t) {
+                updateNotificationBadge(false);
+            }
+        });
+    }
+
+    private void updateNotificationBadge(boolean visible) {
+        View badge = findViewById(R.id.notification_badge);
+        if (badge != null) {
+            badge.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
     }
 
     private void switchFeed(boolean toIslands) {
@@ -201,8 +289,10 @@ public class HomeActivity extends AppCompatActivity {
                             break;
                     }
 
-                    ivWeatherIcon.setImageResource(currentWeatherIconRes);
-                    ivWeatherIcon.setAlpha(1.0f);
+                    if (ivWeatherIcon != null) {
+                        ivWeatherIcon.setImageResource(currentWeatherIconRes);
+                        ivWeatherIcon.setAlpha(1.0f);
+                    }
 
                 }
             }

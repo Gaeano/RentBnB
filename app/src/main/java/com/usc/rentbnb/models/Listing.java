@@ -1,20 +1,36 @@
 package com.usc.rentbnb.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class Listing {
-    //TODO: field names
+    @SerializedName("_id")
     private String id;
+
+    @SerializedName("productName")
     private String productName;
+
     private String description;
     private String category;
     private String island;
     private double price;
+
+    @SerializedName("priceUnit")
     private String priceUnit;
+
     private double rating;
+
+    @SerializedName("totalReviews")
     private int totalReviews;
+
+    @SerializedName("imageUrls")
     private List<String> imageUrls;
+
+    @SerializedName("is_new")
     private boolean isNew;
+
+    @SerializedName("is_trending")
     private boolean isTrending;
 
     public Listing() {}

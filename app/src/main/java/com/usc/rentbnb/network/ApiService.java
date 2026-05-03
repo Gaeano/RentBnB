@@ -5,14 +5,19 @@ import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
 import com.usc.rentbnb.models.IslandResponse;
 import com.usc.rentbnb.models.ListingResponse;
+import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.RegisterRequest;
 import com.usc.rentbnb.models.WeatherResponse;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
@@ -41,4 +46,14 @@ public interface ApiService {
         @Query("lat") double lat,
         @Query("lon") double lon
     );
+
+    // Notifications API
+    @GET("notifications")
+    Call<NotificationResponse> getNotifications();
+
+    @PATCH("notifications/{id}/read")
+    Call<ResponseBody> markAsRead(@Path("id") String notificationId);
+
+    @DELETE("notifications/{id}")
+    Call<ResponseBody> deleteNotification(@Path("id") String notificationId);
 }

@@ -121,13 +121,11 @@ public class ListingInfoFragment extends Fragment {
 
         String name = etProductName.getText().toString().trim();
         String description = etDescription.getText().toString().trim();
-        String address = etAddress.getText().toString().trim();
 
-        // The IF statement checking all 4 required fields
-        boolean isEnabled = !name.isEmpty() 
-                && !description.isEmpty() 
-                && !selectedIslandName.isEmpty() 
-                && !address.isEmpty();
+        // The IF statement checking required fields (Address is now optional)
+        boolean isEnabled = !name.isEmpty()
+                && !description.isEmpty()
+                && !selectedIslandName.isEmpty();
 
         btnContinue.setEnabled(isEnabled);
         btnContinue.setAlpha(isEnabled ? 1.0f : 0.5f);

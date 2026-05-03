@@ -3,12 +3,15 @@ package com.usc.rentbnb.ui.signup;
 import android.os.Bundle;
 
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.usc.rentbnb.R;
 
@@ -40,6 +43,16 @@ public class CompanySignUpActivity extends AppCompatActivity {
         Button btnNext4 = findViewById(R.id.btnNext4);
         Button btnFinish = findViewById(R.id.btnFinish);
         ImageView btnBack = findViewById(R.id.btnBack);
+
+        ViewCompat.setOnApplyWindowInsetsListener(btnBack, (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            params.topMargin = statusBarHeight + 16;
+            v.setLayoutParams(params);
+
+            return insets;
+        });
 
         btnNext1.setOnClickListener(v -> {
             viewFlipper.showNext();

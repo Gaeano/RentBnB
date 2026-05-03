@@ -198,6 +198,7 @@
                     app:boxStrokeColor="@color/teal_primary">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etFirstName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPersonName" />
@@ -215,6 +216,7 @@
                     app:boxCornerRadiusTopStart="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etLastName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPersonName" />
@@ -232,6 +234,7 @@
                     app:boxCornerRadiusTopStart="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textEmailAddress" />
@@ -250,6 +253,7 @@
                     app:passwordToggleEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPassword" />
@@ -268,6 +272,7 @@
                     app:passwordToggleEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etConfirmPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPassword" />
@@ -313,18 +318,34 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/google_btn"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginTop="12dp"
-                    android:src="@android:drawable/ic_menu_search" />
+                    android:src="@drawable/google_icon" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Already have an account? Login"
-                    android:textColor="@color/text_grey"
-                    android:textSize="12sp" />
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Already have an account? "
+                        android:textColor="@color/text_grey"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Login"
+                        android:textColor="@color/teal_dark"
+                        android:textStyle="bold"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Step 2: Mobile Number -->
@@ -364,8 +385,10 @@
                     app:boxCornerRadiusTopStart="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etMobile"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textColor="@color/black"
                         android:inputType="phone" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -388,59 +411,49 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingTop="24dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Email Verification"
+                    android:layout_marginBottom="16dp"
+                    android:text="Verify Email"
                     android:textColor="@color/teal_primary"
-                    android:textSize="28sp"
+                    android:textSize="32sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Verify your email"
+                    android:layout_marginBottom="32dp"
+                    android:text="We sent a verification link to your email. Please click it to continue."
+                    android:textAlignment="center"
                     android:textColor="@color/text_grey"
-                    android:textSize="12sp" />
+                    android:textSize="14sp" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
-                    android:hint="Email"
-                    app:boxCornerRadiusBottomEnd="8dp"
-                    app:boxCornerRadiusBottomStart="8dp"
-                    app:boxCornerRadiusTopEnd="8dp"
-                    app:boxCornerRadiusTopStart="8dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textEmailAddress" />
-                </com.google.android.material.textfield.TextInputLayout>
-
+                <!-- Standardized Button Design -->
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btnNext3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="16dp"
                     android:background="@drawable/button_background"
-                    android:text="next"
+                    android:text="I've Verified, Continue"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
+                <!-- Standardized Link Design -->
                 <TextView
+                    android:id="@+id/btn_resend"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="CHECK INBOX TO VERIFY EMAIL!"
-                    android:textColor="@color/teal_primary"
+                    android:layout_marginBottom="24dp"
+                    android:padding="8dp"
+                    android:text="Send Email Again"
+                    android:textColor="@color/teal_dark"
                     android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -488,6 +501,7 @@
                         app:boxCornerRadiusTopStart="8dp">
 
                         <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAge"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="number" />
@@ -506,6 +520,7 @@
                         app:boxCornerRadiusTopStart="8dp">
 
                         <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etGender"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="text" />
@@ -524,6 +539,7 @@
                     app:boxCornerRadiusTopStart="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text" />
@@ -541,6 +557,7 @@
                     app:boxCornerRadiusTopStart="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etProvince"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text" />
@@ -558,6 +575,7 @@
                     app:boxCornerRadiusTopStart="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCompleteAddress"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPostalAddress" />

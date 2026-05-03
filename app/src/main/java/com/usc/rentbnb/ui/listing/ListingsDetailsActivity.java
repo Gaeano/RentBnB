@@ -15,6 +15,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.booking.RentForm;
+import com.usc.rentbnb.ui.signup.SignupAs;
+import com.usc.rentbnb.ui.splash.SplashActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +84,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         btnRentNow.setOnClickListener(v -> {
-            Toast.makeText(ListingsDetailsActivity.this, "Proceeding to checkout...", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(ListingsDetailsActivity.this, RentForm.class));
         });
 
         // 5. Setup Placeholder Click Listeners

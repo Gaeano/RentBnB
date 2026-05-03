@@ -21,17 +21,18 @@ import com.usc.rentbnb.R;
     1 -> ListingInfoFragment        (name, description)
     2 -> ListingTypeFragment        (category)
     3 -> ListingPricingFragment     (base price, unit, payment methods)
-    4 -> ListingActivitiesFragment  (Supported activity tags)
-    5 -> ListingImagesFragment      (Photo attachment)
-    6 -> ListingSummaryFragment     (Review all details)
-    7 -> ListingSuccessFragment     (Animated checkmark + "View Listing")
+    4 -> ListingPenaltyFragment     (penalty fee, penalty unit)
+    5 -> ListingActivitiesFragment  (Supported activity tags)
+    6 -> ListingImagesFragment      (Photo attachment)
+    7 -> ListingSummaryFragment     (Review all details)
+    8 -> ListingSuccessFragment     (Animated checkmark + "View Listing")
 
     back button = onBackStep()
     ((AddListingActivity) requireActivity()).goNextStep() to next
  */
 public class AddListingActivity extends AppCompatActivity {
 
-    public static final int TOTAL_STEPS = 6;
+    public static final int TOTAL_STEPS = 7;
 
     private ImageButton btnBack;
     private TextView tvStepLabel;
@@ -132,9 +133,10 @@ public class AddListingActivity extends AppCompatActivity {
             case 1: tvStepLabel.setText("Listing Details"); break;
             case 2: tvStepLabel.setText("Listing Type"); break;
             case 3: tvStepLabel.setText("Pricing"); break;
-            case 4: tvStepLabel.setText("Activities"); break;
-            case 5: tvStepLabel.setText("Photos"); break;
-            case 6: tvStepLabel.setText("Review & Submit"); break;
+            case 4: tvStepLabel.setText("Penalty Fee"); break;
+            case 5: tvStepLabel.setText("Activities"); break;
+            case 6: tvStepLabel.setText("Photos"); break;
+            case 7: tvStepLabel.setText("Review & Submit"); break;
         }
     }
 
@@ -143,9 +145,10 @@ public class AddListingActivity extends AppCompatActivity {
             case 1: return new ListingInfoFragment();
             case 2: return new ListingTypeFragment();
             case 3: return new ListingPricingFragment();
-            case 4: return new ListingActivitiesFragment();
-            case 5: return new ListingImagesFragment();
-            case 6: return new ListingSummaryFragment();
+            case 4: return new ListingPenaltyFragment();
+            case 5: return new ListingActivitiesFragment();
+            case 6: return new ListingImagesFragment();
+            case 7: return new ListingSummaryFragment();
             default: return new ListingInfoFragment();
         }
     }

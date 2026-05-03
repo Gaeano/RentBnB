@@ -17,6 +17,9 @@
         android:theme="@style/Theme.RentBnb"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.listing.ListingPenaltyFragment"
+            android:exported="false" />
+        <activity
             android:name=".ui.signup.IndividualSignUpActivity"
             android:exported="false" />
         <activity

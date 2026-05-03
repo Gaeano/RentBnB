@@ -18,4 +18,8 @@ public class AddListingViewModel extends ViewModel {
     public String coverImageUrl = "";
     public List<String> imageUris = new ArrayList<>();
     public String island = "";
+
+    // Penalty related fields
+    public double penaltyPrice = 0.0;
+    public String penaltyUnit = "hourly";
 }

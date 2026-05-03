@@ -1,5 +1,6 @@
 package com.usc.rentbnb.ui.signup;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import android.view.View;
@@ -9,6 +10,8 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.home.HomeActivity;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class IndividualSignUpActivity extends AppCompatActivity {
@@ -58,7 +61,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
 
         btnFinish.setOnClickListener(v -> {
             // Handle completion
-            finish();
+            startActivity(new Intent(IndividualSignUpActivity.this, HomeActivity.class));
         });
 
         btnBack.setOnClickListener(v -> {

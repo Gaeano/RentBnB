@@ -19,6 +19,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.home.HomeActivity;
+import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
+import com.usc.rentbnb.ui.signup.SignupAs;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -66,7 +68,7 @@ public class SplashActivity extends AppCompatActivity {
             });
 
         } else {
-            startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+            startActivity(new Intent(SplashActivity.this, OnboardingActivity.class));
             finish();
         }
     }

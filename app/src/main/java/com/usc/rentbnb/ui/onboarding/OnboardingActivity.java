@@ -19,11 +19,11 @@ import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.auth.SignUpActivity;
 import com.usc.rentbnb.ui.auth.verifyAndForgetActivity;
 import com.usc.rentbnb.ui.home.HomeActivity;
+import com.usc.rentbnb.ui.signup.CompanySignUpActivity;
+import com.usc.rentbnb.ui.signup.SignupAs;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
 
 public class OnboardingActivity extends AppCompatActivity {
 
@@ -33,11 +33,9 @@ public class OnboardingActivity extends AppCompatActivity {
     private OnboardingAdapter adapter;
     private List<OnboardingItem> items;
 
-
     private FirebaseAuth auth;
     private FirebaseUser user;
     private boolean isEmailVerified;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +46,6 @@ public class OnboardingActivity extends AppCompatActivity {
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         );
         setContentView(R.layout.activity_onboarding);
-
 
         viewPager = findViewById(R.id.viewPager);
         btnNext = findViewById(R.id.btnNext);
@@ -65,11 +62,6 @@ public class OnboardingActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 updateIndicators(position);
-                if (position == items.size() - 1) {
-                    btnNext.setVisibility(View.GONE);
-                } else {
-                    btnNext.setVisibility(View.VISIBLE);
-                }
             }
         });
 
@@ -168,12 +160,14 @@ public class OnboardingActivity extends AppCompatActivity {
             }
         }
 
-        if (position == 0 || position == items.size() - 1) {
-            indicatorLayout.setVisibility(View.GONE);
+        // Show Next button on all pages except the last one
+        if (position == items.size() - 1) {
             btnNext.setVisibility(View.GONE);
+            indicatorLayout.setVisibility(View.GONE);
         } else {
-            indicatorLayout.setVisibility(View.VISIBLE);
             btnNext.setVisibility(View.VISIBLE);
+            // Hide indicators on landing page (position 0), show on tutorial pages
+            indicatorLayout.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -194,6 +188,8 @@ public class OnboardingActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             }
+        }else{
+            startActivity(new Intent(OnboardingActivity.this, SignupAs.class));
         }
 
     }

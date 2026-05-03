@@ -83,13 +83,22 @@ public class ListingSummaryFragment extends Fragment {
         tvCategory.setText(viewModel.category.isEmpty() ? "— none selected —" : viewModel.category);
 
         TextView tvPrice = view.findViewById(R.id.tvSummaryPrice);
-        tvPrice.setText(String.format("₱%.2f / %s", viewModel.price, viewModel.priceUnit));
+        if (tvPrice != null) {
+            tvPrice.setText(String.format("₱%.2f / %s", viewModel.price, viewModel.priceUnit));
+        }
+
+        TextView tvPenalty = view.findViewById(R.id.tvSummaryPenalty);
+        if (tvPenalty != null) {
+            tvPenalty.setText(String.format("₱%.2f / %s", viewModel.penaltyPrice, viewModel.penaltyUnit));
+        }
 
         TextView tvPayments = view.findViewById(R.id.tvSummaryPayments);
-        if(viewModel.paymentMethods.isEmpty()) {
-            tvPayments.setText("— none selected —");
-        } else {
-            tvPayments.setText(TextUtils.join(", ", viewModel.paymentMethods));
+        if (tvPayments != null) {
+            if(viewModel.paymentMethods.isEmpty()) {
+                tvPayments.setText("— none selected —");
+            } else {
+                tvPayments.setText(TextUtils.join(", ", viewModel.paymentMethods));
+            }
         }
 
         TextView tvActivities = view.findViewById(R.id.tvSummaryActivities);
@@ -140,6 +149,8 @@ public class ListingSummaryFragment extends Fragment {
                 viewModel.island,
                 viewModel.price,
                 viewModel.priceUnit,
+                viewModel.penaltyPrice,
+                viewModel.penaltyUnit,
                 viewModel.paymentMethods,
                 viewModel.suggestedActivities,
                 uploadedImageUrls

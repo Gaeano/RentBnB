@@ -9,20 +9,23 @@ public class CreateListingRequest {
     private String island;
     private double price;
     private String priceUnit;
+    private double penaltyPrice;
+    private String penaltyUnit;
     private List<String> paymentMethods;
     private List<String> suggestedActivities;
     private List<String> imageUrls;
 
-    public CreateListingRequest(String productName, String description, String category, String island, double price, String priceUnit, List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls) {
-            this.productName = productName;
-            this.description = description;
-            this.category = category;
-            this.island = island;
-            this.price = price;
-            this.priceUnit = priceUnit;
-            this.paymentMethods = paymentMethods;
-            this.suggestedActivities = suggestedActivities;
-            this.imageUrls = imageUrls;
+    public CreateListingRequest(String productName, String description, String category, String island, double price, String priceUnit, double penaltyPrice, String penaltyUnit, List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls) {
+        this.productName = productName;
+        this.description = description;
+        this.category = category;
+        this.island = island;
+        this.price = price;
+        this.priceUnit = priceUnit;
+        this.penaltyPrice = penaltyPrice;
+        this.penaltyUnit = penaltyUnit;
+        this.paymentMethods = paymentMethods;
+        this.suggestedActivities = suggestedActivities;
+        this.imageUrls = imageUrls;
     }
-
 }

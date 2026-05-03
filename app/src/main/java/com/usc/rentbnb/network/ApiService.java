@@ -39,14 +39,11 @@ public interface ApiService {
 
     @POST("auth/register")
     Call<AuthResponse> registerUser(
-            @Header("Authorization") String token,
             @Body RegisterRequest registerRequest
     );
 
     @POST("auth/google")
-    Call<AuthResponse> googleSignIn(
-            @Header("Authorization") String token
-    );
+    Call<AuthResponse> googleSignIn();
 
     @POST("listings")
     Call<CreateListingResponse> createListing(@Body CreateListingRequest createListingRequest);

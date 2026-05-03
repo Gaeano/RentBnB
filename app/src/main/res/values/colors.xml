@@ -30,4 +30,11 @@
     <color name="divider_color">#E0E0E0</color>
     <color name="receipt_bg">#F5F5F5</color>
 
+    <!-- Password Strength Colors -->
+    <color name="strength_weak">#FF4B4B</color>
+    <color name="strength_fair">#FFA500</color>
+    <color name="strength_good">#3DCFCF</color>
+    <color name="strength_strong">#29AAAA</color>
+
+
 </resources>

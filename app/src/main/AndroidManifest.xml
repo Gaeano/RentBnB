@@ -28,7 +28,9 @@
             android:exported="false" />
         <activity
             android:name=".ui.signup.SignupAs"
-            android:exported="false" />
+            android:exported="false">
+
+        </activity>
         <activity
             android:name=".ui.booking.ThankYouPage"
             android:exported="false" />
@@ -54,24 +56,10 @@
         <activity
             android:name=".ui.listing.AddListingActivity"
             android:exported="false">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
         </activity>
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="true">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
         </activity>
         <activity
             android:name=".ui.auth.verifyAndForgetActivity"

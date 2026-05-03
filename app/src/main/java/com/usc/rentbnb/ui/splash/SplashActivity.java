@@ -19,6 +19,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.home.HomeActivity;
+import com.usc.rentbnb.ui.onboarding.OnboardingActivity;
+import com.usc.rentbnb.ui.signup.SignupAs;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -50,6 +52,7 @@ public class SplashActivity extends AppCompatActivity {
     private void checkSessionAndNavigate() {
         SharedPreferences sharedPreferences = getSharedPreferences("RentBnBPrefs", MODE_PRIVATE);
         boolean isRemembered = sharedPreferences.getBoolean("IS_REMEMBERED", false);
+        boolean isFirstTime = sharedPreferences.getBoolean("IS_FIRST_TIME", true);
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = auth.getCurrentUser();
@@ -65,6 +68,14 @@ public class SplashActivity extends AppCompatActivity {
                 finish();
             });
 
+            // SCENARIO 2: First time opening the app -> Go to Onboarding
+        } else if (isFirstTime) {
+            // Notice we do NOT save it as false here anymore.
+            // Replace 'OnboardingActivity.class' with your actual onboarding activity name
+            startActivity(new Intent(SplashActivity.this, OnboardingActivity.class));
+            finish();
+
+            // SCENARIO 3: Not logged in, but has completed onboarding before
         } else {
             startActivity(new Intent(SplashActivity.this, LoginActivity.class));
             finish();

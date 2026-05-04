@@ -57,12 +57,6 @@
             android:name=".ui.listing.AddListingActivity"
             android:exported="false">
         </activity>
-<<<<<<< HEAD
-<!--        <activity-->
-<!--            android:name=".ui.favorites.FavoritesProductActivity"-->
-<!--            android:exported="false" />-->
-=======
->>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="true">
@@ -95,14 +89,10 @@
             android:exported="false" />
         <activity
             android:name=".ui.filter.FilterActivity"
-            android:exported="false" />
-<<<<<<< HEAD
-
-=======
+            android:exported="false"/>
         <activity
             android:name=".ui.notifications.NotificationActivity"
             android:exported="false" />
->>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
     </application>
 
 </manifest>

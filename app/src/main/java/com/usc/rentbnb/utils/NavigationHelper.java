@@ -110,4 +110,8 @@ public class NavigationHelper {
         navigate(new IslandsFragment(), navHome, dotHome, true);
     }
 
+    public void navigateToChat() {
+        navigate(new ChatFragment(), navBookings, dotBookings, false);
+    }
+
 }

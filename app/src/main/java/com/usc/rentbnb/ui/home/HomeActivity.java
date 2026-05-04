@@ -33,8 +33,17 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.usc.rentbnb.repositories.ChatRepository;
+import com.usc.rentbnb.models.ChatRoom;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.FilterCriteria;
+import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.models.ListingResponse;
+import com.usc.rentbnb.models.Notification;
+import com.usc.rentbnb.ui.notifications.NotificationActivity;
+import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.filter.FilterActivity;
@@ -75,6 +84,7 @@ public class HomeActivity extends AppCompatActivity {
     private NavigationHelper navigationHelper;
     private FusedLocationProviderClient fusedLocationClient;
     private FilterCriteria lastCriteria = null;
+    private ListenerRegistration chatListener;
 
 
     // Search Debouncing Logic
@@ -116,7 +126,12 @@ public class HomeActivity extends AppCompatActivity {
         setupSearchLogic(); // Integrated logic
 
 
-        navigationHelper.setInitialState();
+        if (getIntent().getBooleanExtra("navigate_to_chat", false)) {
+            navigationHelper.navigateToChat();
+        } else {
+            navigationHelper.setInitialState();
+        }
+
 
 
         homeViewModel.fetchIslands();
@@ -129,6 +144,46 @@ public class HomeActivity extends AppCompatActivity {
 
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
+<<<<<<< HEAD
+=======
+        View notificationBtn = findViewById(R.id.notification_button);
+        if (notificationBtn != null) {
+            notificationBtn.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        checkUnreadNotifications();
+        listenToUnreadChat();
+
+        EditText searchBar = findViewById(R.id.search_bar);
+        searchBar.addTextChangedListener(new android.text.TextWatcher() {
+            private android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+            private Runnable searchRunnable;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                handler.removeCallbacks(searchRunnable);
+
+                searchRunnable = () -> {
+                    String query = s.toString().trim();
+                    if (showingRentals) {
+                        homeViewModel.filterIslands(query);
+                    } else {
+                        homeViewModel.filterRentals(query);
+                    }
+                };
+                handler.postDelayed(searchRunnable, 500);
+            }
+        });
+>>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
 
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
             @Override
@@ -442,6 +497,105 @@ public class HomeActivity extends AppCompatActivity {
         homeViewModel.fetchIslands();
     }
 
+<<<<<<< HEAD
+=======
+    private void checkUnreadNotifications() {
+        ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
+            @Override
+            public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
+                boolean hasUnread = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Notification> notifications = response.body().getData();
+                    if (notifications != null) {
+                        for (Notification n : notifications) {
+                            if (!n.isRead()) {
+                                hasUnread = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (hasUnread) {
+                    updateNotificationBadge(true);
+                } else {
+                    checkNewListingsForBadge();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                checkNewListingsForBadge();
+            }
+        });
+    }
+
+    private void checkNewListingsForBadge() {
+        ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
+            @Override
+            public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
+                boolean hasNew = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Listing> listings = response.body().getData();
+                    if (listings != null) {
+                        for (Listing l : listings) {
+                            if (l.isNew()) {
+                                hasNew = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                updateNotificationBadge(hasNew);
+            }
+
+            @Override
+            public void onFailure(Call<ListingResponse> call, Throwable t) {
+                updateNotificationBadge(false);
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (chatListener != null) {
+            chatListener.remove();
+        }
+    }
+
+    private void listenToUnreadChat() {
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) return;
+
+        ChatRepository chatRepo = new ChatRepository();
+        chatListener = chatRepo.listenToChatRoomsForUser(currentUserId, new ChatRepository.ChatRoomsListCallback() {
+            @Override
+            public void onUpdate(List<ChatRoom> chatRooms) {
+                boolean hasUnreadChat = false;
+                for (ChatRoom room : chatRooms) {
+                    if (room.getUnreadCountForUser(currentUserId) > 0) {
+                        hasUnreadChat = true;
+                        break;
+                    }
+                }
+                if (hasUnreadChat) {
+                    updateNotificationBadge(true);
+                }
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {}
+        });
+    }
+
+    private void updateNotificationBadge(boolean visible) {
+        View badge = findViewById(R.id.notification_badge);
+        if (badge != null) {
+            badge.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+    }
+>>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
 
     private final ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -450,13 +604,19 @@ public class HomeActivity extends AppCompatActivity {
                     FilterCriteria criteria = (FilterCriteria) result.getData().getSerializableExtra("updated_criteria");
                     lastCriteria = criteria;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
                     View filterButton = findViewById(R.id.filter_button);
                     if (filterButton != null) {
                         filterButton.setActivated(!criteria.isEmpty());
                     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
                     homeViewModel.applyFilters(criteria);
                 }
             }

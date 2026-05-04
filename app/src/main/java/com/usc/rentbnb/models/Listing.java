@@ -5,7 +5,15 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.PropertyName;
 
 public class Listing implements Parcelable {
     private String id;
@@ -21,9 +29,31 @@ public class Listing implements Parcelable {
     private double rating;
     private int totalReviews;
     private int timesRented;
-    private String createdAt;
 
-    public Listing(String id, String productName, String description, String category, String island, double price, String priceUnit, double rating, int totalReviews, List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls, String createdAt, int timesRented) {
+    @Exclude
+    private String createdAt;
+    private String ownerId;
+    private String ownerName;
+    private String ownerFaq;
+
+    @PropertyName("createdAt")
+    public Object getFirestoreCreatedAt() {
+        return null;
+    }
+
+    @PropertyName("createdAt")
+    public void setFirestoreCreatedAt(Object value) {
+        if (value instanceof Timestamp) {
+            Timestamp ts = (Timestamp) value;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            this.createdAt = sdf.format(ts.toDate());
+        } else if (value instanceof String) {
+            this.createdAt = (String) value;
+        }
+    }
+
+    public Listing(String id, String productName, String description, String category, String island, double price, String priceUnit, double rating, int totalReviews, List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls, String createdAt, int timesRented, String ownerId, String ownerName, String ownerFaq) {
         this.id = id;
         this.productName = productName;
         this.description = description;
@@ -38,6 +68,9 @@ public class Listing implements Parcelable {
         this.imageUrls = imageUrls;
         this.createdAt = createdAt;
         this.timesRented = timesRented;
+        this.ownerId = ownerId;
+        this.ownerName = ownerName;
+        this.ownerFaq = ownerFaq;
     }
 
     public Listing() {}
@@ -57,6 +90,9 @@ public class Listing implements Parcelable {
         totalReviews = in.readInt();
         timesRented = in.readInt();
         createdAt = in.readString();
+        ownerId = in.readString();
+        ownerName = in.readString();
+        ownerFaq = in.readString();
     }
 
     public static final Creator<Listing> CREATOR = new Creator<Listing>() {
@@ -81,10 +117,34 @@ public class Listing implements Parcelable {
     public double getRating() {return rating;}
     public int getTotalReviews() {return totalReviews;}
     public List<String> getImageUrls() {return imageUrls;}
+    @Exclude
     public String getCreatedAt() {return createdAt;}
     public int getTimesRented() {return timesRented;}
     public List<String> getPaymentMethods() {return paymentMethods;}
     public List<String> getSuggestedActivities() {return suggestedActivities;}
+    public String getOwnerId() { return ownerId; }
+    public String getOwnerName() { return ownerName; }
+    public String getOwnerFaq() { return ownerFaq; }
+
+    public boolean isNew() {
+        if (createdAt == null || createdAt.isEmpty()) {
+            return false;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date dateCreated = sdf.parse(createdAt);
+
+            if (dateCreated != null) {
+                long diffInMillis = System.currentTimeMillis() - dateCreated.getTime();
+                long hoursDiff = diffInMillis / (1000 * 60 * 60);
+                return hoursDiff <= 48;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     public void setId(String id) {
         this.id = id;
@@ -138,9 +198,14 @@ public class Listing implements Parcelable {
         this.timesRented = timesRented;
     }
 
+    @Exclude
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
+
+    public void setOwnerId(String ownerId) { this.ownerId = ownerId; }
+    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+    public void setOwnerFaq(String ownerFaq) { this.ownerFaq = ownerFaq; }
 
     @Override
     public int describeContents() {
@@ -163,5 +228,8 @@ public class Listing implements Parcelable {
         dest.writeInt(totalReviews);
         dest.writeInt(timesRented);
         dest.writeString(createdAt);
+        dest.writeString(ownerId);
+        dest.writeString(ownerName);
+        dest.writeString(ownerFaq);
     }
 }

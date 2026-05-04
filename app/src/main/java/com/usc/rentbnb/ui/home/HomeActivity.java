@@ -1,6 +1,5 @@
 package com.usc.rentbnb.ui.home;
 
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,15 +8,14 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import android.text.Editable;
+import android.text.TextWatcher;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -29,7 +27,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -51,27 +48,22 @@ import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.utils.NavigationHelper;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
 
-
 import java.util.List;
 import java.util.Locale;
-
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
 public class HomeActivity extends AppCompatActivity {
-
 
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
-    private EditText searchBar;
 
+    private EditText searchBar;
 
     private boolean showingRentals = true;
     private TextView tabIslands, tabRentals;
-
 
     private WeatherResponse.WeatherData currentWeather;
     private int currentWeatherIconRes = R.drawable.ic_sun;
@@ -80,14 +72,12 @@ public class HomeActivity extends AppCompatActivity {
     public double userLat = 10.3157;
     public double userLon = 123.8854;
 
-
     private NavigationHelper navigationHelper;
+
     private FusedLocationProviderClient fusedLocationClient;
     private FilterCriteria lastCriteria = null;
     private ListenerRegistration chatListener;
 
-
-    // Search Debouncing Logic
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
 
@@ -96,7 +86,6 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
 
         LinearLayout homeHeader = findViewById(R.id.homeHeader);
         ViewCompat.setOnApplyWindowInsetsListener(homeHeader, (v, insets) -> {
@@ -110,10 +99,8 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-
         tabIslands = findViewById(R.id.tab_islands);
         tabRentals = findViewById(R.id.tab_rentals);
-        searchBar = findViewById(R.id.search_bar);
 
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
@@ -123,8 +110,6 @@ public class HomeActivity extends AppCompatActivity {
         setupTitleToggle();
         setupBottomNavigation(homeHeader);
         setupFilterButton();
-        setupSearchLogic(); // Integrated logic
-
 
         if (getIntent().getBooleanExtra("navigate_to_chat", false)) {
             navigationHelper.navigateToChat();
@@ -133,19 +118,15 @@ public class HomeActivity extends AppCompatActivity {
         }
 
 
-
         homeViewModel.fetchIslands();
         homeViewModel.fetchListings();
 
-
         switchFeed(true);
-        fetchUserLocation();
 
+        fetchUserLocation();
 
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
-<<<<<<< HEAD
-=======
         View notificationBtn = findViewById(R.id.notification_button);
         if (notificationBtn != null) {
             notificationBtn.setOnClickListener(v -> {
@@ -157,33 +138,9 @@ public class HomeActivity extends AppCompatActivity {
         checkUnreadNotifications();
         listenToUnreadChat();
 
-        EditText searchBar = findViewById(R.id.search_bar);
-        searchBar.addTextChangedListener(new android.text.TextWatcher() {
-            private android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
-            private Runnable searchRunnable;
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(android.text.Editable s) {
-                handler.removeCallbacks(searchRunnable);
-
-                searchRunnable = () -> {
-                    String query = s.toString().trim();
-                    if (showingRentals) {
-                        homeViewModel.filterIslands(query);
-                    } else {
-                        homeViewModel.filterRentals(query);
-                    }
-                };
-                handler.postDelayed(searchRunnable, 500);
-            }
-        });
->>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
+        // --- SEARCH BAR INITIALIZATION ---
+        searchBar = findViewById(R.id.search_bar);
+        setupSearchLogic();
 
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
             @Override
@@ -198,8 +155,9 @@ public class HomeActivity extends AppCompatActivity {
         }, false);
     }
 
-
     private void setupSearchLogic() {
+        if (searchBar == null) return;
+
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -207,7 +165,6 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Cancel pending search if user types again quickly
                 if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
             }
 
@@ -216,43 +173,35 @@ public class HomeActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 String query = s.toString().trim();
                 searchRunnable = () -> {
+                    // CORRECTED LOGIC:
+                    // If showingRentals is true, filter Rentals. Otherwise, filter Islands.
                     if (showingRentals) {
                         homeViewModel.filterRentals(query);
                     } else {
                         homeViewModel.filterIslands(query);
                     }
                 };
-                // 300ms debounce for smoother UI
                 searchHandler.postDelayed(searchRunnable, 300);
             }
         });
     }
 
-
     private void setupTitleToggle() {
         tabRentals.setOnClickListener(v -> {
-            if (!showingRentals) switchFeed(true);
+            if (!showingRentals) {
+                switchFeed(true);
+            }
         });
 
-
         tabIslands.setOnClickListener(v -> {
-            if (showingRentals) switchFeed(false);
+            if (showingRentals) {
+                switchFeed(false);
+            }
         });
     }
 
-
     private void switchFeed(boolean toRentals) {
         updateTabUI(toRentals);
-
-
-        // Apply current search text to the new tab view immediately
-        String currentQuery = searchBar.getText().toString();
-        if (toRentals) {
-            homeViewModel.filterRentals(currentQuery);
-        } else {
-            homeViewModel.filterIslands(currentQuery);
-        }
-
 
         Fragment fragment = toRentals ? new RentalsFragment() : new IslandsFragment();
         getSupportFragmentManager()
@@ -261,16 +210,12 @@ public class HomeActivity extends AppCompatActivity {
                 .replace(R.id.homeFeedContainer, fragment)
                 .commit();
     }
-
-
     private void updateTabUI(boolean isRentals) {
         showingRentals = isRentals;
-
 
         if (isRentals) {
             tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
             tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
-
 
             tabIslands.setBackgroundResource(android.R.color.transparent);
             tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
@@ -278,12 +223,10 @@ public class HomeActivity extends AppCompatActivity {
             tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
             tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
 
-
             tabRentals.setBackgroundResource(android.R.color.transparent);
             tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
         }
     }
-
 
     private void setupFilterChips() {
         TextView chipNearYou = findViewById(R.id.chip_near_you);
@@ -291,9 +234,7 @@ public class HomeActivity extends AppCompatActivity {
         TextView chipNew = findViewById(R.id.chip_new);
         TextView chipTopRated = findViewById(R.id.chip_top_rated);
 
-
         filterChips = new TextView[]{chipNearYou, chipTrending, chipNew, chipTopRated};
-
 
         for (TextView chip : filterChips) {
             if (chip != null) {
@@ -303,11 +244,9 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-
     private void handleChipToggle(TextView selectedChip) {
         boolean isNowSelected = !selectedChip.isSelected();
         selectedChip.setSelected(isNowSelected);
-
 
         if (isNowSelected) {
             selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
@@ -315,7 +254,6 @@ public class HomeActivity extends AppCompatActivity {
             selectedChip.setBackgroundResource(R.drawable.chip_background);
         }
     }
-
 
     private void setupBottomNavigation(View homeHeader) {
         navigationHelper = new NavigationHelper(this, R.id.homeFeedContainer, homeHeader);
@@ -328,11 +266,9 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-
     private void setupFilterButton() {
         View filterButton = findViewById(R.id.filter_button);
         if (filterButton == null) return;
-
 
         filterButton.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, FilterActivity.class);
@@ -343,26 +279,24 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-
     private void fetchWeather(double userLat, double userLon) {
         ApiClient.getApiService().getCurrentWeather(userLat, userLon).enqueue(new Callback<WeatherResponse>() {
             @Override
             public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     currentWeather = response.body().getData();
-                    ImageView ivWeatherIcon = findViewById(R.id.weather_icon);
 
+                    ImageView ivWeatherIcon = findViewById(R.id.weather_icon);
 
                     String condition = currentWeather.getCondition();
                     if (condition == null) condition = "Clear";
-
 
                     switch (condition) {
                         case "Rain":
                             currentWeatherMessage = "It's going to rain soon";
                             currentWeatherIconRes = R.drawable.ic_rain;
                             break;
-                        case "Snow":
+                        case "Snow": // useless pero pang chuy rani kay chuy manko
                             currentWeatherMessage = "Snow expected soon";
                             currentWeatherIconRes = R.drawable.ic_snow;
                             break;
@@ -370,7 +304,7 @@ public class HomeActivity extends AppCompatActivity {
                             currentWeatherMessage = "Nice and cool today";
                             currentWeatherIconRes = R.drawable.ic_cloud;
                             break;
-                        case "Foggy":
+                        case "Foggy": // busay raman tawn ni ey
                             currentWeatherMessage = "Low visibility, take care";
                             currentWeatherIconRes = R.drawable.ic_fog;
                             break;
@@ -380,12 +314,11 @@ public class HomeActivity extends AppCompatActivity {
                             break;
                     }
 
-
                     ivWeatherIcon.setImageResource(currentWeatherIconRes);
                     ivWeatherIcon.setAlpha(1.0f);
+
                 }
             }
-
 
             @Override
             public void onFailure(Call<WeatherResponse> call, Throwable t) {
@@ -394,27 +327,22 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-
     private void showWeatherDialog() {
         android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.setContentView(R.layout.dialog_weather);
-
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             dialog.getWindow().setDimAmount(0.7f);
         }
 
-
         ImageView icon = dialog.findViewById(R.id.dialog_weather_icon);
         TextView tempText = dialog.findViewById(R.id.dialog_weather_temp);
         TextView conditionText = dialog.findViewById(R.id.dialog_weather_condition);
         TextView messageText = dialog.findViewById(R.id.dialog_weather_message);
 
-
         icon.setImageResource(currentWeatherIconRes);
         messageText.setText(currentWeatherMessage);
-
 
         if (currentWeather != null) {
             tempText.setText(currentWeather.getTemp() + "°C");
@@ -424,20 +352,16 @@ public class HomeActivity extends AppCompatActivity {
             conditionText.setText("Loading...");
         }
 
-
         dialog.show();
     }
 
-
     private void fetchUserLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
             return;
         }
-
 
         fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
             if (location != null) {
@@ -445,11 +369,9 @@ public class HomeActivity extends AppCompatActivity {
                 userLon = location.getLongitude();
                 fetchWeather(userLat, userLon);
 
-
                 try {
                     Geocoder geocoder = new Geocoder(this, Locale.getDefault());
                     List<Address> addresses = geocoder.getFromLocation(userLat, userLon, 1);
-
 
                     if (addresses != null && !addresses.isEmpty()) {
                         userCity = addresses.get(0).getLocality();
@@ -459,14 +381,12 @@ public class HomeActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.homeFeedContainer);
                 if (currentFragment instanceof RentalsFragment) {
                     ((RentalsFragment) currentFragment).onLocationUpdated(userCity, userLat, userLon);
                 } else if (currentFragment instanceof IslandsFragment) {
                     ((IslandsFragment) currentFragment).updateLocationTitle(userCity);
                 }
-
 
                 fetchNearbyIslands(userLat, userLon);
             } else {
@@ -476,7 +396,6 @@ public class HomeActivity extends AppCompatActivity {
             fetchWeather(userLat, userLon);
         });
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -491,14 +410,11 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-
     private void fetchNearbyIslands(double lat, double lng) {
         Log.d("DATA", "Preparing to fetch islands near " + lat + ", " + lng);
         homeViewModel.fetchIslands();
     }
 
-<<<<<<< HEAD
-=======
     private void checkUnreadNotifications() {
         ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
             @Override
@@ -595,31 +511,22 @@ public class HomeActivity extends AppCompatActivity {
             badge.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
->>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
 
     private final ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     FilterCriteria criteria = (FilterCriteria) result.getData().getSerializableExtra("updated_criteria");
+
                     lastCriteria = criteria;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
                     View filterButton = findViewById(R.id.filter_button);
                     if (filterButton != null) {
                         filterButton.setActivated(!criteria.isEmpty());
                     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> ef0ce1b94e422a632ed94455637c5e3c382aa333
                     homeViewModel.applyFilters(criteria);
                 }
             }
     );
 }
-

@@ -60,7 +60,7 @@
             android:layout_height="80dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
-            app:cardCornerRadius="16dp"
+            app:cardCornerRadius="40dp"
             app:cardElevation="0dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/profile_header">
@@ -69,23 +69,40 @@
                 android:id="@+id/profile_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/profile_display_picture"
+                android:src="@drawable/profile_display_picture"
+
                 android:scaleType="centerCrop" />
         </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/profile_name"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:text="Bulgogi Bibbing Heredia"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/profile_image_card"
             app:layout_constraintTop_toTopOf="@id/profile_image_card"
-            app:layout_constraintBottom_toBottomOf="@id/profile_image_card" />
+            app:layout_constraintBottom_toBottomOf="@id/profile_image_card">
+
+            <TextView
+                android:id="@+id/profile_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bulgogi Bibbing Heredia"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/profile_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="heredia@example.com"
+                android:textColor="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/stats_card"
@@ -114,9 +131,10 @@
                     android:gravity="center"
                     android:orientation="vertical">
                     <TextView
+                        android:id="@+id/tv_listings_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="3"
+                        android:text="0"
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -142,9 +160,10 @@
                     android:gravity="center"
                     android:orientation="vertical">
                     <TextView
+                        android:id="@+id/tv_purchases_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="7"
+                        android:text="0"
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -180,10 +199,11 @@
                             android:src="@android:drawable/star_on"
                             app:tint="#FFD700" />
                         <TextView
+                            android:id="@+id/tv_rating_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="4.3"
+                            android:text="0.0"
                             android:textColor="@android:color/black"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -210,9 +230,10 @@
                     android:gravity="center"
                     android:orientation="vertical">
                     <TextView
+                        android:id="@+id/tv_earnings_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="P1.2k"
+                        android:text="P0.0"
                         android:textColor="#4CAF50"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -638,5 +659,17 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <ProgressBar
+            android:id="@+id/profile_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:indeterminateTint="#5BC8D3"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
+

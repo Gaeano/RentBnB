@@ -45,6 +45,9 @@ public interface ApiService {
     @POST("auth/google")
     Call<AuthResponse> googleSignIn();
 
+    @GET("auth/users/me")
+    Call<AuthResponse> getUserData();
+
     @POST("listings")
     Call<CreateListingResponse> createListing(@Body CreateListingRequest createListingRequest);
 

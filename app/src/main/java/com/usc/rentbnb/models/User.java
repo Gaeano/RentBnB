@@ -144,13 +144,13 @@ public class User {
 
     // --- EXISTING NESTED CLASS ---
     public static class UserLocation {
-        private String island;
+        private String city;
         private String province;
 
         public UserLocation() {}
-        public String getIsland() { return island; }
+        public String getCity() { return city; }
         public String getProvince() { return province; }
-        public void setIsland(String island) { this.island = island; }
+        public void setCity(String city) { this.city = city; }
         public void setProvince(String province) { this.province = province; }
     }
 

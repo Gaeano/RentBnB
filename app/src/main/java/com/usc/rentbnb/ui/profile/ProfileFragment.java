@@ -134,6 +134,7 @@ public class ProfileFragment extends Fragment {
         LinearLayout menuHelpCenter = view.findViewById(R.id.menu_help_center);
         LinearLayout menuAppSettings = view.findViewById(R.id.menu_app_settings);
         LinearLayout menuLogout = view.findViewById(R.id.menu_logout);
+        View btnEditProfile = view.findViewById(R.id.menu_profile_detail);
 
         menuHistory.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), HistoryActivity.class);
@@ -158,6 +159,18 @@ public class ProfileFragment extends Fragment {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
+
+        if (btnEditProfile != null) {
+            btnEditProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(requireActivity(), ProfileDetailsActivity.class);
+
+                // TODO: Replace with actual check later (e.g., user.getAccountType().equals("COMPANY"))
+                boolean isCompany = false;
+
+                intent.putExtra("IS_COMPANY", isCompany);
+                startActivity(intent);
+            });
+        }
     }
 
     private void clearRememberMeData() {

@@ -8,6 +8,7 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
@@ -23,6 +24,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.ChatRoom;
@@ -35,6 +37,7 @@ import com.usc.rentbnb.ui.chat.ChatRoomActivity;
 import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -279,7 +282,8 @@ public class ListingsDetailsActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(String errorMessage) {
-                        Toast.makeText(ListingsDetailsActivity.this, "Failed to start chat: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ListingsDetailsActivity.this, "Failed to start chat: ", Toast.LENGTH_SHORT).show();
+                        Log.e("CHAT", errorMessage);
                     }
                 }
         );

@@ -1,11 +1,11 @@
 package com.usc.rentbnb.ui.profile;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,16 +13,6 @@ import androidx.fragment.app.Fragment;
 import com.usc.rentbnb.R;
 
 public class CompProfileDetailsFragment extends Fragment {
-
-    // States
-    private boolean isMasterEditing = false;
-    private boolean isCompEditing = false;
-    private boolean isServiceEditing = false;
-    private boolean isPasswordExpanded = false;
-
-    // View Arrays
-    private View[] compDetailRows;
-    private View[] serviceDetailRows;
 
     @Nullable
     @Override
@@ -34,83 +24,52 @@ public class CompProfileDetailsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Map Header Elements
-        TextView tvHeaderName = view.findViewById(R.id.tv_comp_header_name);
-        EditText etHeaderName = view.findViewById(R.id.et_comp_header_name);
-        TextView btnEditToggleTop = view.findViewById(R.id.btn_edit_profile_toggle);
-
-        // Map the photo overlay and set a dummy click listener for the next dev
-        LinearLayout overlayEditPhoto = view.findViewById(R.id.overlay_edit_comp_photo);
-        overlayEditPhoto.setOnClickListener(v -> {
-            android.widget.Toast.makeText(getContext(), "TODO: Implement Image Picker", android.widget.Toast.LENGTH_SHORT).show();
-        });
-
-        // Map Bubble Elements
-        TextView btnEditComp = view.findViewById(R.id.btn_edit_comp_details);
-        TextView btnConfirmComp = view.findViewById(R.id.btn_confirm_comp_details);
-        TextView btnEditService = view.findViewById(R.id.btn_edit_service_details);
-        TextView btnConfirmService = view.findViewById(R.id.btn_confirm_service_details);
-
-        compDetailRows = new View[]{ view.findViewById(R.id.field_acct_name), view.findViewById(R.id.field_business_type), view.findViewById(R.id.field_years), view.findViewById(R.id.field_comp_email), view.findViewById(R.id.field_comp_phone), view.findViewById(R.id.field_comp_address) };
-        serviceDetailRows = new View[]{ view.findViewById(R.id.field_radius), view.findViewById(R.id.field_within), view.findViewById(R.id.field_specific_areas) };
-
-        // --- MASTER TOGGLE LOGIC ---
-        btnEditToggleTop.setOnClickListener(v -> {
-            isMasterEditing = !isMasterEditing;
-            btnEditToggleTop.setText(isMasterEditing ? "SAVE ALL ✓" : "EDIT PROFILE ✎");
-
-            // Toggle Header Name
-            toggleSingleField(isMasterEditing, tvHeaderName, etHeaderName);
-
-            // Toggle Photo Overlay
-            overlayEditPhoto.setVisibility(isMasterEditing ? View.VISIBLE : View.GONE);
-
-            // Force all bubbles to match the master state
-            isCompEditing = isMasterEditing;
-            isServiceEditing = isMasterEditing;
-            forceSectionState(isMasterEditing, compDetailRows, btnEditComp, btnConfirmComp);
-            forceSectionState(isMasterEditing, serviceDetailRows, btnEditService, btnConfirmService);
-        });
-
-        // --- INDIVIDUAL BUBBLE LOGIC ---
-        btnEditComp.setOnClickListener(v -> { isCompEditing = !isCompEditing; forceSectionState(isCompEditing, compDetailRows, btnEditComp, btnConfirmComp); });
-        btnConfirmComp.setOnClickListener(v -> { isCompEditing = !isCompEditing; forceSectionState(isCompEditing, compDetailRows, btnEditComp, btnConfirmComp); });
-
-        btnEditService.setOnClickListener(v -> { isServiceEditing = !isServiceEditing; forceSectionState(isServiceEditing, serviceDetailRows, btnEditService, btnConfirmService); });
-        btnConfirmService.setOnClickListener(v -> { isServiceEditing = !isServiceEditing; forceSectionState(isServiceEditing, serviceDetailRows, btnEditService, btnConfirmService); });
-
-        // Password Area Logic
-        TextView btnChangePassword = view.findViewById(R.id.btn_change_password);
-        LinearLayout passwordArea = view.findViewById(R.id.password_expansion_area);
-        btnChangePassword.setOnClickListener(v -> {
-            isPasswordExpanded = !isPasswordExpanded;
-            passwordArea.setVisibility(isPasswordExpanded ? View.VISIBLE : View.GONE);
-            btnChangePassword.setText(isPasswordExpanded ? "Cancel ✕" : "Change Password ✎");
+        TextView btnEditProfile = view.findViewById(R.id.btn_edit_profile_toggle);
+        btnEditProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), ProfileDetailsEditActivity.class);
+            intent.putExtra("IS_COMPANY", true);
+            startActivity(intent);
         });
     }
 
-    // Helper: Toggles a specific bubble array
-    private void forceSectionState(boolean isEditing, View[] rows, TextView btnEdit, TextView btnConfirm) {
-        btnEdit.setVisibility(isEditing ? View.GONE : View.VISIBLE);
-        btnConfirm.setVisibility(isEditing ? View.VISIBLE : View.GONE);
-
-        for (View row : rows) {
-            if (row != null) {
-                toggleSingleField(isEditing, row.findViewById(R.id.tv_field_value), row.findViewById(R.id.et_field_value));
-            }
-        }
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshDataFromDatabase();
     }
 
-    // Helper: Swaps a TextView and EditText
-    private void toggleSingleField(boolean isEditing, TextView tvValue, EditText etValue) {
-        if (isEditing) {
-            tvValue.setVisibility(View.GONE);
-            etValue.setVisibility(View.VISIBLE);
-            etValue.setText(tvValue.getText());
-        } else {
-            tvValue.setVisibility(View.VISIBLE);
-            etValue.setVisibility(View.GONE);
-            tvValue.setText(etValue.getText());
+    private void refreshDataFromDatabase() {
+        if (getView() == null) return;
+
+        SharedPreferences mockDB = requireActivity().getSharedPreferences("MockFirebaseDB", 0);
+
+        String name = mockDB.getString("comp_name", "Bulgogi Bibbing Heredia");
+        String type = mockDB.getString("comp_type", "Boat Rentals");
+        String years = mockDB.getString("comp_years", "2 years");
+        String phone = mockDB.getString("comp_phone", "9123456780");
+        String address = mockDB.getString("comp_address", "N.s Cabanhud, Lapu-Lapu");
+        String radius = mockDB.getString("comp_radius", "45 km");
+        String coverage = mockDB.getString("comp_coverage", "Within City");
+        String areas = mockDB.getString("comp_areas", "Lakawon Islands, Sipalay, Guimaras");
+
+        TextView tvHeaderName = getView().findViewById(R.id.tv_comp_header_name);
+        if (tvHeaderName != null) tvHeaderName.setText(name);
+
+        updateRowText(R.id.field_acct_name, name);
+        updateRowText(R.id.field_business_type, type);
+        updateRowText(R.id.field_years, years);
+        updateRowText(R.id.field_comp_phone, "+63 " + phone);
+        updateRowText(R.id.field_comp_address, address);
+        updateRowText(R.id.field_radius, radius);
+        updateRowText(R.id.field_within, coverage);
+        updateRowText(R.id.field_specific_areas, areas);
+    }
+
+    private void updateRowText(int rowId, String text) {
+        View row = getView().findViewById(rowId);
+        if (row != null) {
+            TextView tvValue = row.findViewById(R.id.tv_field_value);
+            if (tvValue != null) tvValue.setText(text);
         }
     }
 }

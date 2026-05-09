@@ -82,9 +82,10 @@ public class HomeViewModel extends ViewModel {
             return;
         }
 
+        String lowerQuery = query.toLowerCase().trim();
         List<Island> filtered = new ArrayList<>();
         for(Island island : allIslands){
-            if(island.getIslandName() != null && island.getIslandName().toLowerCase().contains(query.toLowerCase())){
+            if(island.getIslandName() != null && island.getIslandName().toLowerCase().contains(lowerQuery)){
                 filtered.add(island);
             }
         }
@@ -97,9 +98,13 @@ public class HomeViewModel extends ViewModel {
             return;
         }
 
+        String lowerQuery = query.toLowerCase().trim();
         List<Listing> filtered = new ArrayList<>();
         for (Listing listing : allListings) {
-            if (listing.getProductName() != null && listing.getProductName().toLowerCase().contains(query.toLowerCase())) {
+            boolean matchesName = listing.getProductName() != null && listing.getProductName().toLowerCase().contains(lowerQuery);
+            boolean matchesIsland = listing.getIsland() != null && listing.getIsland().toLowerCase().contains(lowerQuery);
+
+            if (matchesName || matchesIsland) {
                 filtered.add(listing);
             }
         }

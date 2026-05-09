@@ -20,6 +20,7 @@ import com.usc.rentbnb.ui.auth.SignUpActivity;
 import com.usc.rentbnb.ui.auth.verifyAndForgetActivity;
 import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.signup.CompanySignUpActivity;
+import com.usc.rentbnb.ui.signup.IndividualSignUpActivity;
 import com.usc.rentbnb.ui.signup.SignupAs;
 
 import java.util.ArrayList;
@@ -180,7 +181,7 @@ public class OnboardingActivity extends AppCompatActivity {
             isEmailVerified = user.isEmailVerified();
 
             if (!isEmailVerified){
-                Intent intent = new Intent(OnboardingActivity.this, verifyAndForgetActivity.class);
+                Intent intent = new Intent(OnboardingActivity.this, IndividualSignUpActivity.class);
                 intent.putExtra("FRAGMENT_MODE", "VERIFY_EMAIL");
                 startActivity(intent);
             } else {

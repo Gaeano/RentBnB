@@ -151,53 +151,23 @@
                         android:textColor="@color/text_grey"
                         android:textSize="10sp" />
 
-                    <!-- Full Name -->
-                    <EditText
+                    <!-- Duration Prompt (Red Font) -->
+                    <TextView
+                        android:id="@+id/tvDurationPrompt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:background="@drawable/edit_text_background"
-                        android:hint="Full Name"
-                        android:padding="12dp"
-                        android:textColor="@color/black"
-                        android:textColorHint="@color/text_grey" />
+                        android:gravity="center"
+                        android:text=""
+                        android:textColor="#FF0000"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:orientation="horizontal">
-
-                        <!-- Age -->
-                        <EditText
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/edit_text_background"
-                            android:hint="Age"
-                            android:inputType="number"
-                            android:padding="12dp"
-                            android:textColor="@color/black"
-                            android:textColorHint="@color/text_grey" />
-
-                        <!-- Gender -->
-                        <EditText
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/edit_text_background"
-                            android:hint="Gender"
-                            android:padding="12dp"
-                            android:textColor="@color/black"
-                            android:textColorHint="@color/text_grey" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="8dp"
                         android:orientation="horizontal">
 
                         <!-- Start Date -->
@@ -235,6 +205,7 @@
 
                     <!-- Contact Number -->
                     <EditText
+                        android:id="@+id/etContactNumber"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
@@ -251,14 +222,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        app:boxBackgroundMode="none"
+                        app:boxBackgroundMode="outline"
                         app:hintEnabled="false">
 
                         <AutoCompleteTextView
                             android:id="@+id/actvPaymentMode"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/edit_text_background"
                             android:hint="Mode of Payment"
                             android:inputType="none"
                             android:padding="12dp"
@@ -338,15 +308,17 @@
                     android:padding="24dp">
 
                     <TextView
+                        android:id="@+id/tvReceiptFullName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="BULGOGI BIBING HEREDIA"
+                        android:text="ACCOUNT NAME"
                         android:textColor="@color/black"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tvReceiptContact"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
@@ -359,6 +331,7 @@
                         android:textSize="14sp" />
 
                     <TextView
+                        android:id="@+id/tvReceiptPaymentMode"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
@@ -427,6 +400,7 @@
             </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDownloadReceipt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"

@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.signup.SignupAs;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 import com.usc.rentbnb.ui.home.HomeActivity;
 
@@ -73,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
         signUpBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(this, SignUpActivity.class);
+            Intent intent = new Intent(this, SignupAs.class);
             startActivity(intent);
             finish();
         });

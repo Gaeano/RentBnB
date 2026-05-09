@@ -16,12 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RentBnb"
         android:usesCleartextTraffic="true">
-        <activity
-            android:name=".ui.listing.ListingPenaltyFragment"
-            android:exported="false" />
+
         <activity
             android:name=".ui.signup.IndividualSignUpActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.signup.CompanySignUpActivity"
             android:exported="false" />
@@ -34,47 +33,34 @@
         <activity
             android:name=".ui.booking.DigitalReceipt"
             android:exported="false" />
+
         <activity
             android:name=".ui.booking.RentForm"
             android:exported="false" />
+
         <activity
             android:name=".ui.listing.ListingsDetailsActivity"
             android:exported="false" />
+
         <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.App.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".ui.listing.AddListingActivity"
-            android:exported="false">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".ui.favorites.FavoritesProductActivity"
             android:exported="false" />
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="true">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".ui.auth.verifyAndForgetActivity"
             android:exported="false" />
@@ -83,15 +69,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.auth.SignUpActivity"
-            android:exported="false">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".ui.onboarding.OnboardingActivity"
             android:exported="false" />

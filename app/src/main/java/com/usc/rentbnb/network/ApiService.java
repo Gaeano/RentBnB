@@ -54,6 +54,9 @@ public interface ApiService {
     @PATCH("notifications/{id}/read")
     Call<ResponseBody> markAsRead(@Path("id") String notificationId);
 
+    @PATCH("notifications/read-all")
+    Call<ResponseBody> markAllAsRead();
+
     @DELETE("notifications/{id}")
     Call<ResponseBody> deleteNotification(@Path("id") String notificationId);
 }

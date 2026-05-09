@@ -34,6 +34,17 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:fontFamily="@font/jost_bold" />
+
+        <ImageView
+            android:id="@+id/btnNotificationMenu"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:padding="8dp"
+            android:src="@drawable/ic_more_horiz"
+            app:tint="@color/teal_primary"
+            android:background="?attr/selectableItemBackgroundBorderless" />
     </RelativeLayout>
 
     <View

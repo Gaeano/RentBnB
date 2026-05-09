@@ -3,6 +3,7 @@ package com.usc.rentbnb.ui.notifications;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +34,7 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
 
     private RecyclerView rvNotifications;
     private TextView tvEmpty;
+    private ImageView btnNotificationMenu;
     private NotificationAdapter adapter;
     private List<Notification> notificationList = new ArrayList<>();
 
@@ -55,11 +57,60 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
 
         rvNotifications = findViewById(R.id.rvNotifications);
         tvEmpty = findViewById(R.id.tvEmpty);
+        btnNotificationMenu = findViewById(R.id.btnNotificationMenu);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        btnNotificationMenu.setOnClickListener(this::showNotificationMenu);
 
         setupRecyclerView();
         fetchNotifications();
+    }
+
+    private void showNotificationMenu(View v) {
+        androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(this, v);
+        popup.getMenu().add("Mark all as read");
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getTitle().equals("Mark all as read")) {
+                markAllAsRead();
+                return true;
+            }
+            return false;
+        });
+        popup.show();
+    }
+
+    private void markAllAsRead() {
+        ApiClient.getApiService().markAllAsRead().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                // Update local state even if server has partial success
+                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                java.util.Set<String> readIds = new java.util.HashSet<>(prefs.getStringSet("read_notification_ids", new java.util.HashSet<>()));
+
+                for (Notification n : notificationList) {
+                    n.setRead(true);
+                    readIds.add(n.getId());
+                }
+                
+                prefs.edit().putStringSet("read_notification_ids", readIds).apply();
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                // Fallback local update
+                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                java.util.Set<String> readIds = new java.util.HashSet<>(prefs.getStringSet("read_notification_ids", new java.util.HashSet<>()));
+
+                for (Notification n : notificationList) {
+                    n.setRead(true);
+                    readIds.add(n.getId());
+                }
+
+                prefs.edit().putStringSet("read_notification_ids", readIds).apply();
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -74,8 +125,11 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
                 notificationList = new ArrayList<>();
                 
+                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
+
                 // ADD MOCK NOTIFICATIONS FOR RENTER UI
-                notificationList.add(new Notification(
+                Notification mockRent = new Notification(
                         "mock_rent_1",
                         "rent",
                         "Yamaha NMAX",
@@ -83,13 +137,17 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                         "yamaha_nmax",
                         "150",
                         "day"
-                ));
+                );
+                mockRent.setRead(readIds.contains(mockRent.getId()));
+                notificationList.add(mockRent);
                 
-                notificationList.add(new Notification(
+                Notification mockChat = new Notification(
                         "mock_chat_1",
                         "chat",
                         "Username"
-                ));
+                );
+                mockChat.setRead(readIds.contains(mockChat.getId()));
+                notificationList.add(mockChat);
 
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> serverList = response.body().getData();
@@ -106,7 +164,10 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
                 notificationList = new ArrayList<>();
-                notificationList.add(new Notification(
+                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
+
+                Notification mockRent = new Notification(
                         "mock_rent_1",
                         "rent",
                         "Yamaha NMAX",
@@ -114,12 +175,18 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                         "yamaha_nmax",
                         "150",
                         "day"
-                ));
-                notificationList.add(new Notification(
+                );
+                mockRent.setRead(readIds.contains(mockRent.getId()));
+                notificationList.add(mockRent);
+
+                Notification mockChat = new Notification(
                         "mock_chat_1",
                         "chat",
                         "Username"
-                ));
+                );
+                mockChat.setRead(readIds.contains(mockChat.getId()));
+                notificationList.add(mockChat);
+
                 fetchNewListingsAsNotifications();
             }
         });
@@ -132,6 +199,9 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                 if (response.isSuccessful() && response.body() != null) {
                     List<Listing> listings = response.body().getData();
                     if (listings != null) {
+                        android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                        java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
+
                         for (Listing listing : listings) {
                             if (listing.isNew()) {
                                 Notification n = new Notification(
@@ -143,6 +213,8 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                                         String.valueOf(listing.getPrice()),
                                         listing.getPriceUnit()
                                 );
+                                n.setRead(readIds.contains(n.getId()));
+
                                 // Check if already exists by message to avoid duplicates if called multiple times
                                 boolean exists = false;
                                 for (Notification existing : notificationList) {
@@ -199,33 +271,33 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
         }
 
         if (!notification.isRead()) {
-            if ("listing".equals(type) || "rent".equals(type) || "chat".equals(type)) {
-                // Local-only notification for now
-                notification.setRead(true);
-                adapter.notifyDataSetChanged();
-                return;
-            }
-
+            // Mark as read in DB
             ApiClient.getApiService().markAsRead(notification.getId()).enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.isSuccessful()) {
-                        notification.setRead(true);
-                        adapter.notifyDataSetChanged();
-                    } else {
-                        // Fallback: mark as read locally anyway if server fails
-                        notification.setRead(true);
-                        adapter.notifyDataSetChanged();
-                    }
+                    notification.setRead(true);
+                    adapter.notifyDataSetChanged();
+                    
+                    // Also mark locally as read to ensure badge sync
+                    markAsReadLocally(notification.getId());
                 }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    // Fallback: mark as read locally anyway
+                    // Fallback local update
                     notification.setRead(true);
                     adapter.notifyDataSetChanged();
+                    markAsReadLocally(notification.getId());
                 }
             });
+        }
+    }
+
+    private void markAsReadLocally(String id) {
+        android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+        java.util.Set<String> readIds = new java.util.HashSet<>(prefs.getStringSet("read_notification_ids", new java.util.HashSet<>()));
+        if (readIds.add(id)) {
+            prefs.edit().putStringSet("read_notification_ids", readIds).apply();
         }
     }
 }

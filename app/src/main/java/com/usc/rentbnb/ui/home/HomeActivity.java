@@ -112,11 +112,19 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
                 boolean hasUnread = false;
+
+                // MOCK CHECK FOR THE RENTER UI DEMO
+                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
+                if (!readIds.contains("mock_rent_1") || !readIds.contains("mock_chat_1")) {
+                    hasUnread = true;
+                }
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> notifications = response.body().getData();
                     if (notifications != null) {
                         for (Notification n : notifications) {
-                            if (!n.isRead()) {
+                            if (!n.isRead() && !readIds.contains(n.getId())) {
                                 hasUnread = true;
                                 break;
                             }
@@ -135,7 +143,18 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
                 // Check listings even if server fails
-                checkNewListingsForBadge();
+                boolean hasUnread = false;
+                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
+                if (!readIds.contains("mock_rent_1") || !readIds.contains("mock_chat_1")) {
+                    hasUnread = true;
+                }
+                
+                if (hasUnread) {
+                    updateNotificationBadge(true);
+                } else {
+                    checkNewListingsForBadge();
+                }
             }
         });
     }
@@ -144,19 +163,22 @@ public class HomeActivity extends AppCompatActivity {
         ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
             @Override
             public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
-                boolean hasNew = false;
+                boolean hasNewUnseen = false;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Listing> listings = response.body().getData();
                     if (listings != null) {
+                        android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                        java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
+                        
                         for (Listing l : listings) {
-                            if (l.isNew()) {
-                                hasNew = true;
+                            if (l.isNew() && !readIds.contains(l.getId())) {
+                                hasNewUnseen = true;
                                 break;
                             }
                         }
                     }
                 }
-                updateNotificationBadge(hasNew);
+                updateNotificationBadge(hasNewUnseen);
             }
 
             @Override
@@ -167,9 +189,9 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateNotificationBadge(boolean visible) {
-        View badge = findViewById(R.id.notification_badge);
-        if (badge != null) {
-            badge.setVisibility(visible ? View.VISIBLE : View.GONE);
+        ImageView icon = findViewById(R.id.notification_icon);
+        if (icon != null) {
+            icon.setImageResource(visible ? R.drawable.ic_notifications_unread : R.drawable.ic_notifications);
         }
     }
 

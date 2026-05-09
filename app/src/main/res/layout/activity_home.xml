@@ -95,18 +95,7 @@
                         android:layout_height="26dp"
                         android:layout_gravity="center"
                         android:alpha="0.9"
-                        app:tint="@color/teal_primary"
                         android:src="@drawable/ic_notifications" />
-
-                    <View
-                        android:id="@+id/notification_badge"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:layout_gravity="top|end"
-                        android:layout_marginTop="13dp"
-                        android:layout_marginEnd="13dp"
-                        android:background="@drawable/badge_dot"
-                        android:visibility="gone" />
                 </FrameLayout>
 
                 <FrameLayout

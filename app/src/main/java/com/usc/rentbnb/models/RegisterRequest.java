@@ -86,12 +86,36 @@ public class RegisterRequest {
         @SerializedName("permitNumber")
         private String permitNumber;
 
+        @SerializedName("businessType")
+        private String businessType;
+
+        @SerializedName("yearsOfOperation")
+        private String yearsOfOperation;
+
         // You can add your radius, specificAreas, and coverage variables here later
         // if you want to store them nested inside the company object on Firestore.
 
-        public CompanyDetails(String companyName, String permitNumber) {
+        public CompanyDetails(String companyName, String permitNumber, String businessType, String yearsOfOperation) {
             this.companyName = companyName;
             this.permitNumber = permitNumber;
+            this.businessType = businessType;
+            this.yearsOfOperation = yearsOfOperation;
+        }
+
+        public String getBusinessType() {
+            return businessType;
+        }
+
+        public void setBusinessType(String businessType) {
+            this.businessType = businessType;
+        }
+
+        public String getYearsOfOperation() {
+            return yearsOfOperation;
+        }
+
+        public void setYearsOfOperation(String yearsOfOperation) {
+            this.yearsOfOperation = yearsOfOperation;
         }
 
         public String getCompanyName() { return companyName; }

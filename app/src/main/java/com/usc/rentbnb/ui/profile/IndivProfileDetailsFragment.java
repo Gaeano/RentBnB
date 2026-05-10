@@ -1,18 +1,32 @@
 package com.usc.rentbnb.ui.profile;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.bumptech.glide.Glide;
+import com.faltenreich.skeletonlayout.Skeleton;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.User;
+import com.usc.rentbnb.viewmodels.UserProfileViewModel;
 
 public class IndivProfileDetailsFragment extends Fragment {
+
+    private UserProfileViewModel profileViewModel;
+    private ImageView profileImg;
+    private TextView userName;
+    private Skeleton skeleton;
 
     @Nullable
     @Override
@@ -24,48 +38,111 @@ public class IndivProfileDetailsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+
+        initViews(view);
+        setUpObservers();
+        Log.d("IndivProfileDetails", "IM opening");
+
         TextView btnEditProfile = view.findViewById(R.id.btn_edit_profile_toggle);
-        btnEditProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), ProfileDetailsEditActivity.class);
-            intent.putExtra("IS_COMPANY", false);
-            startActivity(intent);
-        });
-    }
-
-    // NEW: onResume runs every time this screen becomes visible again!
-    @Override
-    public void onResume() {
-        super.onResume();
-        refreshDataFromDatabase();
-    }
-
-    private void refreshDataFromDatabase() {
-        if (getView() == null) return;
-
-        // 1. Connect to our Mock Database
-        SharedPreferences mockDB = requireActivity().getSharedPreferences("MockFirebaseDB", 0);
-
-        // 2. Fetch the latest data (with fallback defaults)
-        String name = mockDB.getString("indiv_name", "Bulgogi Bibbing Heredia");
-        String phone = mockDB.getString("indiv_phone", "9123456780");
-        String address = mockDB.getString("indiv_address", "Canada, Vancouver");
-
-        // 3. Update the UI
-        TextView tvHeaderName = getView().findViewById(R.id.tv_header_name);
-        if (tvHeaderName != null) tvHeaderName.setText(name);
-
-        // Update the include rows (We target the specific row, then find the value text inside it)
-        updateRowText(R.id.field_name, name);
-        updateRowText(R.id.field_phone, "+63 " + phone); // Re-add the prefix for display
-        updateRowText(R.id.field_address, address);
-    }
-
-    // Helper method for the reusable XML rows
-    private void updateRowText(int rowId, String text) {
-        View row = getView().findViewById(rowId);
-        if (row != null) {
-            TextView tvValue = row.findViewById(R.id.tv_field_value);
-            if (tvValue != null) tvValue.setText(text);
+        if (btnEditProfile != null) {
+            btnEditProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(requireActivity(), ProfileDetailsEditActivity.class);
+                intent.putExtra("IS_COMPANY", false);
+                startActivity(intent);
+            });
         }
+
+        // Trigger the network call via ViewModel
+        profileViewModel.loadUserData();
+    }
+
+    private void initViews(View view) {
+        profileImg = view.findViewById(R.id.iv_avatar);
+        userName = view.findViewById(R.id.user_name);
+
+        // Map the Skeleton wrapper from XML
+        skeleton = view.findViewById(R.id.skeleton_profile_details);
+    }
+
+    private void populateUI(User user) {
+        if (user == null) return;
+
+        // 1. Setup Header
+        String nameStr = (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) ? user.getDisplayName() : "Not Set";
+        userName.setText(nameStr);
+
+        if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
+            Glide.with(this)
+                    .load(user.getPhotoUrl())
+                    .placeholder(R.drawable.profile_display_picture)
+                    .circleCrop()
+                    .into(profileImg);
+        }
+
+        // 2. Setup Include Rows WITH LABELS
+        updateRowText(R.id.field_name, "Name", nameStr);
+        updateRowText(R.id.field_email, "Email", user.getEmail() != null ? user.getEmail() : "Not Set");
+        updateRowText(R.id.field_phone, "Phone Number", user.getPhone() != null ? user.getPhone() : "Not Set");
+
+        // Format Location Safely
+        String address = "Not Set";
+        if (user.getLocation() != null) {
+            String city = user.getLocation().getCity() != null ? user.getLocation().getCity() : "";
+            String prov = user.getLocation().getProvince() != null ? user.getLocation().getProvince() : "";
+            if (!city.isEmpty() || !prov.isEmpty()) {
+                address = city + ", " + prov;
+            }
+        }
+        updateRowText(R.id.field_address, "Address", address);
+
+        // Your current User model does not track Age and Gender natively.
+        // We set these as placeholders until you update the User.java model and backend schema to support them.
+        updateRowText(R.id.field_age, "Age", "Not Set");
+        updateRowText(R.id.field_gender, "Gender", "Not Set");
+    }
+
+    // Helper method to target the specific included XML rows, now including the label
+    private void updateRowText(int rowId, String labelText, String valueText) {
+        View row = getView();
+        if (row != null) {
+            View includeLayout = row.findViewById(rowId);
+            if (includeLayout != null) {
+                // IMPORTANT: Ensure your item_profile_field.xml has a TextView with id tv_field_label
+                TextView tvLabel = includeLayout.findViewById(R.id.tv_field_label);
+                TextView tvValue = includeLayout.findViewById(R.id.tv_field_value);
+
+                if (tvLabel != null) {
+                    tvLabel.setText(labelText);
+                }
+
+                if (tvValue != null) {
+                    tvValue.setText(valueText);
+                }
+            }
+        }
+    }
+
+    private void setUpObservers() {
+        profileViewModel.getUserProfile().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                populateUI(user);
+            }
+        });
+
+        // Toggle Skeleton animation
+        profileViewModel.getIsloading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading) {
+                if (skeleton != null) skeleton.showSkeleton();
+            } else {
+                if (skeleton != null) skeleton.showOriginal();
+            }
+        });
+
+        profileViewModel.getErrorData().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

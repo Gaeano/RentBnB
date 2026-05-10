@@ -1,18 +1,32 @@
 package com.usc.rentbnb.ui.profile;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.bumptech.glide.Glide;
+import com.faltenreich.skeletonlayout.Skeleton;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.User;
+import com.usc.rentbnb.viewmodels.UserProfileViewModel;
 
 public class CompProfileDetailsFragment extends Fragment {
+
+    private UserProfileViewModel profileViewModel;
+    private ImageView profileImg;
+    private TextView tvHeaderName;
+    private Skeleton skeleton;
 
     @Nullable
     @Override
@@ -24,52 +38,116 @@ public class CompProfileDetailsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+
+        initViews(view);
+        setUpObservers();
+
         TextView btnEditProfile = view.findViewById(R.id.btn_edit_profile_toggle);
-        btnEditProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), ProfileDetailsEditActivity.class);
-            intent.putExtra("IS_COMPANY", true);
-            startActivity(intent);
-        });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        refreshDataFromDatabase();
-    }
-
-    private void refreshDataFromDatabase() {
-        if (getView() == null) return;
-
-        SharedPreferences mockDB = requireActivity().getSharedPreferences("MockFirebaseDB", 0);
-
-        String name = mockDB.getString("comp_name", "Bulgogi Bibbing Heredia");
-        String type = mockDB.getString("comp_type", "Boat Rentals");
-        String years = mockDB.getString("comp_years", "2 years");
-        String phone = mockDB.getString("comp_phone", "9123456780");
-        String address = mockDB.getString("comp_address", "N.s Cabanhud, Lapu-Lapu");
-        String radius = mockDB.getString("comp_radius", "45 km");
-        String coverage = mockDB.getString("comp_coverage", "Within City");
-        String areas = mockDB.getString("comp_areas", "Lakawon Islands, Sipalay, Guimaras");
-
-        TextView tvHeaderName = getView().findViewById(R.id.tv_comp_header_name);
-        if (tvHeaderName != null) tvHeaderName.setText(name);
-
-        updateRowText(R.id.field_acct_name, name);
-        updateRowText(R.id.field_business_type, type);
-        updateRowText(R.id.field_years, years);
-        updateRowText(R.id.field_comp_phone, "+63 " + phone);
-        updateRowText(R.id.field_comp_address, address);
-        updateRowText(R.id.field_radius, radius);
-        updateRowText(R.id.field_within, coverage);
-        updateRowText(R.id.field_specific_areas, areas);
-    }
-
-    private void updateRowText(int rowId, String text) {
-        View row = getView().findViewById(rowId);
-        if (row != null) {
-            TextView tvValue = row.findViewById(R.id.tv_field_value);
-            if (tvValue != null) tvValue.setText(text);
+        if (btnEditProfile != null) {
+            btnEditProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(requireActivity(), ProfileDetailsEditActivity.class);
+                intent.putExtra("IS_COMPANY", true);
+                startActivity(intent);
+            });
         }
+
+        // Trigger the network call via ViewModel
+        profileViewModel.loadUserData();
+    }
+
+    private void initViews(View view) {
+        // Ensure your XML has an ImageView with this ID for the company logo/avatar
+        profileImg = view.findViewById(R.id.iv_avatar);
+        tvHeaderName = view.findViewById(R.id.tv_comp_header_name);
+
+        // IMPORTANT: Ensure you wrap your XML layout in a SkeletonLayout with this ID
+        skeleton = view.findViewById(R.id.skeleton_comp_profile_details);
+    }
+
+    private void populateUI(User user) {
+        if (user == null) return;
+
+        // 1. Setup Header
+        String nameStr = (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) ? user.getDisplayName() : "Not Set";
+        if (tvHeaderName != null) {
+            tvHeaderName.setText(nameStr);
+        }
+
+        if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty() && profileImg != null) {
+            Glide.with(this)
+                    .load(user.getPhotoUrl())
+                    .placeholder(R.drawable.profile_display_picture)
+                    .circleCrop()
+                    .into(profileImg);
+        }
+
+        // 2. Setup Include Rows WITH LABELS
+        // Mapping the standard user fields
+        updateRowText(R.id.field_acct_name, "Account Name", nameStr);
+        updateRowText(R.id.field_comp_phone, "Phone Number", user.getPhone() != null ? user.getPhone() : "Not Set");
+
+        // Format Location Safely
+        String address = "Not Set";
+        if (user.getLocation() != null) {
+            String city = user.getLocation().getCity() != null ? user.getLocation().getCity() : "";
+            String prov = user.getLocation().getProvince() != null ? user.getLocation().getProvince() : "";
+            if (!city.isEmpty() || !prov.isEmpty()) {
+                address = city + ", " + prov;
+            }
+        }
+        updateRowText(R.id.field_comp_address, "Address", address);
+        String businessType = user.getCompanyDetails().getBusinessType();
+        String yearsOperation = user.getCompanyDetails().getYearsOfOperation();
+        // Mapping Company-Specific Fields (Placeholders until User model is updated)
+        updateRowText(R.id.field_business_type, "Business Type", businessType);
+        updateRowText(R.id.field_years, "Years in Operation", yearsOperation);
+        updateRowText(R.id.field_radius, "Operational Radius", "Not Set");
+        updateRowText(R.id.field_within, "Coverage", "Not Set");
+        updateRowText(R.id.field_specific_areas, "Specific Areas", "Not Set");
+    }
+
+    // Helper method to target the specific included XML rows, including the label
+    private void updateRowText(int rowId, String labelText, String valueText) {
+        View row = getView();
+        if (row != null) {
+            View includeLayout = row.findViewById(rowId);
+            if (includeLayout != null) {
+                // IMPORTANT: Ensure your item_profile_field.xml has a TextView with id tv_field_label
+                TextView tvLabel = includeLayout.findViewById(R.id.tv_field_label);
+                TextView tvValue = includeLayout.findViewById(R.id.tv_field_value);
+
+                if (tvLabel != null) {
+                    tvLabel.setText(labelText);
+                }
+
+                if (tvValue != null) {
+                    tvValue.setText(valueText);
+                }
+            }
+        }
+    }
+
+    private void setUpObservers() {
+        profileViewModel.getUserProfile().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                populateUI(user);
+            }
+        });
+
+        // Toggle Skeleton animation
+        profileViewModel.getIsloading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading) {
+                if (skeleton != null) skeleton.showSkeleton();
+            } else {
+                if (skeleton != null) skeleton.showOriginal();
+            }
+        });
+
+        profileViewModel.getErrorData().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

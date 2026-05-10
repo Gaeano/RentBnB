@@ -130,7 +130,9 @@ public class AuthViewModel extends ViewModel {
 
             RegisterRequest.CompanyDetails details = new RegisterRequest.CompanyDetails(
                     regData.getCompanyName(),
-                    "PENDING_UPLOAD"
+                    "PENDING_UPLOAD",
+                    regData.getBusinessType(),
+                    regData.getYearsOfOperation()
             );
             requestData.setCompanyDetails(details);
 

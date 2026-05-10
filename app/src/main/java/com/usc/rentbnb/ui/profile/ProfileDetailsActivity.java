@@ -15,6 +15,7 @@ import com.usc.rentbnb.R;
 
 public class ProfileDetailsActivity extends AppCompatActivity {
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,15 +28,9 @@ public class ProfileDetailsActivity extends AppCompatActivity {
         // 2. Apply your insets logic here to protect the "My Account" text and back button
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-
-            // Note: For top bars, using Padding instead of Margins is usually cleaner
-            // so the white background extends all the way up behind the clock!
-            v.setPadding(
-                    v.getPaddingLeft(),
-                    statusBarHeight + 16,
-                    v.getPaddingRight(),
-                    v.getPaddingBottom()
-            );
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            params.topMargin = statusBarHeight + 16;
+            v.setLayoutParams(params);
             return insets;
         });
 
@@ -52,4 +47,6 @@ public class ProfileDetailsActivity extends AppCompatActivity {
                 .replace(R.id.profile_fragment_container, fragmentToLoad)
                 .commit();
     }
+
+
 }

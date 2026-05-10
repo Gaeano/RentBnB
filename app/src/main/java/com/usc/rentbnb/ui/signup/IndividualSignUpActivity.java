@@ -308,6 +308,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
 
         authViewModel.getAuthStepCompletedLiveData().observe(this, isCompleted -> {
             if (isCompleted != null && isCompleted) {
+                loadingOverlay.setVisibility(View.GONE);
                 Toast.makeText(this, "Verification email sent to " + regData.getEmail(), Toast.LENGTH_LONG).show();
                 viewFlipper.setDisplayedChild(2);
                 updateStepper(2);

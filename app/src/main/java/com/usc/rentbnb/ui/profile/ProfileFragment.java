@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.faltenreich.skeletonlayout.Skeleton;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.auth.LoginActivity;
@@ -35,11 +36,12 @@ public class ProfileFragment extends Fragment {
     // UI Elements
     private TextView tvName, tvEmail;
     private ImageView ivAvatar;
-    private ProgressBar progressBar;
     private LinearLayout profileHeader;
     private TextView tvListingsCount, tvPurchasesCount, tvRatingValue, tvEarningsValue;
+    private Skeleton skeleton;
 
     private UserProfileViewModel profileViewModel;
+    private boolean isCompany = false;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -76,14 +78,19 @@ public class ProfileFragment extends Fragment {
         profileViewModel.getUserProfile().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 populateUI(user);
+                String userType = user.getUserType();
+                if(userType.equals("COMPANY")){
+                    isCompany = true;
+                }
             }
         });
 
+        // ADDED FEATURE: Toggle Skeleton instead of ProgressBar
         profileViewModel.getIsloading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading) {
-                progressBar.setVisibility(View.VISIBLE);
+                if (skeleton != null) skeleton.showSkeleton();
             } else {
-                progressBar.setVisibility(View.GONE);
+                if (skeleton != null) skeleton.showOriginal();
             }
         });
 
@@ -99,13 +106,15 @@ public class ProfileFragment extends Fragment {
         tvName = view.findViewById(R.id.profile_name);
         tvEmail = view.findViewById(R.id.profile_email);
         ivAvatar = view.findViewById(R.id.profile_image);
-        progressBar = view.findViewById(R.id.profile_progress_bar);
         profileHeader = view.findViewById(R.id.profile_header);
 
         tvListingsCount = view.findViewById(R.id.tv_listings_count);
         tvPurchasesCount = view.findViewById(R.id.tv_purchases_count);
         tvRatingValue = view.findViewById(R.id.tv_rating_value);
         tvEarningsValue = view.findViewById(R.id.tv_earnings_value);
+
+        // ADDED FEATURE: Map the Skeleton from your XML
+        skeleton = view.findViewById(R.id.skeleton_profile);
     }
 
     private void populateUI(User user) {
@@ -123,7 +132,7 @@ public class ProfileFragment extends Fragment {
         if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
             Glide.with(this)
                     .load(user.getPhotoUrl())
-                    .placeholder(R.drawable.userprofile)
+                    .placeholder(R.drawable.userprofile) // Updated placeholder name based on your code
                     .circleCrop() // Makes the image circular
                     .into(ivAvatar);
         }
@@ -163,9 +172,6 @@ public class ProfileFragment extends Fragment {
         if (btnEditProfile != null) {
             btnEditProfile.setOnClickListener(v -> {
                 Intent intent = new Intent(requireActivity(), ProfileDetailsActivity.class);
-
-                // TODO: Replace with actual check later (e.g., user.getAccountType().equals("COMPANY"))
-                boolean isCompany = true;
 
                 intent.putExtra("IS_COMPANY", isCompany);
                 startActivity(intent);

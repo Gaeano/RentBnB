@@ -157,14 +157,33 @@ public class User {
     public static class CompanyDetails {
         private String companyName;
         private String permitNumber;
+        private String businessType;
+        private String yearsOfOperation;
         private boolean isVerified;
 
         public CompanyDetails() {}
 
-        public CompanyDetails(String companyName, String permitNumber) {
+        public CompanyDetails(String companyName, String permitNumber, String businessType, String yearsOfOperation) {
             this.companyName = companyName;
             this.permitNumber = permitNumber;
-            this.isVerified = false;
+            this.businessType = businessType;
+            this.yearsOfOperation = yearsOfOperation;
+        }
+
+        public String getBusinessType() {
+            return businessType;
+        }
+
+        public void setBusinessType(String businessType) {
+            this.businessType = businessType;
+        }
+
+        public String getYearsOfOperation() {
+            return yearsOfOperation;
+        }
+
+        public void setYearsOfOperation(String yearsOfOperation) {
+            this.yearsOfOperation = yearsOfOperation;
         }
 
         public String getCompanyName() { return companyName; }

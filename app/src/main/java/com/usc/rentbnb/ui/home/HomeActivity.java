@@ -6,6 +6,10 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -55,6 +59,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
+    private EditText searchBar;
 
     private boolean showingRentals = true;
     private TextView tabIslands, tabRentals;
@@ -71,6 +76,10 @@ public class HomeActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private FilterCriteria lastCriteria = null;
     private ListenerRegistration chatListener;
+
+    // saerch debouncing lkogic
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +100,7 @@ public class HomeActivity extends AppCompatActivity {
 
         tabIslands = findViewById(R.id.tab_islands);
         tabRentals = findViewById(R.id.tab_rentals);
-
+        searchBar = findViewById(R.id.search_bar);
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
@@ -100,6 +109,7 @@ public class HomeActivity extends AppCompatActivity {
         setupTitleToggle();
         setupBottomNavigation(homeHeader);
         setupFilterButton();
+        setupSearchLogic();
 
         if (getIntent().getBooleanExtra("navigate_to_chat", false)) {
             navigationHelper.navigateToChat();
@@ -128,33 +138,6 @@ public class HomeActivity extends AppCompatActivity {
         checkUnreadNotifications();
         listenToUnreadChat();
 
-        EditText searchBar = findViewById(R.id.search_bar);
-        searchBar.addTextChangedListener(new android.text.TextWatcher() {
-            private android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
-            private Runnable searchRunnable;
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(android.text.Editable s) {
-                handler.removeCallbacks(searchRunnable);
-
-                searchRunnable = () -> {
-                    String query = s.toString().trim();
-                    if (showingRentals) {
-                        homeViewModel.filterIslands(query);
-                    } else {
-                        homeViewModel.filterRentals(query);
-                    }
-                };
-                handler.postDelayed(searchRunnable, 500);
-            }
-        });
-
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
             @Override
             public void onFragmentResumed(@NonNull androidx.fragment.app.FragmentManager fm, @NonNull Fragment f) {
@@ -166,6 +149,34 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
         }, false);
+    }
+
+    private void setupSearchLogic() {
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+            }
+
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString().trim();
+                searchRunnable = () -> {
+                    if (showingRentals) {
+                        homeViewModel.filterRentals(query);
+                    } else {
+                        homeViewModel.filterIslands(query);
+                    }
+                };
+
+                searchHandler.postDelayed(searchRunnable, 300);
+            }
+        });
     }
 
     private void setupTitleToggle() {
@@ -185,6 +196,13 @@ public class HomeActivity extends AppCompatActivity {
     private void switchFeed(boolean toRentals) {
         updateTabUI(toRentals);
 
+        String currentQuery = searchBar.getText().toString();
+        if (toRentals) {
+            homeViewModel.filterRentals(currentQuery);
+        } else {
+            homeViewModel.filterIslands(currentQuery);
+        }
+
         Fragment fragment = toRentals ? new RentalsFragment() : new IslandsFragment();
         getSupportFragmentManager()
                 .beginTransaction()
@@ -192,6 +210,7 @@ public class HomeActivity extends AppCompatActivity {
                 .replace(R.id.homeFeedContainer, fragment)
                 .commit();
     }
+
     private void updateTabUI(boolean isRentals) {
         showingRentals = isRentals;
 

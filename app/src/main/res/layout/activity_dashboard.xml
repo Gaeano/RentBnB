@@ -8,9 +8,6 @@
     android:background="@color/card_background"
     tools:context=".ui.dashboard.DashboardActivity">
 
-    <!-- ══════════════════════════════════════════════════════════
-         1. GLOBAL HEADER
-         ══════════════════════════════════════════════════════════ -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -24,7 +21,6 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp">
 
-            <!-- Circular profile avatar -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivProfileAvatar"
                 android:layout_width="40dp"
@@ -38,7 +34,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
-            <!-- "Dashboard" — Jost Bold -->
             <TextView
                 android:id="@+id/tvDashboardTitle"
                 android:layout_width="wrap_content"
@@ -53,7 +48,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
-            <!-- Bell icon + red badge -->
             <FrameLayout
                 android:id="@+id/flNotificationContainer"
                 android:layout_width="40dp"
@@ -71,7 +65,6 @@
                     app:tint="@color/text_dark"
                     android:contentDescription="Notifications" />
 
-                <!-- Badge "3" — Jost Bold on red circle -->
                 <TextView
                     android:id="@+id/tvNotificationBadge"
                     android:layout_width="16dp"
@@ -93,9 +86,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- ══════════════════════════════════════════════════════════
-         2. SCROLLABLE BODY
-         ══════════════════════════════════════════════════════════ -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
@@ -111,9 +101,6 @@
             android:paddingTop="16dp"
             android:paddingBottom="8dp">
 
-            <!-- ══════════════════════════════════════════════════
-                 2.1  QUICK STATS  2 × 2 GRID
-                 ══════════════════════════════════════════════════ -->
             <GridLayout
                 android:id="@+id/gridStats"
                 android:layout_width="match_parent"
@@ -124,7 +111,6 @@
                 android:rowCount="2"
                 android:useDefaultMargins="false">
 
-                <!-- ── Card 1 · Earnings ──────────────────────── -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardEarnings"
                     android:layout_width="0dp"
@@ -144,7 +130,6 @@
                         android:orientation="vertical"
                         android:padding="16dp">
 
-                        <!-- Teal icon container -->
                         <FrameLayout
                             android:layout_width="36dp"
                             android:layout_height="36dp"
@@ -157,7 +142,6 @@
                                 app:tint="@color/white" />
                         </FrameLayout>
 
-                        <!-- Value — Jost Bold -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -168,7 +152,6 @@
                             android:fontFamily="@font/jost_bold"
                             android:textStyle="bold" />
 
-                        <!-- Sub-label — Inconsolata -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -178,7 +161,6 @@
                             android:textSize="12sp"
                             android:fontFamily="@font/inconsolata" />
 
-                        <!-- Trend — Jost Bold, teal_dark -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -192,7 +174,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ── Card 2 · Pending Payouts ───────────────── -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardPayouts"
                     android:layout_width="0dp"
@@ -256,7 +237,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ── Card 3 · Active Listings ───────────────── -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardListings"
                     android:layout_width="0dp"
@@ -319,7 +299,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ── Card 4 · Overall Rating ────────────────── -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardRating"
                     android:layout_width="0dp"
@@ -384,11 +363,6 @@
 
             </GridLayout>
 
-            <!-- ══════════════════════════════════════════════════
-                 2.2  ACTION REQUIRED SECTION
-                 ══════════════════════════════════════════════════ -->
-
-            <!-- Section header -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -399,7 +373,6 @@
                 android:layout_marginBottom="10dp"
                 android:gravity="center_vertical">
 
-                <!-- Jost Bold heading -->
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -410,7 +383,6 @@
                     android:fontFamily="@font/jost_bold"
                     android:textStyle="bold" />
 
-                <!-- Inconsolata sub-label -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -421,7 +393,6 @@
 
             </LinearLayout>
 
-            <!-- Action Required card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardActionRequired"
                 android:layout_width="match_parent"
@@ -439,7 +410,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- ● NEW BOOKING REQUEST — Jost Bold on teal_light pill -->
                     <TextView
                         android:id="@+id/tvNewBookingPill"
                         android:layout_width="wrap_content"
@@ -456,7 +426,6 @@
                         android:textStyle="bold"
                         android:letterSpacing="0.04" />
 
-                    <!-- Renter info row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -479,7 +448,6 @@
                             android:orientation="vertical"
                             android:layout_marginStart="12dp">
 
-                            <!-- Name — Jost Bold -->
                             <TextView
                                 android:id="@+id/tvRenterName"
                                 android:layout_width="wrap_content"
@@ -490,7 +458,6 @@
                                 android:fontFamily="@font/jost_bold"
                                 android:textStyle="bold" />
 
-                            <!-- "wants to rent your" — Inconsolata -->
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -500,7 +467,6 @@
                                 android:fontFamily="@font/inconsolata"
                                 android:layout_marginTop="1dp" />
 
-                            <!-- Item name — Jost Bold -->
                             <TextView
                                 android:id="@+id/tvRentedItemName"
                                 android:layout_width="wrap_content"
@@ -514,7 +480,6 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Dates + Payout box — receipt_bg background -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -523,7 +488,6 @@
                         android:orientation="horizontal"
                         android:padding="12dp">
 
-                        <!-- Dates column -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -543,7 +507,6 @@
                                 android:orientation="vertical"
                                 android:layout_marginStart="8dp">
 
-                                <!-- "Dates" — Inconsolata -->
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
@@ -552,7 +515,6 @@
                                     android:textSize="11sp"
                                     android:fontFamily="@font/inconsolata" />
 
-                                <!-- Date value — Jost Bold -->
                                 <TextView
                                     android:id="@+id/tvBookingDates"
                                     android:layout_width="wrap_content"
@@ -567,7 +529,6 @@
                             </LinearLayout>
                         </LinearLayout>
 
-                        <!-- Vertical divider -->
                         <View
                             android:layout_width="1dp"
                             android:layout_height="match_parent"
@@ -575,7 +536,6 @@
                             android:layout_marginStart="8dp"
                             android:layout_marginEnd="8dp" />
 
-                        <!-- Payout column -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -595,7 +555,6 @@
                                 android:orientation="vertical"
                                 android:layout_marginStart="8dp">
 
-                                <!-- "Your payout" — Inconsolata -->
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
@@ -604,7 +563,6 @@
                                     android:textSize="11sp"
                                     android:fontFamily="@font/inconsolata" />
 
-                                <!-- Amount — Jost Bold -->
                                 <TextView
                                     android:id="@+id/tvBookingPayout"
                                     android:layout_width="wrap_content"
@@ -621,14 +579,12 @@
 
                     </LinearLayout>
 
-                    <!-- Action buttons -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
                         android:orientation="horizontal">
 
-                        <!-- Decline — outlined, teal_primary stroke -->
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnDecline"
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -644,7 +600,6 @@
                             app:strokeColor="@color/teal_primary"
                             app:strokeWidth="1.5dp" />
 
-                        <!-- Accept — filled teal_primary -->
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnAccept"
                             style="@style/Widget.MaterialComponents.Button"
@@ -664,11 +619,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ══════════════════════════════════════════════════
-                 2.3  CURRENTLY RENTED OUT SECTION
-                 ══════════════════════════════════════════════════ -->
-
-            <!-- Section header -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -679,7 +629,6 @@
                 android:layout_marginBottom="10dp"
                 android:gravity="center_vertical">
 
-                <!-- Jost Bold heading -->
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -690,7 +639,6 @@
                     android:fontFamily="@font/jost_bold"
                     android:textStyle="bold" />
 
-                <!-- "See all" — Jost Bold, teal_primary -->
                 <TextView
                     android:id="@+id/tvSeeAll"
                     android:layout_width="wrap_content"
@@ -702,12 +650,6 @@
                     android:textStyle="bold" />
 
             </LinearLayout>
-
-            <!--
-                PRODUCTION NOTE:
-                Replace the three hardcoded <include>s with a RecyclerView.
-                Status pills are themed in RentalStatusHelper.kt.
-            -->
 
             <include layout="@layout/item_rented_out"
                 android:id="@+id/itemBike"
@@ -737,9 +679,6 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- ══════════════════════════════════════════════════════════
-         3. BOTTOM NAVIGATION
-         ══════════════════════════════════════════════════════════ -->
     <include
         layout="@layout/dashboard_bottom_nav_bar"
         android:layout_width="match_parent"

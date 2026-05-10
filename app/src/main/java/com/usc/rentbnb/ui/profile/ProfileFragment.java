@@ -165,7 +165,7 @@ public class ProfileFragment extends Fragment {
                 Intent intent = new Intent(requireActivity(), ProfileDetailsActivity.class);
 
                 // TODO: Replace with actual check later (e.g., user.getAccountType().equals("COMPANY"))
-                boolean isCompany = false;
+                boolean isCompany = true;
 
                 intent.putExtra("IS_COMPANY", isCompany);
                 startActivity(intent);

@@ -42,20 +42,6 @@
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_camera"
-                        app:tint="@android:color/white" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="EDIT"
-                        android:textColor="@android:color/white"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -75,17 +61,6 @@
                 android:textStyle="bold"
                 android:textColor="@color/black" />
 
-                <EditText
-                    android:id="@+id/et_comp_header_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="36dp"
-                    android:visibility="gone"
-                    android:background="@drawable/bg_edittext_outline"
-                    android:paddingHorizontal="10dp"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"
-                    android:inputType="textPersonName" />
 
                 <TextView
                     android:id="@+id/btn_edit_profile_toggle"
@@ -120,28 +95,6 @@
                 <include layout="@layout/item_profile_field" android:id="@+id/field_comp_phone" />
                 <include layout="@layout/item_profile_field" android:id="@+id/field_comp_address" />
 
-                <TextView
-                    android:id="@+id/btn_edit_comp_details"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="EDIT DETAILS ✎"
-                    android:textAlignment="viewEnd"
-                    android:textColor="#9E9E9E"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"/>
-
-                <TextView
-                    android:id="@+id/btn_confirm_comp_details"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="CONFIRM"
-                    android:textAlignment="viewEnd"
-                    android:textColor="#5BC8D3"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    android:layout_marginTop="16dp"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -172,93 +125,6 @@
                 <include layout="@layout/item_profile_field" android:id="@+id/field_radius" />
                 <include layout="@layout/item_profile_field" android:id="@+id/field_within" />
                 <include layout="@layout/item_profile_field" android:id="@+id/field_specific_areas" />
-
-                <TextView
-                    android:id="@+id/btn_edit_service_details"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="EDIT DETAILS ✎"
-                    android:textAlignment="viewEnd"
-                    android:textColor="#9E9E9E"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"/>
-
-                <TextView
-                    android:id="@+id/btn_confirm_service_details"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="CONFIRM"
-                    android:textAlignment="viewEnd"
-                    android:textColor="#5BC8D3"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    android:layout_marginTop="16dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="#F5F5F5"
-            android:layout_marginBottom="40dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PASSWORD"
-                        android:textColor="#9E9E9E"
-                        android:textStyle="bold"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/btn_change_password"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="Change Password ✎"
-                        android:textColor="@color/black"
-                        android:textSize="12sp" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:id="@+id/password_expansion_area"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="16dp"
-                    android:visibility="gone">
-
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Password" android:textSize="12sp"/>
-                    <EditText android:layout_width="match_parent" android:layout_height="40dp" android:background="@drawable/bg_edittext_outline" android:hint="Enter Password" android:paddingHorizontal="12dp" android:layout_marginBottom="12dp" android:textSize="14sp"/>
-
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="New Password" android:textSize="12sp"/>
-                    <EditText android:layout_width="match_parent" android:layout_height="40dp" android:background="@drawable/bg_edittext_outline" android:hint="Re-enter Password" android:paddingHorizontal="12dp" android:layout_marginBottom="12dp" android:textSize="14sp"/>
-
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Confirm Password" android:textSize="12sp"/>
-                    <EditText android:layout_width="match_parent" android:layout_height="40dp" android:background="@drawable/bg_edittext_outline" android:hint="Re-enter Password" android:paddingHorizontal="12dp" android:layout_marginBottom="16dp" android:textSize="14sp"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="CONFIRM"
-                        android:textStyle="bold"
-                        android:textColor="#5BC8D3"
-                        android:textAlignment="viewEnd"/>
-                </LinearLayout>
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

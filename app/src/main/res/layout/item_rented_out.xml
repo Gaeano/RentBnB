@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    RentBnb — item_rented_out.xml
+    RecyclerView item for "Currently rented out" list.
+
+    Font rules:
+      Item name         → @font/jost_bold    (primary text)
+      "Rented by …"     → @font/inconsolata  (secondary)
+      Status pill text  → @font/inconsolata  (set in RentalStatusHelper.kt)
+
+    Status pill backgrounds (set programmatically):
+      RETURNING_SOON  → bg_pill_gray   (#EFEFEF)  text @color/text_dark_grey
+      RETURNING_TODAY → bg_pill_orange (#FEF3C7)  text @color/strength_fair  (#FFA500)
+      OVERDUE         → bg_pill_red    (#FEE2E2)  text @color/strength_weak  (#FF4B4B)
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardRentedItem"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Rounded-square product thumbnail -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivItemThumbnail"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            app:shapeAppearance="@style/RoundedSquareImageView"
+            tools:src="@drawable/ic_snow"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Item name / renter / status pill column -->
+        <LinearLayout
+            android:id="@+id/llItemInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toEndOf="@id/ivItemThumbnail"
+            app:layout_constraintEnd_toStartOf="@id/ivChevron"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Item name — Jost Bold, text_dark -->
+            <TextView
+                android:id="@+id/tvItemName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_dark"
+                android:textSize="14sp"
+                android:fontFamily="@font/jost_bold"
+                android:textStyle="bold"
+                tools:text="Trail Mountain Bike" />
+
+            <!-- "Rented by …" — Inconsolata, text_grey -->
+            <TextView
+                android:id="@+id/tvRentedBy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/text_grey"
+                android:textSize="12sp"
+                android:fontFamily="@font/inconsolata"
+                tools:text="Rented by James Okafor" />
+
+            <!--
+                STATUS PILL
+                Set entirely from code via RentalStatusHelper.kt:
+                    RentalStatusHelper.applyStatus(binding.tvStatusPill, item.status, label, ctx)
+
+                Background drawables → res/drawable/:
+                  bg_pill_gray.xml    solid #EFEFEF  corners 20dp
+                  bg_pill_orange.xml  solid #FEF3C7  corners 20dp
+                  bg_pill_red.xml     solid #FEE2E2  corners 20dp
+
+                Text colors from colors.xml:
+                  RETURNING_SOON  → @color/text_dark_grey  (#616161)
+                  RETURNING_TODAY → @color/strength_fair   (#FFA500)
+                  OVERDUE         → @color/strength_weak   (#FF4B4B)
+            -->
+            <TextView
+                android:id="@+id/tvStatusPill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/weather_info_bg"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:textSize="11sp"
+                android:fontFamily="@font/inconsolata"
+                android:textStyle="bold"
+                tools:text="Returns in 2 days"
+                tools:textColor="@color/text_dark_grey" />
+
+        </LinearLayout>
+
+        <!-- Chevron — gray, vertically centred -->
+        <ImageView
+            android:id="@+id/ivChevron"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_chevron_right"
+            app:tint="@color/indicator_inactive"
+            android:contentDescription="View details"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

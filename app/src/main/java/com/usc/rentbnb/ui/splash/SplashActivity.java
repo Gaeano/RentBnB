@@ -66,8 +66,10 @@ public class SplashActivity extends AppCompatActivity {
                 }
                 finish();
             });
-
         } else {
+            if (currentUser != null) {
+                auth.signOut();
+            }
             startActivity(new Intent(SplashActivity.this, OnboardingActivity.class));
             finish();
         }

@@ -181,7 +181,7 @@ public class OnboardingActivity extends AppCompatActivity {
             isEmailVerified = user.isEmailVerified();
 
             if (!isEmailVerified){
-                Intent intent = new Intent(OnboardingActivity.this, IndividualSignUpActivity.class);
+                Intent intent = new Intent(OnboardingActivity.this, verifyAndForgetActivity.class);
                 intent.putExtra("FRAGMENT_MODE", "VERIFY_EMAIL");
                 startActivity(intent);
             } else {

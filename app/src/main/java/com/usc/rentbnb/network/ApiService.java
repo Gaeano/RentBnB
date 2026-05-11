@@ -3,11 +3,14 @@ package com.usc.rentbnb.network;
 import com.usc.rentbnb.models.AuthResponse;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
+import com.usc.rentbnb.models.FAQ;
 import com.usc.rentbnb.models.IslandResponse;
 import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.RegisterRequest;
 import com.usc.rentbnb.models.WeatherResponse;
+
+import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -59,4 +62,17 @@ public interface ApiService {
 
     @DELETE("notifications/{id}")
     Call<ResponseBody> deleteNotification(@Path("id") String notificationId);
+
+    // FAQ API
+    @GET("users/me/faqs")
+    Call<List<FAQ>> getDefaultFaqs();
+
+    @POST("users/me/faqs")
+    Call<FAQ> addDefaultFaq(@Body FAQ faq);
+
+    @PATCH("users/me/faqs/{id}")
+    Call<FAQ> updateDefaultFaq(@Path("id") String faqId, @Body FAQ faq);
+
+    @DELETE("users/me/faqs/{id}")
+    Call<ResponseBody> deleteDefaultFaq(@Path("id") String faqId);
 }

@@ -12,9 +12,20 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.FAQ;
+import com.usc.rentbnb.network.ApiClient;
+import com.usc.rentbnb.viewmodels.AddListingViewModel;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  order:
@@ -39,12 +50,15 @@ public class AddListingActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private int currentStep = 1;
+    private AddListingViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_add_listing);
+
+        viewModel = new ViewModelProvider(this).get(AddListingViewModel.class);
 
         View mainView = findViewById(R.id.main);
         if (mainView != null) {
@@ -61,6 +75,24 @@ public class AddListingActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             mainView.post(() -> navigateToStep(1, false));
         }
+
+        fetchDefaultFaqs();
+    }
+
+    private void fetchDefaultFaqs() {
+        ApiClient.getApiService().getDefaultFaqs().enqueue(new Callback<List<FAQ>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<FAQ>> call, @NonNull Response<List<FAQ>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    viewModel.faqs = response.body();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<FAQ>> call, @NonNull Throwable t) {
+                // Silently fail, just means no default FAQs
+            }
+        });
     }
 
     public void goNextStep() {

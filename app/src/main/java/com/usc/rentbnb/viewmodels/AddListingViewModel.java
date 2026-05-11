@@ -2,6 +2,8 @@ package com.usc.rentbnb.viewmodels;
 
 import androidx.lifecycle.ViewModel;
 
+import com.usc.rentbnb.models.FAQ;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,4 +20,6 @@ public class AddListingViewModel extends ViewModel {
     public String coverImageUrl = "";
     public List<String> imageUris = new ArrayList<>();
     public String island = "";
+    @SuppressWarnings("unused")
+    public List<FAQ> faqs = new ArrayList<>();
 }

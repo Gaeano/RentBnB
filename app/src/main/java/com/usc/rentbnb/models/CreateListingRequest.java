@@ -12,8 +12,10 @@ public class CreateListingRequest {
     private List<String> paymentMethods;
     private List<String> suggestedActivities;
     private List<String> imageUrls;
+    @SuppressWarnings("unused")
+    private final List<FAQ> faqs;
 
-    public CreateListingRequest(String productName, String description, String category, String island, double price, String priceUnit, List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls) {
+    public CreateListingRequest(String productName, String description, String category, String island, double price, String priceUnit, List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls, List<FAQ> faqs) {
             this.productName = productName;
             this.description = description;
             this.category = category;
@@ -23,6 +25,11 @@ public class CreateListingRequest {
             this.paymentMethods = paymentMethods;
             this.suggestedActivities = suggestedActivities;
             this.imageUrls = imageUrls;
+            this.faqs = faqs;
+    }
+
+    public List<FAQ> getFaqs() {
+        return faqs;
     }
 
 }

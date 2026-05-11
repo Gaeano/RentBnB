@@ -134,7 +134,8 @@ public class ListingSummaryFragment extends Fragment {
                 viewModel.priceUnit,
                 viewModel.paymentMethods,
                 viewModel.suggestedActivities,
-                viewModel.imageUris
+                viewModel.imageUris,
+                viewModel.faqs
         );
 
         ApiClient.getApiService().createListing(createListingRequest).enqueue(new Callback<CreateListingResponse>() {

@@ -131,6 +131,7 @@ public class ProfileFragment extends Fragment {
         LinearLayout menuProfileDetail = view.findViewById(R.id.menu_profile_detail);
         LinearLayout menuFavorites = view.findViewById(R.id.menu_favorites);
         LinearLayout menuHistory = view.findViewById(R.id.menu_history);
+        LinearLayout menuManageFaqs = view.findViewById(R.id.menu_manage_faqs);
         LinearLayout menuHelpCenter = view.findViewById(R.id.menu_help_center);
         LinearLayout menuAppSettings = view.findViewById(R.id.menu_app_settings);
         LinearLayout menuLogout = view.findViewById(R.id.menu_logout);
@@ -149,6 +150,12 @@ public class ProfileFragment extends Fragment {
         menuHistory.setOnClickListener(v -> {
             //replace with navigation logic (prob fragment again)
             Intent intent = new Intent(requireActivity(), HistoryActivity.class);
+            startActivity(intent);
+        });
+
+        menuManageFaqs.setOnClickListener(v -> {
+            Log.d("ProfileFragment", "Manage FAQs button clicked");
+            Intent intent = new Intent(requireActivity(), ManageFaqsActivity.class);
             startActivity(intent);
         });
 

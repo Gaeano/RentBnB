@@ -20,7 +20,8 @@
             android:orientation="vertical"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:paddingBottom="12dp">
+            android:paddingBottom="12dp"
+            android:background="@color/white">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -42,39 +43,44 @@
                         android:layout_height="wrap_content"
                         android:text="Explore"
                         android:textColor="@android:color/black"
-                        android:fontFamily="@font/inconsolata"
-                        android:textSize="14sp"
-                        android:textStyle="bold|italic" />
+                        android:fontFamily="@font/jost_bold"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
 
                     <LinearLayout
-                        android:id="@+id/feed_title_row"
+                        android:id="@+id/feed_toggle_row"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackgroundBorderless">
+                        android:gravity="center_vertical">
 
                         <TextView
-                            android:id="@+id/feed_title"
+                            android:id="@+id/tab_rentals"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Islands"
+                            android:background="@drawable/bg_tab_active"
+                            android:text="RENTALS"
                             android:textColor="@color/teal_primary"
-                            android:textSize="32sp"
+                            android:textSize="12sp"
                             android:textStyle="bold"
-                            android:fontFamily="@font/jost_bold" />
+                            android:fontFamily="@font/jost_bold"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="6dp" />
 
-                        <ImageView
-                            android:id="@+id/feed_title_chevron"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_marginStart="6dp"
-                            android:src="@drawable/ic_back"
-                            android:rotation="-90"
-                            android:alpha="0.6"
-                            app:tint="@color/teal_primary" />
+                        <TextView
+                            android:id="@+id/tab_islands"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:background="@android:color/transparent"
+                            android:text="ISLANDS"
+                            android:textColor="@color/text_grey"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/jost_bold"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="6dp" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -95,7 +101,18 @@
                         android:layout_height="26dp"
                         android:layout_gravity="center"
                         android:alpha="0.9"
+                        app:tint="@color/teal_primary"
                         android:src="@drawable/ic_notifications" />
+
+                    <ImageView
+                        android:id="@+id/notification_badge"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="13dp"
+                        android:layout_marginEnd="13dp"
+                        android:background="@drawable/badge_dot"
+                        android:visibility="gone" />
                 </FrameLayout>
 
                 <FrameLayout
@@ -117,31 +134,71 @@
                         app:tint="@color/teal_primary"
                         android:src="@drawable/ic_sun" />
                 </FrameLayout>
+
             </RelativeLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/search_bar_container"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="14dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="3dp"
-                app:cardBackgroundColor="#F9F9F9">
+                android:layout_height="56dp"
+                android:layout_marginTop="10dp"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#EEEEEE">
 
-                <EditText
-                    android:id="@+id/search_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@android:color/transparent"
-                    android:drawableStart="@drawable/ic_search"
-                    android:drawablePadding="12dp"
-                    android:hint="Search islands, rentals…"
-                    android:fontFamily="@font/inconsolata"
-                    android:inputType="text"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:textColorHint="#BCBCBC"
-                    android:textSize="14sp" />
+                <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="6dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_toStartOf="@id/filter_button"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_search"
+                            app:tint="@color/black" />
+
+                        <EditText
+                            android:id="@+id/search_bar"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@null"
+                            android:hint="Find islands, rentals..."
+                            android:textColorHint="@color/text_grey"
+                            android:textSize="16sp"
+                            android:inputType="text"
+                            android:fontFamily="@font/inconsolata" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/filter_button"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/circular_light_bg"
+                        android:backgroundTint="@color/white"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_filter"
+                            app:tint="@color/black" />
+                    </FrameLayout>
+
+                </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
             <HorizontalScrollView
@@ -149,7 +206,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:scrollbars="none">
+                android:scrollbars="none"
+                android:clipToPadding="false"
+                android:paddingEnd="20dp">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -157,69 +216,73 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/chip_popular"
+                        android:id="@+id/chip_near_you"
                         android:layout_width="wrap_content"
-                        android:layout_height="34dp"
+                        android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
-                        android:background="@drawable/chip_background_selected"
-                        android:text="Popular"
-                        android:textColor="@android:color/white"
-                        android:textSize="13sp"
+                        android:background="@drawable/chip_background"
+                        android:text="Near You"
+                        android:textColor="@color/teal_primary"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/jost_bold"
                         android:gravity="center"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp" />
+                        android:paddingEnd="16dp"
+                        android:drawablePadding="4dp"
+                        app:drawableStartCompat="@drawable/ic_near"
+                        android:drawableTint="@color/teal_primary"/>
 
                     <TextView
                         android:id="@+id/chip_trending"
                         android:layout_width="wrap_content"
-                        android:layout_height="34dp"
+                        android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/chip_background"
                         android:text="Trending"
-                        android:textColor="#5F5F5F"
-                        android:textSize="13sp"
+                        android:textColor="@color/teal_primary"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/jost_bold"
                         android:gravity="center"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp" />
+                        android:paddingEnd="16dp"
+                        android:drawablePadding="4dp"
+                        app:drawableStartCompat="@drawable/ic_trending"
+                        android:drawableTint="@color/teal_primary"/>
 
                     <TextView
                         android:id="@+id/chip_new"
                         android:layout_width="wrap_content"
-                        android:layout_height="34dp"
+                        android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/chip_background"
                         android:text="New"
-                        android:textColor="#5F5F5F"
-                        android:textSize="13sp"
+                        android:textColor="@color/teal_primary"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/jost_bold"
                         android:gravity="center"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp" />
+                        android:paddingEnd="16dp"
+                        android:drawablePadding="4dp"
+                        app:drawableStartCompat="@drawable/ic_new"
+                        android:drawableTint="@color/teal_primary"/>
 
                     <TextView
-                        android:id="@+id/chip_label1"
+                        android:id="@+id/chip_top_rated"
                         android:layout_width="wrap_content"
-                        android:layout_height="34dp"
+                        android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/chip_background"
-                        android:text="Label"
-                        android:textColor="#5F5F5F"
-                        android:textSize="13sp"
+                        android:text="Top Rated"
+                        android:textColor="@color/teal_primary"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/jost_bold"
                         android:gravity="center"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp" />
+                        android:paddingEnd="16dp"
+                        android:drawablePadding="4dp"
+                        app:drawableStartCompat="@drawable/ic_top_rated"
+                        android:drawableTint="@color/teal_primary"/>
 
-                    <TextView
-                        android:id="@+id/chip_label2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="34dp"
-                        android:layout_marginEnd="8dp"
-                        android:background="@drawable/chip_background"
-                        android:text="Label"
-                        android:textColor="#5F5F5F"
-                        android:textSize="13sp"
-                        android:gravity="center"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp" />
                 </LinearLayout>
             </HorizontalScrollView>
         </LinearLayout>

@@ -1,19 +1,17 @@
 package com.usc.rentbnb.ui.profile;
 
-import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.net.LinkAddress;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,14 +20,28 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+import com.faltenreich.skeletonlayout.Skeleton;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.history.HistoryActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
+import com.usc.rentbnb.viewmodels.UserProfileViewModel;
+
+import java.util.Locale;
 
 public class ProfileFragment extends Fragment {
 
-    private TextView[] filterChips;
+    // UI Elements
+    private TextView tvName, tvEmail;
+    private ImageView ivAvatar;
+    private LinearLayout profileHeader;
+    private TextView tvListingsCount, tvPurchasesCount, tvRatingValue, tvEarningsValue;
+    private Skeleton skeleton;
+
+    private UserProfileViewModel profileViewModel;
+    private boolean isCompany = false;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -38,7 +50,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment (Make sure you rename your XML file to fragment_profile!)
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
@@ -46,109 +57,96 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        LinearLayout profileHeader = view.findViewById(R.id.profile_header);
+        profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+
+        initViews(view);
+        setupObservers();
 
         ViewCompat.setOnApplyWindowInsetsListener(profileHeader, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-            v.setPadding(
-                    v.getPaddingLeft(),
-                    statusBarHeight + 8,
-                    v.getPaddingRight(),
-                    v.getPaddingBottom()
-            );
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            params.topMargin = statusBarHeight + 16;
+            v.setLayoutParams(params);
             return insets;
         });
+        setupClickListeners(view);
 
-        setupFilterChips(view);
-
-        setClickListenersMenu(view);
-
+        profileViewModel.loadUserData();
     }
 
-    private void setupFilterChips(View view) {
-        // Notice we are calling view.findViewById() now
-        TextView chipCamera = view.findViewById(R.id.chip_camera);
-        TextView chipSnorkel = view.findViewById(R.id.chip_snorkel);
-        TextView chipMotorcycle = view.findViewById(R.id.chip_motorcycle);
-        TextView chipBike = view.findViewById(R.id.chip_bike);
-        TextView chipLabel = view.findViewById(R.id.chip_label);
-
-        filterChips = new TextView[]{chipCamera, chipSnorkel, chipMotorcycle, chipBike, chipLabel};
-
-        for (TextView chip : filterChips) {
-            if (chip != null) {
-                chip.setOnTouchListener((v, event) -> {
-                    TextView clickedChip = (TextView) v;
-
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            clickedChip.animate().scaleX(0.90f).scaleY(0.90f).setDuration(100).start();
-                            break;
-
-                        case MotionEvent.ACTION_UP:
-                            clickedChip.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start();
-                            handleChipSelection(clickedChip);
-                            v.performClick();
-                            break;
-
-                        case MotionEvent.ACTION_CANCEL:
-                            clickedChip.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start();
-                            break;
-                    }
-                    return true;
-                });
-            }
-        }
-    }
-
-    private void handleChipSelection(TextView selectedChip) {
-        if (selectedChip.getCurrentTextColor() == Color.WHITE) {
-            return;
-        }
-
-        for (TextView chip : filterChips) {
-            if (chip != null && chip != selectedChip) {
-                chip.setBackgroundResource(R.drawable.chip_background_teal);
-
-                if (chip.getCurrentTextColor() != Color.BLACK) {
-                    ValueAnimator colorAnim = ValueAnimator.ofArgb(chip.getCurrentTextColor(), Color.BLACK);
-                    colorAnim.setDuration(200);
-                    colorAnim.addUpdateListener(animator -> chip.setTextColor((int) animator.getAnimatedValue()));
-                    colorAnim.start();
+    private void setupObservers() {
+        profileViewModel.getUserProfile().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                populateUI(user);
+                String userType = user.getUserType();
+                if(userType.equals("COMPANY")){
+                    isCompany = true;
                 }
             }
-        }
+        });
 
-        selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
+        // ADDED FEATURE: Toggle Skeleton instead of ProgressBar
+        profileViewModel.getIsloading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading) {
+                if (skeleton != null) skeleton.showSkeleton();
+            } else {
+                if (skeleton != null) skeleton.showOriginal();
+            }
+        });
 
-        ValueAnimator colorAnimation = ValueAnimator.ofArgb(selectedChip.getCurrentTextColor(), Color.WHITE);
-        colorAnimation.setDuration(200);
-        colorAnimation.addUpdateListener(animator -> selectedChip.setTextColor((int) animator.getAnimatedValue()));
-        colorAnimation.start();
+        profileViewModel.getErrorData().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private void setClickListenersMenu(View view){
-        LinearLayout menuProfileDetail = view.findViewById(R.id.menu_profile_detail);
-        LinearLayout menuFavorites = view.findViewById(R.id.menu_favorites);
+    private void initViews(View view) {
+        // Map the UI elements
+        tvName = view.findViewById(R.id.profile_name);
+        tvEmail = view.findViewById(R.id.profile_email);
+        ivAvatar = view.findViewById(R.id.profile_image);
+        profileHeader = view.findViewById(R.id.profile_header);
+
+        tvListingsCount = view.findViewById(R.id.tv_listings_count);
+        tvPurchasesCount = view.findViewById(R.id.tv_purchases_count);
+        tvRatingValue = view.findViewById(R.id.tv_rating_value);
+        tvEarningsValue = view.findViewById(R.id.tv_earnings_value);
+
+        // ADDED FEATURE: Map the Skeleton from your XML
+        skeleton = view.findViewById(R.id.skeleton_profile);
+    }
+
+    private void populateUI(User user) {
+        tvName.setText(user.getDisplayName() != null ? user.getDisplayName() : "N/A");
+        tvEmail.setText(user.getEmail() != null ? user.getEmail() : "N/A");
+
+        tvRatingValue.setText(String.format(Locale.getDefault(), "%.1f", user.getRating()));
+        tvEarningsValue.setText(String.format(Locale.getDefault(), "P%.1f", user.getTotalEarnings()));
+
+        // Placeholders for now
+        tvListingsCount.setText("0");
+        tvPurchasesCount.setText("0");
+
+        // Bind the image using Glide
+        if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
+            Glide.with(this)
+                    .load(user.getPhotoUrl())
+                    .placeholder(R.drawable.userprofile) // Updated placeholder name based on your code
+                    .circleCrop() // Makes the image circular
+                    .into(ivAvatar);
+        }
+    }
+
+    private void setupClickListeners(View view) {
         LinearLayout menuHistory = view.findViewById(R.id.menu_history);
         LinearLayout menuManageFaqs = view.findViewById(R.id.menu_manage_faqs);
         LinearLayout menuHelpCenter = view.findViewById(R.id.menu_help_center);
         LinearLayout menuAppSettings = view.findViewById(R.id.menu_app_settings);
         LinearLayout menuLogout = view.findViewById(R.id.menu_logout);
-
-
-        menuProfileDetail.setOnClickListener(v -> {
-            //replace with navigation logic (prob fragment again)
-            Log.d("ProfileFragment", "Profile Detail button clicked");
-        });
-
-        menuFavorites.setOnClickListener(v -> {
-            //replace with navigation logic (prob fragment again)
-            Log.d("ProfileFragment", "Favorites button clicked");
-        });
+        View btnEditProfile = view.findViewById(R.id.menu_profile_detail);
 
         menuHistory.setOnClickListener(v -> {
-            //replace with navigation logic (prob fragment again)
             Intent intent = new Intent(requireActivity(), HistoryActivity.class);
             startActivity(intent);
         });
@@ -160,12 +158,10 @@ public class ProfileFragment extends Fragment {
         });
 
         menuHelpCenter.setOnClickListener(v -> {
-            //replace with navigation logic (prob fragment again)
             Log.d("ProfileFragment", "Help Center button clicked");
         });
 
         menuAppSettings.setOnClickListener(v -> {
-            //replace with navigation logic (prob fragment again)
             Log.d("ProfileFragment", "App Settings button clicked");
         });
 
@@ -179,9 +175,18 @@ public class ProfileFragment extends Fragment {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
+
+        if (btnEditProfile != null) {
+            btnEditProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(requireActivity(), ProfileDetailsActivity.class);
+
+                intent.putExtra("IS_COMPANY", isCompany);
+                startActivity(intent);
+            });
+        }
     }
 
-    private void clearRememberMeData(){
+    private void clearRememberMeData() {
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("RentBnBPrefs", requireActivity().MODE_PRIVATE);
         SharedPreferences.Editor edit = sharedPreferences.edit();
         edit.putBoolean("IS_REMEMBERED", false);

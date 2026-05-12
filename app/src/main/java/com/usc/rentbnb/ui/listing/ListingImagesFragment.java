@@ -79,10 +79,10 @@ public class ListingImagesFragment extends Fragment {
 
         btnContinue.setOnClickListener(v -> {
             AddListingViewModel viewModel = new ViewModelProvider(requireActivity()).get(AddListingViewModel.class);
-            viewModel.imageUris.clear();
+            viewModel.currentDraft().imageUris.clear();
 
             if (selectedImages.containsKey(R.id.coverPhotoSlot)) {
-                viewModel.imageUris.add(selectedImages.get(R.id.coverPhotoSlot).toString());
+                viewModel.currentDraft().imageUris.add(selectedImages.get(R.id.coverPhotoSlot).toString());
             }
 
             int[] otherSlots = {
@@ -93,7 +93,7 @@ public class ListingImagesFragment extends Fragment {
 
             for (int slot : otherSlots) {
                 if (selectedImages.containsKey(slot)) {
-                    viewModel.imageUris.add(selectedImages.get(slot).toString());
+                    viewModel.currentDraft().imageUris.add(selectedImages.get(slot).toString());
                 }
             }
 
@@ -196,7 +196,7 @@ public class ListingImagesFragment extends Fragment {
     private void restoreImagesFromViewModel() {
         AddListingViewModel viewModel = new androidx.lifecycle.ViewModelProvider(requireActivity()).get(AddListingViewModel.class);
 
-        if (viewModel.imageUris == null || viewModel.imageUris.isEmpty()) {
+        if (viewModel.currentDraft().imageUris == null || viewModel.currentDraft().imageUris.isEmpty()) {
             return;
         }
 
@@ -207,8 +207,8 @@ public class ListingImagesFragment extends Fragment {
                 R.id.photoSlot5
         };
 
-        for (int i = 0; i < viewModel.imageUris.size() && i < allSlots.length; i++) {
-            Uri uri = Uri.parse(viewModel.imageUris.get(i));
+        for (int i = 0; i < viewModel.currentDraft().imageUris.size() && i < allSlots.length; i++) {
+            Uri uri = Uri.parse(viewModel.currentDraft().imageUris.get(i));
             int slotId = allSlots[i];
 
             selectedImages.put(slotId, uri);

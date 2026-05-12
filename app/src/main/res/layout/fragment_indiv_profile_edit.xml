@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="32dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="0dp">
+                <ImageView android:id="@+id/iv_edit_avatar" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:background="#E0E0E0" />
+            </androidx.cardview.widget.CardView>
+
+        </RelativeLayout>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Full Name*" android:textColor="#757575" android:textSize="12sp" />
+        <EditText android:id="@+id/et_edit_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Bulgogi Bibbing Heredia" android:textColor="@color/black" android:textSize="16sp" android:layout_marginBottom="16dp" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Email" android:textColor="#757575" android:textSize="12sp" />
+        <TextView android:id="@+id/tv_edit_email" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="amazingGrace@gmail.com" android:textColor="#9E9E9E" android:textSize="16sp" android:layout_marginBottom="24dp" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Phone Number*" android:textColor="#757575" android:textSize="12sp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="+63 " android:textColor="@color/black" android:textSize="16sp" />
+            <EditText
+                android:id="@+id/et_edit_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="9123456780"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:inputType="phone"
+                android:paddingVertical="8dp"
+                android:maxLength="10"
+                android:digits="0123456789" />        </LinearLayout>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Address (Optional)" android:textColor="#757575" android:textSize="12sp" />
+        <EditText android:id="@+id/et_edit_address" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Canada, Vancouver" android:textColor="@color/black" android:textSize="16sp" android:layout_marginBottom="32dp" />
+
+        <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btn_save_profile"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="#006970"
+            app:cardElevation="0dp"
+            android:enabled="false"
+            android:alpha="0.5">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="Save" android:textColor="@android:color/white" android:textSize="16sp" android:textStyle="bold" />
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/btn_change_password"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_btn_outline"
+            android:gravity="center"
+            android:text="Change Password"
+            android:textColor="#006970"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</ScrollView>

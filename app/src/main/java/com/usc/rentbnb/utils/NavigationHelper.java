@@ -13,6 +13,7 @@ import com.usc.rentbnb.R;
 import com.usc.rentbnb.ui.chat.ChatFragment;
 import com.usc.rentbnb.ui.favorites.FavoritesFragment;
 import com.usc.rentbnb.ui.home.IslandsFragment;
+import com.usc.rentbnb.ui.home.RentalsFragment;
 import com.usc.rentbnb.ui.profile.ProfileFragment;
 
 public class NavigationHelper {
@@ -24,7 +25,7 @@ public class NavigationHelper {
 
     private ImageView navHome, navFavorites, navBookings, navProfile;
     private View dotHome, dotFavorites, dotBookings, dotProfile;
-    private final Fragment islandsFragment = new IslandsFragment();
+    private final Fragment rentalsFragment = new RentalsFragment();
     private final Fragment favoritesFragment = new FavoritesFragment();
 
     public NavigationHelper(AppCompatActivity activity, int containerId, View homeHeader) {
@@ -49,7 +50,7 @@ public class NavigationHelper {
     }
     private void setOnClickListeners() {
         activity.findViewById(R.id.navHome).setOnClickListener(v -> {
-             navigate (islandsFragment, navHome, dotHome, true);
+             navigate (rentalsFragment, navHome, dotHome, true);
         });
 
         activity.findViewById(R.id.navFavorites).setOnClickListener(v -> {
@@ -112,4 +113,5 @@ public class NavigationHelper {
     public void navigateToChat() {
         navigate(new ChatFragment(), navBookings, dotBookings, false);
     }
+
 }

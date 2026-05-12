@@ -12,14 +12,29 @@
     <color name="white">#FAFAFA</color>
     <color name="black">#000000</color>
     <color name="hint_color">#808080</color>
+    <color name="favorite_color">#FF6B81</color>
 
     <!-- Indicators -->
     <color name="indicator_active">#3DCFCF</color>
     <color name="indicator_inactive">#C8E6E6</color>
+    <color name="tab_indicator">#CCFCFC</color>
 
     <!-- System -->
     <color name="colorPrimary">#3DCFCF</color>
     <color name="colorPrimaryDark">#29AAAA</color>
     <color name="colorAccent">#3DCFCF</color>
+
+
+    <color name="card_background">#F8F8F8</color>
+    <color name="text_dark_grey">#616161</color>
+    <color name="divider_color">#E0E0E0</color>
+    <color name="receipt_bg">#F5F5F5</color>
+
+    <!-- Password Strength Colors -->
+    <color name="strength_weak">#FF4B4B</color>
+    <color name="strength_fair">#FFA500</color>
+    <color name="strength_good">#3DCFCF</color>
+    <color name="strength_strong">#29AAAA</color>
+
 
 </resources>

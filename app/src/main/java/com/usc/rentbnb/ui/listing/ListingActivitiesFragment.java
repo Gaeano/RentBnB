@@ -23,13 +23,15 @@ public class ListingActivitiesFragment extends Fragment {
     private AddListingViewModel viewModel;
 
     private static final String[] ACTIVITIES = {
-            "Swimming", "Snorkeling", "Scuba Diving",
-            "Canyoneering", "Cliff Jumping", "Island Hopping",
-            "Fishing", "Surfing", "Kayaking",
-            "Paddleboarding", "Whale Watching", "Biking",
-            "Hiking", "Running", "Spelunking",
-            "Camping", "Photography", "Bird Watching",
-            "Horseback Riding", "ATV / Off-road"
+            "Island Hopping tours", "Sunset / Sunrise cruising", "Dolphin or whale watching",
+            "Sandbar picnics and lounging", "Deep-sea fishing", "Private cove exploration",
+            "Mangrove forest touring", "Hidden lagoon exploring", "Coastal sightseeing",
+            "Wave surfing / Kite surfing", "Wakeboarding", "Coral reef snorkeling",
+            "Freediving / Scuba diving", "Sea turtle swimming", "Underwater photography / videography",
+            "Shipwreck exploring", "Coastal road tripping", "Mountain viewpoint chasing",
+            "Waterfall trekking & hiking", "Local food and culture tours", "Off-road trail riding",
+            "Beach-hopping the coastline", "Overnight beach camping", "Beachfront BBQs and grilling",
+            "Stargazing", "Bonfire gatherings", "Sunset beach lounging"
     };
 
     private final List<Integer> selectedActivities = new ArrayList<>();
@@ -51,11 +53,11 @@ public class ListingActivitiesFragment extends Fragment {
         buildActivityChips(chipContainer);
 
         view.findViewById(R.id.btnContinue).setOnClickListener(v -> {
-            List<String> selectedActivities = new ArrayList<>();
+            List<String> names = new ArrayList<>();
             for (int i : this.selectedActivities) {
-                selectedActivities.add(ACTIVITIES[i]);
+                names.add(ACTIVITIES[i]);
             }
-            viewModel.suggestedActivities = selectedActivities;
+            viewModel.currentDraft().suggestedActivities = names;
 
             if (getActivity() instanceof AddListingActivity) {
                 ((AddListingActivity) getActivity()).goNextStep();

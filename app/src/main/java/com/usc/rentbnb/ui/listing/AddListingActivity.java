@@ -6,7 +6,6 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -27,19 +26,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- order:
-    1 -> ListingInfoFragment        (name, description)
-    2 -> ListingTypeFragment        (category)
-    3 -> ListingPricingFragment     (base price, unit, payment methods)
-    4 -> ListingActivitiesFragment  (Supported activity tags)
-    5 -> ListingImagesFragment      (Photo attachment)
-    6 -> ListingSummaryFragment     (Review all details)
-    7 -> ListingSuccessFragment     (Animated checkmark + "View Listing")
-
-    back button = onBackStep()
-    ((AddListingActivity) requireActivity()).goNextStep() to next
- */
 public class AddListingActivity extends AppCompatActivity {
 
     public static final int TOTAL_STEPS = 6;
@@ -48,14 +34,12 @@ public class AddListingActivity extends AppCompatActivity {
     private TextView tvStepLabel;
     private TextView tvStepCounter;
     private ProgressBar progressBar;
-
     private int currentStep = 1;
     private AddListingViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_add_listing);
 
         viewModel = new ViewModelProvider(this).get(AddListingViewModel.class);
@@ -64,7 +48,8 @@ public class AddListingActivity extends AppCompatActivity {
         if (mainView != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
                 Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                v.setPadding(systemBars.left, systemBars.top,
+                        systemBars.right, systemBars.bottom);
                 return insets;
             });
         }
@@ -116,10 +101,45 @@ public class AddListingActivity extends AppCompatActivity {
         onBackStep();
     }
 
+    public void restartFormForNewDraft() {
+        currentStep = 1;
+        updateToolbar(1);
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(
+                R.anim.slide_in_left,
+                R.anim.slide_out_right,
+                R.anim.slide_in_right,
+                R.anim.slide_out_left
+        );
+        ft.replace(R.id.fragmentContainer, new ListingInfoFragment()).commit();
+    }
+
+    public void goToSuccessWithCount(int count) {
+        currentStep = TOTAL_STEPS + 1;
+
+        tvStepLabel.setVisibility(View.GONE);
+        tvStepCounter.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+        btnBack.setVisibility(View.GONE);
+        TextView tvTitle = findViewById(R.id.tvTitle);
+        if (tvTitle != null) tvTitle.setVisibility(View.GONE);
+
+        ListingSuccessFragment successFragment = new ListingSuccessFragment();
+        Bundle args = new Bundle();
+        args.putInt("listing_count", count);
+        successFragment.setArguments(args);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left)
+                .replace(R.id.fragmentContainer, successFragment)
+                .commit();
+    }
 
     private void bindViews() {
-        btnBack= findViewById(R.id.btnBack);
-        tvStepLabel= findViewById(R.id.tvStepLabel);
+        btnBack = findViewById(R.id.btnBack);
+        tvStepLabel = findViewById(R.id.tvStepLabel);
         tvStepCounter = findViewById(R.id.tvStepCounter);
         progressBar = findViewById(R.id.progressBar);
     }
@@ -134,19 +154,7 @@ public class AddListingActivity extends AppCompatActivity {
         replaceFragment(fragmentForStep(step), forward);
     }
 
-    private void navigateToSuccess() {
-        currentStep = TOTAL_STEPS + 1;
-
-        tvStepLabel.setVisibility(View.GONE);
-        tvStepCounter.setVisibility(View.GONE);
-        progressBar.setVisibility(View.GONE);
-        btnBack.setVisibility(View.GONE);
-        TextView tvTitle = findViewById(R.id.tvTitle);
-
-        tvTitle.setVisibility(View.GONE);
-
-        replaceFragment(new ListingSuccessFragment(), true);
-    }
+    private void navigateToSuccess() { goToSuccessWithCount(1);}
 
     private void updateToolbar(int step) {
         btnBack.setVisibility(View.VISIBLE);
@@ -154,14 +162,14 @@ public class AddListingActivity extends AppCompatActivity {
         tvStepCounter.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.VISIBLE);
         TextView tvTitle = findViewById(R.id.tvTitle);
-        tvTitle.setVisibility(View.VISIBLE);
+        if (tvTitle != null) tvTitle.setVisibility(View.VISIBLE);
 
         tvStepCounter.setText(String.format("%02d / %02d", step, TOTAL_STEPS));
         progressBar.setMax(TOTAL_STEPS);
         progressBar.setProgress(step);
 
         switch (step) {
-            case 1: tvStepLabel.setText("Listing Details"); break;
+            case 1: tvStepLabel.setText("Listing Details");  break;
             case 2: tvStepLabel.setText("Listing Type"); break;
             case 3: tvStepLabel.setText("Pricing"); break;
             case 4: tvStepLabel.setText("Activities"); break;
@@ -183,26 +191,14 @@ public class AddListingActivity extends AppCompatActivity {
     }
 
     private void replaceFragment(Fragment fragment, boolean forward) {
-        FragmentTransaction ft = getSupportFragmentManager()
-                .beginTransaction();
-
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         if (forward) {
-            ft.setCustomAnimations(
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left,
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right
-            );
+            ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right);
         } else {
-            ft.setCustomAnimations(
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right,
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left
-            );
+            ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right,
+                    R.anim.slide_in_right, R.anim.slide_out_left);
         }
-
-        ft.replace(R.id.fragmentContainer, fragment)
-                .commit();
+        ft.replace(R.id.fragmentContainer, fragment).commit();
     }
 }

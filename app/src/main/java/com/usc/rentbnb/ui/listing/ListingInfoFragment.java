@@ -24,6 +24,7 @@ import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.models.IslandResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.viewmodels.AddListingViewModel;
+import com.usc.rentbnb.viewmodels.ListingDraft;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ import retrofit2.Callback;
 
 public class ListingInfoFragment extends Fragment {
     private AddListingViewModel viewModel;
+    private ListingDraft draft;
     private Spinner spinnerIsland;
     private ProgressBar islandLoadingProgress;
     private EditText etProductName, etDescription, etAddress;
@@ -52,9 +54,10 @@ public class ListingInfoFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(super.getContext() != null ? view : view, savedInstanceState);
+        super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(requireActivity()).get(AddListingViewModel.class);
+        draft = viewModel.currentDraft();
 
         etProductName = view.findViewById(R.id.etProductName);
         etDescription = view.findViewById(R.id.etDescription);
@@ -63,9 +66,9 @@ public class ListingInfoFragment extends Fragment {
         spinnerIsland = view.findViewById(R.id.spinnerIsland);
         islandLoadingProgress = view.findViewById(R.id.islandLoadingProgress);
 
-        etProductName.setText(viewModel.productName);
-        etDescription.setText(viewModel.description);
-        etAddress.setText(viewModel.address);
+        etProductName.setText(draft.productName);
+        etDescription.setText(draft.description);
+        etAddress.setText(draft.address);
 
         fetchIslands();
 
@@ -73,10 +76,10 @@ public class ListingInfoFragment extends Fragment {
         updateContinueButtonState();
 
         btnContinue.setOnClickListener(v -> {
-            viewModel.productName = etProductName.getText().toString();
-            viewModel.description = etDescription.getText().toString();
-            viewModel.address = etAddress.getText().toString();
-            viewModel.island = selectedIslandName;
+            draft.productName = etProductName.getText().toString();
+            draft.description = etDescription.getText().toString();
+            draft.address = etAddress.getText().toString();
+            draft.island = selectedIslandName;
 
             if (getActivity() instanceof AddListingActivity) {
                 ((AddListingActivity) getActivity()).goNextStep();
@@ -95,7 +98,6 @@ public class ListingInfoFragment extends Fragment {
 
         etProductName.addTextChangedListener(validationWatcher);
         etDescription.addTextChangedListener(validationWatcher);
-        etAddress.addTextChangedListener(validationWatcher);
 
         spinnerIsland.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -122,9 +124,8 @@ public class ListingInfoFragment extends Fragment {
         String name = etProductName.getText().toString().trim();
         String description = etDescription.getText().toString().trim();
 
-        // The IF statement checking required fields (Address is now optional)
-        boolean isEnabled = !name.isEmpty()
-                && !description.isEmpty()
+        boolean isEnabled = !name.isEmpty() 
+                && !description.isEmpty() 
                 && !selectedIslandName.isEmpty();
 
         btnContinue.setEnabled(isEnabled);
@@ -138,6 +139,8 @@ public class ListingInfoFragment extends Fragment {
         ApiClient.getApiService().getIslands().enqueue(new Callback<IslandResponse>() {
             @Override
             public void onResponse(Call<IslandResponse> call, Response<IslandResponse> response) {
+                if (!isAdded()) return;
+                
                 islandLoadingProgress.setVisibility(View.GONE);
                 spinnerIsland.setVisibility(View.VISIBLE);
 
@@ -151,6 +154,8 @@ public class ListingInfoFragment extends Fragment {
 
             @Override
             public void onFailure(Call<IslandResponse> call, Throwable t) {
+                if (!isAdded()) return;
+                
                 islandLoadingProgress.setVisibility(View.GONE);
                 spinnerIsland.setVisibility(View.VISIBLE);
                 Toast.makeText(requireContext(), "Network error loading islands", Toast.LENGTH_SHORT).show();
@@ -159,6 +164,8 @@ public class ListingInfoFragment extends Fragment {
     }
 
     private void populateSpinner(List<Island> islands) {
+        if (!isAdded()) return;
+
         List<String> displayNames = new ArrayList<>();
         displayNames.add("Select an Island");
 
@@ -174,11 +181,11 @@ public class ListingInfoFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerIsland.setAdapter(adapter);
 
-        if (!viewModel.island.isEmpty()) {
+        if (draft != null && draft.island != null && !draft.island.isEmpty()) {
             for (int i = 0; i < islands.size(); i++) {
-                if (islands.get(i).getIslandName().equals(viewModel.island)) {
+                if (islands.get(i).getIslandName().equals(draft.island)) {
                     spinnerIsland.setSelection(i + 1);
-                    selectedIslandName = viewModel.island;
+                    selectedIslandName = draft.island;
                     break;
                 }
             }

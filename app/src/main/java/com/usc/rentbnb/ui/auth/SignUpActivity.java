@@ -122,7 +122,6 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
-        authViewModel.signUp(emailText, passwordText, fullNameText);
 
     }
 

@@ -1,36 +1,55 @@
 package com.usc.rentbnb.ui.home;
 
+import android.Manifest;
 import android.content.Intent;
-import android.graphics.Color;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.usc.rentbnb.repositories.ChatRepository;
+import com.usc.rentbnb.models.ChatRoom;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.FilterCriteria;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.models.Notification;
+import com.usc.rentbnb.ui.notifications.NotificationActivity;
 import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.WeatherResponse;
 import com.usc.rentbnb.network.ApiClient;
+import com.usc.rentbnb.ui.filter.FilterActivity;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
-import com.usc.rentbnb.ui.notifications.NotificationActivity;
 import com.usc.rentbnb.utils.NavigationHelper;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
 
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,17 +57,29 @@ import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private TextView feedTitleView;
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
+    private EditText searchBar;
 
-    private boolean showingIslands = true;
+    private boolean showingRentals = true;
+    private TextView tabIslands, tabRentals;
 
     private WeatherResponse.WeatherData currentWeather;
     private int currentWeatherIconRes = R.drawable.ic_sun;
     private String currentWeatherMessage = "Checking the skies...";
+    public String userCity = "Cebu City";
+    public double userLat = 10.3157;
+    public double userLon = 123.8854;
 
     private NavigationHelper navigationHelper;
+
+    private FusedLocationProviderClient fusedLocationClient;
+    private FilterCriteria lastCriteria = null;
+    private ListenerRegistration chatListener;
+
+    // saerch debouncing lkogic
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +98,18 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
+        tabIslands = findViewById(R.id.tab_islands);
+        tabRentals = findViewById(R.id.tab_rentals);
+        searchBar = findViewById(R.id.search_bar);
+
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        feedTitleView = findViewById(R.id.feed_title);
+
 
         setupFilterChips();
         setupTitleToggle();
         setupBottomNavigation(homeHeader);
+        setupFilterButton();
+        setupSearchLogic();
 
         if (getIntent().getBooleanExtra("navigate_to_chat", false)) {
             navigationHelper.navigateToChat();
@@ -80,15 +117,16 @@ public class HomeActivity extends AppCompatActivity {
             navigationHelper.setInitialState();
         }
 
+
         homeViewModel.fetchIslands();
         homeViewModel.fetchListings();
 
         switchFeed(true);
 
-        fetchWeather(10.3157, 123.8854); // TODO: Use user's location (lat, lng)
+        fetchUserLocation();
+
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
-        // Notification button logic
         View notificationBtn = findViewById(R.id.notification_button);
         if (notificationBtn != null) {
             notificationBtn.setOnClickListener(v -> {
@@ -98,110 +136,74 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         checkUnreadNotifications();
-    }
+        listenToUnreadChat();
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Re-check unread status whenever returning to Home
-        checkUnreadNotifications();
-    }
-
-    private void checkUnreadNotifications() {
-        ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
+        getSupportFragmentManager().registerFragmentLifecycleCallbacks(new androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
             @Override
-            public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
-                boolean hasUnread = false;
-
-                // MOCK CHECK FOR THE RENTER UI DEMO
-                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
-                java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
-                if (!readIds.contains("mock_rent_1") || !readIds.contains("mock_chat_1")) {
-                    hasUnread = true;
-                }
-
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Notification> notifications = response.body().getData();
-                    if (notifications != null) {
-                        for (Notification n : notifications) {
-                            if (!n.isRead() && !readIds.contains(n.getId())) {
-                                hasUnread = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-                if (hasUnread) {
-                    updateNotificationBadge(true);
-                } else {
-                    // Check for new listings if no unread server notifications
-                    checkNewListingsForBadge();
+            public void onFragmentResumed(@NonNull androidx.fragment.app.FragmentManager fm, @NonNull Fragment f) {
+                super.onFragmentResumed(fm, f);
+                if (f instanceof RentalsFragment) {
+                    updateTabUI(true);
+                } else if (f instanceof IslandsFragment) {
+                    updateTabUI(false);
                 }
             }
+        }, false);
+    }
+
+    private void setupSearchLogic() {
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
 
             @Override
-            public void onFailure(Call<NotificationResponse> call, Throwable t) {
-                // Check listings even if server fails
-                boolean hasUnread = false;
-                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
-                java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
-                if (!readIds.contains("mock_rent_1") || !readIds.contains("mock_chat_1")) {
-                    hasUnread = true;
-                }
-                
-                if (hasUnread) {
-                    updateNotificationBadge(true);
-                } else {
-                    checkNewListingsForBadge();
-                }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+            }
+
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString().trim();
+                searchRunnable = () -> {
+                    if (showingRentals) {
+                        homeViewModel.filterRentals(query);
+                    } else {
+                        homeViewModel.filterIslands(query);
+                    }
+                };
+
+                searchHandler.postDelayed(searchRunnable, 300);
             }
         });
     }
 
-    private void checkNewListingsForBadge() {
-        ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
-            @Override
-            public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
-                boolean hasNewUnseen = false;
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Listing> listings = response.body().getData();
-                    if (listings != null) {
-                        android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
-                        java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
-                        
-                        for (Listing l : listings) {
-                            if (l.isNew() && !readIds.contains(l.getId())) {
-                                hasNewUnseen = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                updateNotificationBadge(hasNewUnseen);
+    private void setupTitleToggle() {
+        tabRentals.setOnClickListener(v -> {
+            if (!showingRentals) {
+                switchFeed(true);
             }
+        });
 
-            @Override
-            public void onFailure(Call<ListingResponse> call, Throwable t) {
-                updateNotificationBadge(false);
+        tabIslands.setOnClickListener(v -> {
+            if (showingRentals) {
+                switchFeed(false);
             }
         });
     }
 
-    private void updateNotificationBadge(boolean visible) {
-        ImageView icon = findViewById(R.id.notification_icon);
-        if (icon != null) {
-            icon.setImageResource(visible ? R.drawable.ic_notifications_unread : R.drawable.ic_notifications);
+    private void switchFeed(boolean toRentals) {
+        updateTabUI(toRentals);
+
+        String currentQuery = searchBar.getText().toString();
+        if (toRentals) {
+            homeViewModel.filterRentals(currentQuery);
+        } else {
+            homeViewModel.filterIslands(currentQuery);
         }
-    }
 
-    private void switchFeed(boolean toIslands) {
-        showingIslands = toIslands;
-
-        String label = toIslands ? "Islands" : "Rentals";
-        feedTitleView.setText(label);
-
-        Fragment fragment = toIslands ? new IslandsFragment() : new RentalsFragment();
+        Fragment fragment = toRentals ? new RentalsFragment() : new IslandsFragment();
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
@@ -209,60 +211,49 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void setupTitleToggle() {
-        LinearLayout titleRow = findViewById(R.id.feed_title_row);
-        titleRow.setOnClickListener(this::showFeedDropdown);
-    }
+    private void updateTabUI(boolean isRentals) {
+        showingRentals = isRentals;
 
-    private void showFeedDropdown(View anchor) {
-        View dropdownView = LayoutInflater.from(this)
-                .inflate(R.layout.dropdown_feed_menu, null);
+        if (isRentals) {
+            tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
 
-        PopupWindow popup = new PopupWindow(
-                dropdownView,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                true
-        );
-        popup.setElevation(12f);
+            tabIslands.setBackgroundResource(android.R.color.transparent);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        } else {
+            tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
 
-        dropdownView.findViewById(R.id.menuIslands).setOnClickListener(v -> {
-            switchFeed(true);
-            popup.dismiss();
-        });
-
-        dropdownView.findViewById(R.id.menuRentals).setOnClickListener(v -> {
-            switchFeed(false);
-            popup.dismiss();
-        });
-
-        popup.showAsDropDown(anchor, 0, 4, Gravity.START);
+            tabRentals.setBackgroundResource(android.R.color.transparent);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+        }
     }
 
     private void setupFilterChips() {
-        TextView chipPopular = findViewById(R.id.chip_popular);
+        TextView chipNearYou = findViewById(R.id.chip_near_you);
         TextView chipTrending = findViewById(R.id.chip_trending);
         TextView chipNew = findViewById(R.id.chip_new);
-        TextView chipLabel1 = findViewById(R.id.chip_label1);
-        TextView chipLabel2 = findViewById(R.id.chip_label2);
+        TextView chipTopRated = findViewById(R.id.chip_top_rated);
 
-        filterChips = new TextView[]{chipPopular, chipTrending, chipNew, chipLabel1, chipLabel2};
+        filterChips = new TextView[]{chipNearYou, chipTrending, chipNew, chipTopRated};
 
         for (TextView chip : filterChips) {
             if (chip != null) {
-                chip.setOnClickListener(v -> handleChipSelection((TextView) v));
+                chip.setSelected(false);
+                chip.setOnClickListener(v -> handleChipToggle((TextView) v));
             }
         }
     }
 
-    private void handleChipSelection(TextView selectedChip) {
-        for (TextView chip : filterChips) {
-            chip.setBackgroundResource(R.drawable.chip_background);
-            chip.setTextColor(Color.parseColor("#5F5F5F"));
-        }
+    private void handleChipToggle(TextView selectedChip) {
+        boolean isNowSelected = !selectedChip.isSelected();
+        selectedChip.setSelected(isNowSelected);
 
-        selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
-        selectedChip.setTextColor(Color.WHITE);
+        if (isNowSelected) {
+            selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
+        } else {
+            selectedChip.setBackgroundResource(R.drawable.chip_background);
+        }
     }
 
     private void setupBottomNavigation(View homeHeader) {
@@ -274,6 +265,19 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+    }
+
+    private void setupFilterButton() {
+        View filterButton = findViewById(R.id.filter_button);
+        if (filterButton == null) return;
+
+        filterButton.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, FilterActivity.class);
+            if (lastCriteria != null) {
+                intent.putExtra("current_criteria", lastCriteria);
+            }
+            filterLauncher.launch(intent);
+        });
     }
 
     private void fetchWeather(double userLat, double userLon) {
@@ -293,7 +297,7 @@ public class HomeActivity extends AppCompatActivity {
                             currentWeatherMessage = "It's going to rain soon";
                             currentWeatherIconRes = R.drawable.ic_rain;
                             break;
-                        case "Snow":
+                        case "Snow": // useless pero pang chuy rani kay chuy manko
                             currentWeatherMessage = "Snow expected soon";
                             currentWeatherIconRes = R.drawable.ic_snow;
                             break;
@@ -301,7 +305,7 @@ public class HomeActivity extends AppCompatActivity {
                             currentWeatherMessage = "Nice and cool today";
                             currentWeatherIconRes = R.drawable.ic_cloud;
                             break;
-                        case "Foggy":
+                        case "Foggy": // busay raman tawn ni ey
                             currentWeatherMessage = "Low visibility, take care";
                             currentWeatherIconRes = R.drawable.ic_fog;
                             break;
@@ -311,10 +315,8 @@ public class HomeActivity extends AppCompatActivity {
                             break;
                     }
 
-                    if (ivWeatherIcon != null) {
-                        ivWeatherIcon.setImageResource(currentWeatherIconRes);
-                        ivWeatherIcon.setAlpha(1.0f);
-                    }
+                    ivWeatherIcon.setImageResource(currentWeatherIconRes);
+                    ivWeatherIcon.setAlpha(1.0f);
 
                 }
             }
@@ -353,4 +355,186 @@ public class HomeActivity extends AppCompatActivity {
 
         dialog.show();
     }
+
+    private void fetchUserLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // check if user granted permission
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // no permission = ask permission; show pop-up
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+            return;
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                userLat = location.getLatitude();
+                userLon = location.getLongitude();
+                fetchWeather(userLat, userLon);
+
+                try {
+                    Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                    List<Address> addresses = geocoder.getFromLocation(userLat, userLon, 1);
+
+                    if (addresses != null && !addresses.isEmpty()) {
+                        userCity = addresses.get(0).getLocality();
+                        Log.d("LOCATION", "User is in: " + userCity);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.homeFeedContainer);
+                if (currentFragment instanceof RentalsFragment) {
+                    ((RentalsFragment) currentFragment).onLocationUpdated(userCity, userLat, userLon);
+                } else if (currentFragment instanceof IslandsFragment) {
+                    ((IslandsFragment) currentFragment).updateLocationTitle(userCity);
+                }
+
+                fetchNearbyIslands(userLat, userLon);
+            } else {
+                fetchWeather(userLat, userLon);
+            }
+        }).addOnFailureListener(e -> {
+            fetchWeather(userLat, userLon);
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchUserLocation();
+            } else {
+                Log.d("LOCATION", "Permission denied, defaulting to Cebu");
+                fetchWeather(10.3157, 123.8854);
+            }
+        }
+    }
+
+    private void fetchNearbyIslands(double lat, double lng) {
+        // TODO: pass 'lat' and 'lng' to backend to calculate distance puhon
+        // ApiClient.getApiService().getNearbyIslands(lat, lng)...
+
+        Log.d("DATA", "Preparing to fetch islands near " + lat + ", " + lng);
+
+        // fornow because db only has 6 islands, just fetch ALL islands
+        homeViewModel.fetchIslands();
+    }
+
+    private void checkUnreadNotifications() {
+        ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
+            @Override
+            public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
+                boolean hasUnread = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Notification> notifications = response.body().getData();
+                    if (notifications != null) {
+                        for (Notification n : notifications) {
+                            if (!n.isRead()) {
+                                hasUnread = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (hasUnread) {
+                    updateNotificationBadge(true);
+                } else {
+                    checkNewListingsForBadge();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                checkNewListingsForBadge();
+            }
+        });
+    }
+
+    private void checkNewListingsForBadge() {
+        ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
+            @Override
+            public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
+                boolean hasNew = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Listing> listings = response.body().getData();
+                    if (listings != null) {
+                        for (Listing l : listings) {
+                            if (l.isNew()) {
+                                hasNew = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                updateNotificationBadge(hasNew);
+            }
+
+            @Override
+            public void onFailure(Call<ListingResponse> call, Throwable t) {
+                updateNotificationBadge(false);
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (chatListener != null) {
+            chatListener.remove();
+        }
+    }
+
+    private void listenToUnreadChat() {
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) return;
+
+        ChatRepository chatRepo = new ChatRepository();
+        chatListener = chatRepo.listenToChatRoomsForUser(currentUserId, new ChatRepository.ChatRoomsListCallback() {
+            @Override
+            public void onUpdate(List<ChatRoom> chatRooms) {
+                boolean hasUnreadChat = false;
+                for (ChatRoom room : chatRooms) {
+                    if (room.getUnreadCountForUser(currentUserId) > 0) {
+                        hasUnreadChat = true;
+                        break;
+                    }
+                }
+                if (hasUnreadChat) {
+                    updateNotificationBadge(true);
+                }
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {}
+        });
+    }
+
+    private void updateNotificationBadge(boolean visible) {
+        View badge = findViewById(R.id.notification_badge);
+        if (badge != null) {
+            badge.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private final ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    FilterCriteria criteria = (FilterCriteria) result.getData().getSerializableExtra("updated_criteria");
+
+                    lastCriteria = criteria;
+
+                    View filterButton = findViewById(R.id.filter_button);
+                    if (filterButton != null) {
+                        filterButton.setActivated(!criteria.isEmpty());
+                    }
+
+                    homeViewModel.applyFilters(criteria);
+                }
+            }
+    );
 }

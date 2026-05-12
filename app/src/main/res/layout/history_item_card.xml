@@ -19,7 +19,6 @@
             android:layout_width="90dp"
             android:layout_height="90dp"
             android:scaleType="fitCenter"
-            android:background="@drawable/yamaha_nmax"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -29,13 +28,34 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="Yamaha NMAX"
+            android:text="Item Title"
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/status_card"
             app:layout_constraintStart_toEndOf="@id/item_image"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- NEW: Status Badge -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/status_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/item_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:text="UPCOMING"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/item_category"
@@ -43,7 +63,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="2dp"
-            android:text="Motorcycle"
             android:textColor="#555555"
             android:fontFamily="monospace"
             android:textSize="11sp"
@@ -56,7 +75,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="Nicole Filo"
             android:textColor="@android:color/black"
             android:fontFamily="monospace"
             android:textSize="11sp"
@@ -64,18 +82,31 @@
             app:layout_constraintStart_toEndOf="@id/item_image"
             app:layout_constraintTop_toBottomOf="@id/item_category" />
 
+        <!-- NEW: Dates -->
+        <TextView
+            android:id="@+id/item_dates"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textColor="#757575"
+            android:textSize="11sp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_image"
+            app:layout_constraintTop_toBottomOf="@id/item_owner_name" />
+
         <TextView
             android:id="@+id/item_price"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="₱1000.00"
-            android:textColor="@android:color/black"
-            android:fontFamily="monospace"
-            android:textSize="11sp"
+            android:layout_marginTop="2dp"
+            android:textColor="#5BC8D3"
+            android:textStyle="bold"
+            android:textSize="13sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/item_image"
-            app:layout_constraintTop_toBottomOf="@id/item_owner_name" />
+            app:layout_constraintTop_toBottomOf="@id/item_dates" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

@@ -602,7 +602,8 @@
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_keyboard_arrow_down" />
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="#A0A0A0" />
                 </LinearLayout>
 
                 <View

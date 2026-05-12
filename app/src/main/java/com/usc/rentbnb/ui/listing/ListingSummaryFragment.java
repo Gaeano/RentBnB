@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
+import com.usc.rentbnb.models.FAQ;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.viewmodels.AddListingViewModel;
 import com.usc.rentbnb.viewmodels.ListingDraft;
@@ -218,7 +219,8 @@ public class ListingSummaryFragment extends Fragment {
                 draft.priceUnit,
                 draft.paymentMethods,
                 draft.suggestedActivities,
-                imageUrls
+                imageUrls,
+                viewModel.faqs
         );
 
         ApiClient.getApiService().createListing(request)

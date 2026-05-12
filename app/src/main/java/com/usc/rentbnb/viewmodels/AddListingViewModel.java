@@ -1,10 +1,12 @@
 package com.usc.rentbnb.viewmodels;
 
 import androidx.lifecycle.ViewModel;
+import com.usc.rentbnb.models.FAQ;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AddListingViewModel extends ViewModel {
+    public List<FAQ> faqs = new ArrayList<>();
     private final List<ListingDraft> drafts = new ArrayList<>();
     private int currentDraftIndex = 0;
 

@@ -5,6 +5,7 @@ import com.usc.rentbnb.models.AuthResponse;
 import com.usc.rentbnb.models.BookingResponse;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
+import com.usc.rentbnb.models.FAQ;
 import com.usc.rentbnb.models.InquilinoOpeningRequest;
 import com.usc.rentbnb.models.InquilinoReplyRequest;
 import com.usc.rentbnb.models.InquilinoResponse;
@@ -15,6 +16,8 @@ import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.RegisterRequest;
 import com.usc.rentbnb.models.WeatherResponse;
+
+import java.util.List;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -118,11 +121,27 @@ public interface ApiService {
     @GET("notifications")
     Call<NotificationResponse> getNotifications();
 
+    @PATCH("notifications/read-all")
+    Call<ResponseBody> markAllAsRead();
+
     @PATCH("notifications/{id}/read")
     Call<ResponseBody> markAsRead(@Path("id") String notificationId);
 
     @DELETE("notifications/{id}")
     Call<ResponseBody> deleteNotification(@Path("id") String notificationId);
+
+    // FAQs
+    @GET("faqs/defaults")
+    Call<List<FAQ>> getDefaultFaqs();
+
+    @POST("faqs/defaults")
+    Call<FAQ> addDefaultFaq(@Body FAQ faq);
+
+    @PUT("faqs/defaults/{id}")
+    Call<FAQ> updateDefaultFaq(@Path("id") String id, @Body FAQ faq);
+
+    @DELETE("faqs/defaults/{id}")
+    Call<ResponseBody> deleteDefaultFaq(@Path("id") String id);
 
     // Inquilino (AI Chatbot)
     @POST("chat/inquilino/opening")

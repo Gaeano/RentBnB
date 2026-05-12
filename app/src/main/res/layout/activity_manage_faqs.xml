@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/notificationRoot"
+    android:id="@+id/faqRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -9,7 +9,7 @@
 
     <!-- Custom Toolbar -->
     <RelativeLayout
-        android:id="@+id/notificationToolbar"
+        android:id="@+id/faqToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:paddingStart="16dp"
@@ -29,20 +29,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Notifications"
+            android:text="Default FAQs"
             android:textColor="@color/teal_primary"
             android:textSize="20sp"
             android:textStyle="bold"
             android:fontFamily="@font/jost_bold" />
 
         <ImageView
-            android:id="@+id/btnNotificationMenu"
+            android:id="@+id/btnAddFaq"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:padding="8dp"
-            android:src="@drawable/ic_more_horiz"
+            android:src="@drawable/ic_add_circle"
             app:tint="@color/teal_primary"
             android:background="?attr/selectableItemBackgroundBorderless" />
     </RelativeLayout>
@@ -52,19 +52,31 @@
         android:layout_height="1dp"
         android:background="#EEEEEE" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvNotifications"
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="These FAQs will be automatically added to
+        your new listings and will help the Inquilino AI answer questions for you."
+        android:textColor="@color/text_grey"
+        android:textSize="14sp"
+        android:fontFamily="@font/inconsolata"
+        android:background="#F9F9F9"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvFaqs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:clipToPadding="false"
         android:padding="8dp" />
 
     <TextView
-        android:id="@+id/tvEmpty"
+        android:id="@+id/tvEmptyFaqs"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="No notifications yet"
+        android:text="No default FAQs yet.\nTap + to add your first one."
         android:textColor="@color/text_grey"
         android:fontFamily="@font/inconsolata"
         android:visibility="gone" />

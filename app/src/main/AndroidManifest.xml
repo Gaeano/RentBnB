@@ -98,6 +98,15 @@
         <activity
             android:name=".ui.notifications.NotificationActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.profile.ManageFaqsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.LegalContentActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

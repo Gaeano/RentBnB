@@ -163,6 +163,8 @@ public class ProfileFragment extends Fragment {
 
         menuAppSettings.setOnClickListener(v -> {
             Log.d("ProfileFragment", "App Settings button clicked");
+            Intent intent = new Intent(requireActivity(), SettingsActivity.class);
+            startActivity(intent);
         });
 
         menuLogout.setOnClickListener(v -> {

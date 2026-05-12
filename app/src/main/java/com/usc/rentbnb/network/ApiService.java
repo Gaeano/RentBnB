@@ -2,12 +2,16 @@ package com.usc.rentbnb.network;
 
 import com.google.gson.JsonObject;
 import com.usc.rentbnb.models.AuthResponse;
+import com.usc.rentbnb.models.BookingRequest;
+import com.usc.rentbnb.models.BookingResponse;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
 import com.usc.rentbnb.models.IslandResponse;
 import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.models.RegisterRequest;
 import com.usc.rentbnb.models.WeatherResponse;
+
+import java.util.Map;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -16,8 +20,10 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Multipart;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 
@@ -55,4 +61,14 @@ public interface ApiService {
             @Part("upload_preset") RequestBody uploadPreset,
             @Part MultipartBody.Part file
     );
+
+    // Booking Endpoints
+    @POST("bookings")
+    Call<BookingResponse> createBooking(@Body BookingRequest bookingRequest);
+
+    @GET("bookings/user/{userId}")
+    Call<BookingResponse> getBookingsByUser(@Path("userId") String userId);
+
+    @PATCH("bookings/{bookingId}/status")
+    Call<BookingResponse> updateBookingStatus(@Path("bookingId") String bookingId, @Body Map<String, String> status);
 }

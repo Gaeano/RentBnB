@@ -1,37 +1,54 @@
 package com.usc.rentbnb.ui.booking;
 
-import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import androidx.core.util.Pair;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointForward;
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.BookingRequest;
+import com.usc.rentbnb.models.BookingResponse;
+import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.network.ApiClient;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RentForm extends AppCompatActivity {
 
+    private static final String TAG = "RentForm";
     private EditText etStartDate, etEndDate, etContactNumber;
     private AutoCompleteTextView actvPaymentMode;
-    private TextView tvDurationPrompt;
-    private Calendar startCalendar, endCalendar;
+    private TextView tvDurationPrompt, tvBoatName, tvOwnerName, tvPrice;
+    private ImageButton btnBack;
+    private Long startDateMillis, endDateMillis;
+    private Listing currentListing;
+    private double calculatedTotal = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +65,13 @@ public class RentForm extends AppCompatActivity {
             });
         }
 
+        currentListing = (Listing) getIntent().getSerializableExtra("listing_object");
+
         // Initialize Views
+        btnBack = findViewById(R.id.btnBack);
+        tvBoatName = findViewById(R.id.tvBoatName);
+        tvOwnerName = findViewById(R.id.tvOwnerName);
+        tvPrice = findViewById(R.id.tvPrice);
         tvDurationPrompt = findViewById(R.id.tvDurationPrompt);
         etStartDate = findViewById(R.id.etStartDate);
         etEndDate = findViewById(R.id.etEndDate);
@@ -56,37 +79,29 @@ public class RentForm extends AppCompatActivity {
         actvPaymentMode = findViewById(R.id.actvPaymentMode);
         Button btnRent = findViewById(R.id.btnRent);
 
-        startCalendar = Calendar.getInstance();
-        endCalendar = Calendar.getInstance();
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
+        if (currentListing != null) {
+            tvBoatName.setText(currentListing.getProductName());
+            tvOwnerName.setText("👤 Owner ID: " + currentListing.getOwnerId());
+            tvPrice.setText("₱" + String.format(Locale.US, "%,.0f", currentListing.getPrice()) + " / " + currentListing.getPriceUnit());
+        }
 
         setupDatePickers();
         setupPaymentDropdown();
 
         btnRent.setOnClickListener(v -> {
             if (validateFields()) {
-                String contact = etContactNumber.getText().toString().trim();
-                String payment = actvPaymentMode.getText().toString().trim();
-
-                // Get current user's name if possible, or let DigitalReceipt handle it
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                String name = (user != null && user.getDisplayName() != null) ? user.getDisplayName() : "Account User";
-
-                Intent intent = new Intent(RentForm.this, DigitalReceipt.class);
-                intent.putExtra("FULL_NAME", name);
-                intent.putExtra("CONTACT", contact);
-                intent.putExtra("PAYMENT_MODE", payment);
-                startActivity(intent);
+                submitBooking();
             }
         });
     }
 
     private boolean validateFields() {
-        if (etStartDate.getText().toString().isEmpty()) {
-            Toast.makeText(this, "Start Date is required", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (etEndDate.getText().toString().isEmpty()) {
-            Toast.makeText(this, "End Date is required", Toast.LENGTH_SHORT).show();
+        if (startDateMillis == null || endDateMillis == null) {
+            Toast.makeText(this, "Please select rental dates", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (etContactNumber.getText().toString().trim().isEmpty()) {
@@ -101,68 +116,48 @@ public class RentForm extends AppCompatActivity {
     }
 
     private void setupDatePickers() {
-        etStartDate.setOnClickListener(v -> showDatePicker(true));
-        etEndDate.setOnClickListener(v -> showDatePicker(false));
-    }
+        View.OnClickListener dateListener = v -> {
+            CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
+            constraintsBuilder.setValidator(DateValidatorPointForward.now());
 
-    private void showDatePicker(boolean isStartDate) {
-        Calendar currentSelection = isStartDate ? startCalendar : endCalendar;
-        
-        // Using a style to ensure buttons are visible if theme colors clash
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
-                (view, year, monthOfYear, dayOfMonth) -> {
-                    currentSelection.set(Calendar.YEAR, year);
-                    currentSelection.set(Calendar.MONTH, monthOfYear);
-                    currentSelection.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    currentSelection.set(Calendar.HOUR_OF_DAY, 0);
-                    currentSelection.set(Calendar.MINUTE, 0);
-                    currentSelection.set(Calendar.SECOND, 0);
-                    currentSelection.set(Calendar.MILLISECOND, 0);
+            MaterialDatePicker<Pair<Long, Long>> dateRangePicker =
+                    MaterialDatePicker.Builder.dateRangePicker()
+                            .setTitleText("Select Dates")
+                            .setCalendarConstraints(constraintsBuilder.build())
+                            .build();
 
-                    String myFormat = "MM/dd/yyyy";
-                    SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-                    
-                    if (isStartDate) {
-                        etStartDate.setText(sdf.format(currentSelection.getTime()));
-                    } else {
-                        etEndDate.setText(sdf.format(currentSelection.getTime()));
-                    }
-                    
-                    calculateAndShowDuration();
-                }, 
-                currentSelection.get(Calendar.YEAR), 
-                currentSelection.get(Calendar.MONTH), 
-                currentSelection.get(Calendar.DAY_OF_MONTH));
+            dateRangePicker.show(getSupportFragmentManager(), "DATE_RANGE_PICKER");
 
-        // CANNOT select a date prior to today
-        Calendar minDate = Calendar.getInstance();
-        minDate.set(Calendar.HOUR_OF_DAY, 0);
-        minDate.set(Calendar.MINUTE, 0);
-        minDate.set(Calendar.SECOND, 0);
-        minDate.set(Calendar.MILLISECOND, 0);
-        datePickerDialog.getDatePicker().setMinDate(minDate.getTimeInMillis());
-        
-        datePickerDialog.show();
+            dateRangePicker.addOnPositiveButtonClickListener(selection -> {
+                startDateMillis = selection.first;
+                endDateMillis = selection.second;
+
+                SimpleDateFormat displayFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+                displayFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                etStartDate.setText(displayFormat.format(startDateMillis));
+                etEndDate.setText(displayFormat.format(endDateMillis));
+
+                calculateAndShowDuration();
+            });
+        };
+
+        etStartDate.setOnClickListener(dateListener);
+        etEndDate.setOnClickListener(dateListener);
     }
 
     private void calculateAndShowDuration() {
-        String startStr = etStartDate.getText().toString();
-        String endStr = etEndDate.getText().toString();
-
-        if (!startStr.isEmpty() && !endStr.isEmpty()) {
-            long diffInMillis = endCalendar.getTimeInMillis() - startCalendar.getTimeInMillis();
-            
-            if (diffInMillis < 0) {
-                tvDurationPrompt.setText("End date cannot be before start date!");
-                tvDurationPrompt.setVisibility(View.VISIBLE);
-                return;
-            }
-
+        if (startDateMillis != null && endDateMillis != null) {
+            long diffInMillis = endDateMillis - startDateMillis;
             long diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis);
-            // Rental is usually inclusive, e.g., same day = 1 day
             long rentalDays = diffInDays + 1;
             
-            tvDurationPrompt.setText("Rented for " + rentalDays + " day(s)");
+            if (currentListing != null) {
+                calculatedTotal = rentalDays * currentListing.getPrice();
+                tvDurationPrompt.setText("Rented for " + rentalDays + " day(s). Total: ₱" + String.format(Locale.US, "%,.0f", calculatedTotal));
+            } else {
+                tvDurationPrompt.setText("Rented for " + rentalDays + " day(s)");
+            }
             tvDurationPrompt.setVisibility(View.VISIBLE);
         } else {
             tvDurationPrompt.setVisibility(View.GONE);
@@ -176,5 +171,56 @@ public class RentForm extends AppCompatActivity {
                     android.R.layout.simple_dropdown_item_1line, paymentOptions);
             actvPaymentMode.setAdapter(adapter);
         }
+    }
+
+    private void submitBooking() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || currentListing == null) {
+            Toast.makeText(this, "Error: User or Listing not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        SimpleDateFormat apiFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        apiFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String renterId = user.getUid();
+        String ownerId = currentListing.getOwnerId();
+        String listingId = currentListing.getId();
+        String startDate = apiFormat.format(startDateMillis);
+        String endDate = apiFormat.format(endDateMillis);
+        String status = "pending";
+
+        BookingRequest request = new BookingRequest(renterId, ownerId, listingId, startDate, endDate, calculatedTotal, status);
+
+        ApiClient.getApiService().createBooking(request).enqueue(new Callback<BookingResponse>() {
+            @Override
+            public void onResponse(Call<BookingResponse> call, Response<BookingResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(RentForm.this, "Booking Requested Successfully!", Toast.LENGTH_LONG).show();
+                    
+                    Intent intent = new Intent(RentForm.this, DigitalReceipt.class);
+                    intent.putExtra("FULL_NAME", user.getDisplayName() != null ? user.getDisplayName() : "User");
+                    intent.putExtra("CONTACT", etContactNumber.getText().toString());
+                    intent.putExtra("PAYMENT_MODE", actvPaymentMode.getText().toString());
+                    intent.putExtra("TOTAL_PRICE", calculatedTotal);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                        Log.e(TAG, "Booking failed: " + response.code() + " - " + errorBody);
+                        Toast.makeText(RentForm.this, "Booking failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error reading error body", e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BookingResponse> call, Throwable t) {
+                Log.e(TAG, "API Error: " + t.getMessage());
+                Toast.makeText(RentForm.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

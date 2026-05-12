@@ -60,8 +60,6 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
         }
 
         public void bind(Listing listing) {
-            /// TODO: Add to Favorites button functional
-            ///  TODO: onClickListener on card and redirects to listing details
             tvProductName.setText(listing.getProductName());
             tvPrice.setText("₱" + listing.getPrice() + "/" + listing.getPriceUnit());
             tvReviewCount.setText(listing.getTotalReviews() + " rents");
@@ -81,17 +79,11 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
                         .into(ivListingImage);
             }
 
-            //TODO: instead of intents, fetch the entire data from db and pass it onto the next activity
             itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(itemView.getContext(), ListingsDetailsActivity.class);
-
-                intent.putExtra("product_name", listing.getProductName());
-                intent.putExtra("price", String.valueOf(listing.getPrice()));
-                intent.putExtra("price_unit", listing.getPriceUnit());
-                intent.putExtra("category", listing.getCategory());
+                intent.putExtra("listing_object", listing);
                 itemView.getContext().startActivity(intent);
             });
         }
     }
-
 }

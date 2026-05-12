@@ -18,6 +18,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_back"
+                app:layout_constraintBottom_toBottomOf="@id/tvRentFormHeader"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvRentFormHeader"
+                app:tint="@color/white" />
+
             <TextView
                 android:id="@+id/tvRentFormHeader"
                 android:layout_width="wrap_content"
@@ -78,6 +90,7 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/tvRating"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="⭐ 4.5"
@@ -103,6 +116,7 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/tvBoatType"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Palm Boat"
@@ -128,6 +142,7 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/tvPrice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="P7,590"
@@ -285,6 +300,7 @@
                 app:layout_constraintTop_toBottomOf="@id/tvReceiptHeader">
 
                 <TextView
+                    android:id="@+id/tvReceiptBoatName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="IskoBoat"
@@ -293,6 +309,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvReceiptOwnerName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="👤 Nicole Filo"
@@ -359,6 +376,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvReceiptAmount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
@@ -380,6 +398,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvReceiptTotalAmount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"

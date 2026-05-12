@@ -32,15 +32,34 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/tvParticipantName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="User Name"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/jost_bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
         <TextView
-            android:id="@+id/tvParticipantName"
+            android:id="@+id/tvTimestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User Name"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:fontFamily="@font/jost_bold" />
+            android:layout_marginStart="8dp"
+            android:text="9:24 AM"
+            android:textColor="#BDBDBD"
+            android:textSize="11sp" />
+    </LinearLayout>
 
         <TextView
             android:id="@+id/tvListingTitle"
@@ -54,25 +73,33 @@
             android:maxLines="1"
             android:ellipsize="end" />
 
-        <TextView
-            android:id="@+id/tvLastMessage"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Last message preview..."
-            android:textColor="@color/text_grey"
-            android:textSize="13sp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:fontFamily="@font/inconsolata" />
-    </LinearLayout>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-    <View
-        android:id="@+id/vUnreadDot"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/bg_unread_dot"
-        android:visibility="gone" />
+            <TextView
+                android:id="@+id/tvLastMessage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Last message preview..."
+                android:textColor="@color/text_grey"
+                android:textSize="13sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:fontFamily="@font/inconsolata" />
+
+            <View
+                android:id="@+id/vUnreadDot"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/badge_dot"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

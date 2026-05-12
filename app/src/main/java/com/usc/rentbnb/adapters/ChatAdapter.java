@@ -75,12 +75,40 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    // Add this helper method inside ChatAdapter
+    private String getDateStringForMessage(Message msg) {
+        // Assuming you have a Date object or can parse the formatted time.
+        // If your getFormattedTime() returns "MM/dd/yyyy hh:mm a", parse it here.
+        // For simplicity, assuming you implement a getFormattedDateOnly() on the Message model.
+        return msg.getFormattedDateOnly(); // e.g., returns "Today", "Yesterday", or "Oct 12"
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Message msg = messageList.get(position);
-        if (holder instanceof UserViewHolder)  ((UserViewHolder) holder).bind(msg);
-        else if (holder instanceof OwnerViewHolder) ((OwnerViewHolder) holder).bind(msg, ownerName);
-        else if (holder instanceof AiViewHolder)    ((AiViewHolder) holder).bind(msg);
+
+        // 1. Handle Date Grouping
+        boolean showDateHeader = false;
+        if (position == 0) {
+            showDateHeader = true; // Always show for the very first message
+        } else {
+            Message previousMsg = messageList.get(position - 1);
+            String currentDate = getDateStringForMessage(msg);
+            String previousDate = getDateStringForMessage(previousMsg);
+
+            if (!currentDate.equals(previousDate)) {
+                showDateHeader = true; // Show header when the day changes
+            }
+        }
+
+        // 2. Bind the specific ViewHolders (You will need to add tvDateHeader to your ViewHolders)
+        if (holder instanceof UserViewHolder) {
+            ((UserViewHolder) holder).bind(msg, showDateHeader);
+        } else if (holder instanceof OwnerViewHolder) {
+            ((OwnerViewHolder) holder).bind(msg, ownerName, showDateHeader);
+        } else if (holder instanceof AiViewHolder) {
+            ((AiViewHolder) holder).bind(msg, showDateHeader);
+        }
     }
 
     @Override
@@ -118,37 +146,58 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static class UserViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvMessageText;
         private final TextView tvTimestamp;
+        private final TextView tvDateHeader; // NEW
 
         UserViewHolder(@NonNull View v) {
             super(v);
             tvMessageText = v.findViewById(R.id.tvMessageText);
             tvTimestamp   = v.findViewById(R.id.tvTimestamp);
+            tvDateHeader  = v.findViewById(R.id.tvDateHeader); // NEW
         }
 
-        void bind(@NonNull Message msg) {
+        void bind(@NonNull Message msg, boolean showDateHeader) {
             tvMessageText.setText(msg.getText());
-            // getFormattedTime() is null-safe — returns "" if timestamp is null
             tvTimestamp.setText(msg.getFormattedTime());
+
+            // Handle Date Visibility
+            if (showDateHeader && tvDateHeader != null) {
+                tvDateHeader.setVisibility(View.VISIBLE);
+                tvDateHeader.setText(msg.getFormattedDateOnly());
+            } else if (tvDateHeader != null) {
+                tvDateHeader.setVisibility(View.GONE);
+            }
         }
     }
+
 
     // ─── ViewHolder: Owner (left-aligned neutral bubble) ──────────────────────
     static class OwnerViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvSenderName;
         private final TextView tvMessageText;
         private final TextView tvTimestamp;
+        private final TextView tvDateHeader; // NEW
 
         OwnerViewHolder(@NonNull View v) {
             super(v);
             tvSenderName  = v.findViewById(R.id.tvSenderName);
             tvMessageText = v.findViewById(R.id.tvMessageText);
             tvTimestamp   = v.findViewById(R.id.tvTimestamp);
+            tvDateHeader  = v.findViewById(R.id.tvDateHeader); // NEW
         }
 
-        void bind(@NonNull Message msg, @NonNull String ownerName) {
+        // UPDATED: Now accepts the 3rd boolean argument!
+        void bind(@NonNull Message msg, @NonNull String ownerName, boolean showDateHeader) {
             tvSenderName.setText(ownerName);
             tvMessageText.setText(msg.getText());
             tvTimestamp.setText(msg.getFormattedTime());
+
+            // Handle Date Visibility
+            if (showDateHeader && tvDateHeader != null) {
+                tvDateHeader.setVisibility(View.VISIBLE);
+                tvDateHeader.setText(msg.getFormattedDateOnly());
+            } else if (tvDateHeader != null) {
+                tvDateHeader.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -157,18 +206,29 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final TextView tvAiLabel;
         private final TextView tvMessageText;
         private final TextView tvTimestamp;
+        private final TextView tvDateHeader; // NEW
 
         AiViewHolder(@NonNull View v) {
             super(v);
             tvAiLabel     = v.findViewById(R.id.tvAiLabel);
             tvMessageText = v.findViewById(R.id.tvMessageText);
             tvTimestamp   = v.findViewById(R.id.tvTimestamp);
+            tvDateHeader  = v.findViewById(R.id.tvDateHeader); // NEW
         }
 
-        void bind(@NonNull Message msg) {
+        // UPDATED: Now accepts the boolean argument!
+        void bind(@NonNull Message msg, boolean showDateHeader) {
             tvAiLabel.setText("Inquilino");
             tvMessageText.setText(msg.getText());
             tvTimestamp.setText(msg.getFormattedTime());
+
+            // Handle Date Visibility
+            if (showDateHeader && tvDateHeader != null) {
+                tvDateHeader.setVisibility(View.VISIBLE);
+                tvDateHeader.setText(msg.getFormattedDateOnly());
+            } else if (tvDateHeader != null) {
+                tvDateHeader.setVisibility(View.GONE);
+            }
         }
     }
 }

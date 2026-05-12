@@ -14,7 +14,26 @@
         android:textColor="@color/black"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:padding="16dp" />
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etSearchChats"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_search_input"
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:drawablePadding="8dp"
+        android:hint="Search users or messages..."
+        android:paddingHorizontal="16dp"
+        android:textColor="@color/black"
+        android:textColorHint="#9E9E9E"
+        android:textSize="14sp"
+        android:inputType="text"
+        android:imeOptions="actionSearch" />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayoutChats"

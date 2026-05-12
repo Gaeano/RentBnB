@@ -66,6 +66,7 @@ public class ChatRoomActivity extends AppCompatActivity {
     private String chatRoomId, listingId, listingTitle, ownerId, renterId, currentUserId, currentMode;
     private boolean isCurrentUserRenter;
     private String ownerDisplayName = "Owner";
+    private com.google.firebase.Timestamp lastMessageTimestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,11 +128,47 @@ public class ChatRoomActivity extends AppCompatActivity {
         updateUiForCurrentMode();
     }
 
+    public com.google.firebase.Timestamp getLastMessageTimestamp() {
+        return lastMessageTimestamp;
+    }
+
+    public void setLastMessageTimestamp(com.google.firebase.Timestamp lastMessageTimestamp) {
+        this.lastMessageTimestamp = lastMessageTimestamp;
+    }
+
+    public String getFormattedTime() {
+        if (this.lastMessageTimestamp == null) return "";
+
+        java.util.Date date = this.lastMessageTimestamp.toDate();
+
+        java.util.Calendar msgCal = java.util.Calendar.getInstance();
+        msgCal.setTime(date);
+
+        java.util.Calendar today = java.util.Calendar.getInstance();
+        java.util.Calendar yesterday = java.util.Calendar.getInstance();
+        yesterday.add(java.util.Calendar.DAY_OF_YEAR, -1);
+
+        if (msgCal.get(java.util.Calendar.YEAR) == today.get(java.util.Calendar.YEAR) &&
+                msgCal.get(java.util.Calendar.DAY_OF_YEAR) == today.get(java.util.Calendar.DAY_OF_YEAR)) {
+            // If it's today, show the time (e.g., "9:24 AM")
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault());
+            return sdf.format(date);
+        } else if (msgCal.get(java.util.Calendar.YEAR) == yesterday.get(java.util.Calendar.YEAR) &&
+                msgCal.get(java.util.Calendar.DAY_OF_YEAR) == yesterday.get(java.util.Calendar.DAY_OF_YEAR)) {
+            return "Yesterday";
+        } else {
+            // If it's older, show the date (e.g., "Oct 12")
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault());
+            return sdf.format(date);
+        }
+    }
+
     private void setupWindowInsets() {
-        ConstraintLayout headerBar = findViewById(R.id.headerBar);
-        ViewCompat.setOnApplyWindowInsetsListener(headerBar, (v, insets) -> {
-            int top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-            v.setPadding(v.getPaddingLeft(), top + 16, v.getPaddingRight(), v.getPaddingBottom());
+        // 1. Smooth Keyboard Push (Requires android:windowSoftInputMode="adjustResize" in Manifest)
+        View rootView = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
+            androidx.core.graphics.Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
     }
@@ -236,6 +273,23 @@ public class ChatRoomActivity extends AppCompatActivity {
                 chatAdapter.setMessages(messages);
                 scrollToBottom();
                 rebuildConversationHistory(messages);
+
+                // 2. AUTO-HANDOFF LOGIC: If AI is active but the human Owner just replied
+                if (ChatRoom.MODE_AI.equals(currentMode)) {
+                    for (Message msg : messages) {
+                        if (Message.TYPE_OWNER.equals(msg.getSenderType())) {
+                            // The owner intervened! Automatically switch the UI to human mode.
+                            currentMode = ChatRoom.MODE_OWNER;
+                            chatRepository.switchChatMode(chatRoomId, ChatRoom.MODE_OWNER, success -> {});
+
+                            runOnUiThread(() -> {
+                                updateUiForCurrentMode();
+                                Toast.makeText(ChatRoomActivity.this, "Owner has joined the chat", Toast.LENGTH_SHORT).show();
+                            });
+                            break;
+                        }
+                    }
+                }
             }
 
             @Override

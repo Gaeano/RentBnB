@@ -150,7 +150,12 @@
             android:textSize="15sp"
             android:textStyle="bold"
             android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="13sp"
+            android:autoSizeMaxTextSize="15sp"
+            android:autoSizeStepGranularity="1sp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/item_rent_count"
             app:layout_constraintTop_toBottomOf="@id/item_category"
             tools:text="₱300/day" />
 

@@ -295,6 +295,7 @@
     </LinearLayout>
 
     <include
+        android:id="@+id/bottom_nav_bar"
         layout="@layout/bottom_nav_bar"
         android:layout_width="match_parent"
         android:layout_height="72dp"

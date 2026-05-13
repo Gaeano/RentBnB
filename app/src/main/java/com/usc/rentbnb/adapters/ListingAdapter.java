@@ -123,7 +123,13 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
         public void bind(Listing listing, double userLat, double userLon) {
             ///  TODO: onClickListener on card and redirects to listing details
             tvProductName.setText(listing.getProductName());
-            tvPrice.setText("₱" + listing.getPrice() + "/" + listing.getPriceUnit());
+
+            double price = listing.getPrice();
+            String priceFormatted = (price == (long) price)
+                    ? String.format("₱%d/%s", (long) price, listing.getPriceUnit())
+                    : String.format("₱%.1f/%s", price, listing.getPriceUnit());
+            tvPrice.setText(priceFormatted);
+
             tvRentCount.setText(listing.getTimesRented() + " rents");
             tvCategory.setText(listing.getCategory());
 

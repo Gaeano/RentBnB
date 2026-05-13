@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.history.HistoryActivity;
+import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 
@@ -147,9 +148,8 @@ public class ProfileFragment extends Fragment {
         });
 
         menuFavorites.setOnClickListener(v -> {
-            View navFavorites = requireActivity().findViewById(R.id.navFavorites);
-            if (navFavorites != null) {
-                navFavorites.performClick();
+            if (getActivity() instanceof HomeActivity) {
+                ((HomeActivity) getActivity()).navigateToFavorites();
             }
         });
 

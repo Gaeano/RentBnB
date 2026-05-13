@@ -30,6 +30,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.usc.rentbnb.repositories.ChatRepository;
@@ -90,12 +91,7 @@ public class HomeActivity extends AppCompatActivity {
         LinearLayout homeHeader = findViewById(R.id.homeHeader);
         ViewCompat.setOnApplyWindowInsetsListener(homeHeader, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-            v.setPadding(
-                    v.getPaddingLeft(),
-                    statusBarHeight + 8,
-                    v.getPaddingRight(),
-                    v.getPaddingBottom()
-            );
+            v.setPadding(v.getPaddingLeft(), statusBarHeight + 8, v.getPaddingRight(), v.getPaddingBottom());
             return insets;
         });
 
@@ -117,6 +113,8 @@ public class HomeActivity extends AppCompatActivity {
             navigationHelper.setInitialState();
         }
 
+        updateTabUI(true);
+        loadInitialFragment();
 
         homeViewModel.fetchIslands();
         homeViewModel.fetchListings();
@@ -146,13 +144,16 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onFragmentResumed(@NonNull androidx.fragment.app.FragmentManager fm, @NonNull Fragment f) {
                 super.onFragmentResumed(fm, f);
-                if (f instanceof RentalsFragment) {
-                    updateTabUI(true);
-                } else if (f instanceof IslandsFragment) {
-                    updateTabUI(false);
-                }
+                if (f instanceof RentalsFragment) updateTabUI(true);
+                else if (f instanceof IslandsFragment) updateTabUI(false);
             }
         }, false);
+    }
+
+    public void navigateToFavorites() {
+        if (navigationHelper != null) {
+            navigationHelper.navigateToFavorites();
+        }
     }
 
     private void setupSearchLogic() {
@@ -210,48 +211,58 @@ public class HomeActivity extends AppCompatActivity {
                 .replace(R.id.homeFeedContainer, fragment)
                 .commit();
     }
+
+    private void loadInitialFragment() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.homeFeedContainer, new RentalsFragment())
+                .commit();
+    }
     private void updateTabUI(boolean isRentals) {
         showingRentals = isRentals;
 
+        int activeColor = ContextCompat.getColor(this, R.color.teal_primary);
+        int inactiveColor = ContextCompat.getColor(this, R.color.text_grey);
+
         if (isRentals) {
             tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
-            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
-
+            tabRentals.setTextColor(activeColor);
             tabIslands.setBackgroundResource(android.R.color.transparent);
-            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+            tabIslands.setTextColor(inactiveColor);
         } else {
             tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
-            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
-
+            tabIslands.setTextColor(activeColor);
             tabRentals.setBackgroundResource(android.R.color.transparent);
-            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+            tabRentals.setTextColor(inactiveColor);
         }
     }
 
     private void setupFilterChips() {
-        TextView chipNearYou = findViewById(R.id.chip_near_you);
-        TextView chipTrending = findViewById(R.id.chip_trending);
-        TextView chipNew = findViewById(R.id.chip_new);
-        TextView chipTopRated = findViewById(R.id.chip_top_rated);
+        int[] chipIds = {R.id.chip_near_you, R.id.chip_trending, R.id.chip_new, R.id.chip_top_rated};
+        filterChips = new TextView[chipIds.length];
 
-        filterChips = new TextView[]{chipNearYou, chipTrending, chipNew, chipTopRated};
-
-        for (TextView chip : filterChips) {
-            if (chip != null) {
-                chip.setSelected(false);
-                chip.setOnClickListener(v -> handleChipToggle((TextView) v));
+        for (int i = 0; i < chipIds.length; i++) {
+            filterChips[i] = findViewById(chipIds[i]);
+            if (filterChips[i] != null) {
+                filterChips[i].setSelected(false);
+                filterChips[i].setOnClickListener(v -> handleChipToggle((TextView) v));
             }
         }
     }
 
     private void handleChipToggle(TextView selectedChip) {
         boolean isNowSelected = !selectedChip.isSelected();
-        selectedChip.setSelected(isNowSelected);
+
+        for (TextView chip : filterChips) {
+            chip.setSelected(false);
+            chip.setBackgroundResource(R.drawable.chip_background);
+            chip.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start();
+        }
 
         if (isNowSelected) {
+            selectedChip.setSelected(true);
             selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
-        } else {
-            selectedChip.setBackgroundResource(R.drawable.chip_background);
+            selectedChip.animate().scaleX(1.05f).scaleY(1.05f).setDuration(100).start();
         }
     }
 

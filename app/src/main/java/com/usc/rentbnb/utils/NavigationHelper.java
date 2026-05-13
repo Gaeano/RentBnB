@@ -37,6 +37,10 @@ public class NavigationHelper {
         setOnClickListeners();
     }
 
+    public void navigateToFavorites() {
+        navigate(favoritesFragment, navFavorites, dotFavorites, false);
+    }
+
     private void initializeViews(){
         navHome = activity.findViewById(R.id.navHome);
         navFavorites = activity.findViewById(R.id.navFavorites);

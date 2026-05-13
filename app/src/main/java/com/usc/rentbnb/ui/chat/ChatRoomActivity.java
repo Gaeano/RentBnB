@@ -67,6 +67,7 @@ public class ChatRoomActivity extends AppCompatActivity {
     private boolean isCurrentUserRenter;
     private String ownerDisplayName = "Owner";
     private com.google.firebase.Timestamp lastMessageTimestamp;
+    private float fabTranslationY = 0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,11 +183,27 @@ public class ChatRoomActivity extends AppCompatActivity {
             handleSendMessage(text);
         });
         fabToggleMode.setOnClickListener(v -> toggleChatMode());
+
         recyclerViewChat.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrolled(@androidx.annotation.NonNull RecyclerView rv, int dx, int dy) {
-                if (dy > 0 && fabToggleMode.isExtended()) fabToggleMode.shrink();
-                else if (dy < 0 && !fabToggleMode.isExtended()) fabToggleMode.extend();
+            public void onScrolled(@androidx.annotation.NonNull RecyclerView rv, int dx, int dy){
+                if (fabToggleMode.getVisibility() != View.VISIBLE) return;
+
+                float maxScroll = fabToggleMode.getHeight() + 100f;
+
+                fabTranslationY += dy;
+
+                if (fabTranslationY > maxScroll) fabTranslationY = maxScroll;
+
+                if(fabTranslationY < 0) fabTranslationY = 0;
+
+                fabToggleMode.setTranslationY(fabTranslationY);
+
+                if (dy > 0 && fabToggleMode.isExtended()){
+                    fabToggleMode.shrink();
+                }else if (dy < 0 && !fabToggleMode.isExtended() && fabTranslationY < maxScroll / 2) {
+                    fabToggleMode.extend();
+                }
             }
         });
     }

@@ -115,6 +115,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/white"
+        android:elevation="8dp"
         android:paddingHorizontal="12dp"
         android:paddingVertical="10dp"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -94,7 +94,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.filter.FilterActivity"
-            android:exported="false" />
+            android:exported="false"/>
         <activity
             android:name=".ui.notifications.NotificationActivity"
             android:exported="false" />

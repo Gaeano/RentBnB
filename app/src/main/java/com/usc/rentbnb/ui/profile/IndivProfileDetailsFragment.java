@@ -98,8 +98,8 @@ public class IndivProfileDetailsFragment extends Fragment {
 
         // Your current User model does not track Age and Gender natively.
         // We set these as placeholders until you update the User.java model and backend schema to support them.
-        updateRowText(R.id.field_age, "Age", "Not Set");
-        updateRowText(R.id.field_gender, "Gender", "Not Set");
+        updateRowText(R.id.field_age, "Age", user.getAge());
+        updateRowText(R.id.field_gender, "Gender", user.getGender());
     }
 
     // Helper method to target the specific included XML rows, now including the label

@@ -13,6 +13,8 @@ public class User {
     private String displayName; // For individuals, this is their name. For companies, it can be the rep's name or company name.
     private String email;
     private String photoUrl;
+    private String age;
+    private String gender;
     private String phone;
     private UserLocation location;
     private double rating;
@@ -136,6 +138,22 @@ public class User {
 
     public CompanyDetails getCompanyDetails() {
         return companyDetails;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public void setCompanyDetails(CompanyDetails companyDetails) {

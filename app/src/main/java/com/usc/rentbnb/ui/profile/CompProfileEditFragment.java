@@ -17,7 +17,7 @@ import com.usc.rentbnb.R;
 
 public class CompProfileEditFragment extends Fragment {
 
-    private EditText etName, etType, etYears, etPhone, etAddress, etRadius, etCoverage, etAreas;
+    private EditText etName, etType, etYears, etEmail, etPhone, etAddress, etRadius, etCoverage, etAreas;
     private CardView btnSaveProfile;
     private EditText[] allEditableFields;
     private String[] originalData;
@@ -36,6 +36,7 @@ public class CompProfileEditFragment extends Fragment {
         etName = view.findViewById(R.id.et_edit_comp_name);
         etType = view.findViewById(R.id.et_edit_comp_type);
         etYears = view.findViewById(R.id.et_edit_comp_years);
+        etEmail = view.findViewById(R.id.et_edit_comp_email);
         etPhone = view.findViewById(R.id.et_edit_comp_phone);
         etAddress = view.findViewById(R.id.et_edit_comp_address);
         etRadius = view.findViewById(R.id.et_edit_comp_radius);
@@ -46,17 +47,18 @@ public class CompProfileEditFragment extends Fragment {
         btnSaveProfile.setClickable(false);
         btnSaveProfile.setEnabled(false);
 
-        // --- NEW: FETCH FROM DATABASE ON LOAD ---
         SharedPreferences mockDB = requireActivity().getSharedPreferences("MockFirebaseDB", 0);
         etName.setText(mockDB.getString("comp_name", "Insert Company / Store"));
         etType.setText(mockDB.getString("comp_type", "Boat Rentals"));
-        etYears.setText(mockDB.getString("comp_years", "2 years"));
+        etYears.setText(mockDB.getString("comp_years", "2"));
+        etEmail.setText(mockDB.getString("comp_email", "CompanyNamed@gmail.com"));
         etPhone.setText(mockDB.getString("comp_phone", "9123456780"));
         etAddress.setText(mockDB.getString("comp_address", "N.s Cabanhud, Lapu-Lapu"));
         etRadius.setText(mockDB.getString("comp_radius", "45 km"));
         etCoverage.setText(mockDB.getString("comp_coverage", "Within City"));
         etAreas.setText(mockDB.getString("comp_areas", "Lakawon Islands, Sipalay, Guimaras"));
 
+        // All fields that can trigger state modification (excluding locked etEmail)
         allEditableFields = new EditText[]{etName, etType, etYears, etPhone, etAddress, etRadius, etCoverage, etAreas};
         originalData = new String[allEditableFields.length];
 
@@ -66,7 +68,6 @@ public class CompProfileEditFragment extends Fragment {
 
         setupTextWatchers();
 
-        // --- NEW: PUSH TO DATABASE ON SAVE ---
         btnSaveProfile.setOnClickListener(v -> {
             if (!isSaveReady) return;
 
@@ -79,14 +80,14 @@ public class CompProfileEditFragment extends Fragment {
                     .putString("comp_radius", etRadius.getText().toString().trim())
                     .putString("comp_coverage", etCoverage.getText().toString().trim())
                     .putString("comp_areas", etAreas.getText().toString().trim())
-                    .apply(); // Mimics uploading to Firebase!
+                    .apply();
 
             Toast.makeText(getContext(), "Company Profile Saved!", Toast.LENGTH_SHORT).show();
             requireActivity().finish();
         });
 
         View btnChangePassword = view.findViewById(R.id.btn_comp_change_password);
-        if(btnChangePassword != null) {
+        if (btnChangePassword != null) {
             btnChangePassword.setOnClickListener(v -> {
                 startActivity(new android.content.Intent(requireActivity(), ChangePassActivity.class));
             });

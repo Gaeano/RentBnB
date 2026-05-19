@@ -24,8 +24,7 @@ import com.usc.rentbnb.viewmodels.UserProfileViewModel;
 public class IndivProfileDetailsFragment extends Fragment {
 
     private UserProfileViewModel profileViewModel;
-    private ImageView profileImg;
-    private TextView userName;
+    private TextView tvDetailName, tvDetailAge, tvDetailGender, tvDetailEmail, tvDetailPhone, tvDetailAddress;
     private Skeleton skeleton;
 
     @Nullable
@@ -42,9 +41,8 @@ public class IndivProfileDetailsFragment extends Fragment {
 
         initViews(view);
         setUpObservers();
-        Log.d("IndivProfileDetails", "IM opening");
 
-        TextView btnEditProfile = view.findViewById(R.id.btn_edit_profile_toggle);
+        View btnEditProfile = view.findViewById(R.id.btn_edit_profile_toggle);
         if (btnEditProfile != null) {
             btnEditProfile.setOnClickListener(v -> {
                 Intent intent = new Intent(requireActivity(), ProfileDetailsEditActivity.class);
@@ -53,39 +51,32 @@ public class IndivProfileDetailsFragment extends Fragment {
             });
         }
 
-        // Trigger the network call via ViewModel
         profileViewModel.loadUserData();
     }
 
     private void initViews(View view) {
-        profileImg = view.findViewById(R.id.iv_avatar);
-        userName = view.findViewById(R.id.user_name);
 
-        // Map the Skeleton wrapper from XML
+        tvDetailName = view.findViewById(R.id.tv_detail_name);
+        tvDetailAge = view.findViewById(R.id.tv_detail_age);
+        tvDetailGender = view.findViewById(R.id.tv_detail_gender);
+        tvDetailEmail = view.findViewById(R.id.tv_detail_email);
+        tvDetailPhone = view.findViewById(R.id.tv_detail_phone);
+        tvDetailAddress = view.findViewById(R.id.tv_detail_address);
+
         skeleton = view.findViewById(R.id.skeleton_profile_details);
     }
 
     private void populateUI(User user) {
         if (user == null) return;
 
-        // 1. Setup Header
         String nameStr = (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) ? user.getDisplayName() : "Not Set";
-        userName.setText(nameStr);
 
-        if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
-            Glide.with(this)
-                    .load(user.getPhotoUrl())
-                    .placeholder(R.drawable.profile_display_picture)
-                    .circleCrop()
-                    .into(profileImg);
-        }
+        if (tvDetailName != null) tvDetailName.setText(nameStr);
+        if (tvDetailEmail != null) tvDetailEmail.setText(user.getEmail() != null ? user.getEmail() : "Not Set");
+        if (tvDetailPhone != null) tvDetailPhone.setText(user.getPhone() != null ? "(+63) " + user.getPhone() : "Not Set");
+        if (tvDetailAge != null) tvDetailAge.setText(user.getAge() != null ? user.getAge() : "Not Set");
+        if (tvDetailGender != null) tvDetailGender.setText(user.getGender() != null ? user.getGender() : "Not Set");
 
-        // 2. Setup Include Rows WITH LABELS
-        updateRowText(R.id.field_name, "Name", nameStr);
-        updateRowText(R.id.field_email, "Email", user.getEmail() != null ? user.getEmail() : "Not Set");
-        updateRowText(R.id.field_phone, "Phone Number", user.getPhone() != null ? user.getPhone() : "Not Set");
-
-        // Format Location Safely
         String address = "Not Set";
         if (user.getLocation() != null) {
             String city = user.getLocation().getCity() != null ? user.getLocation().getCity() : "";
@@ -94,33 +85,7 @@ public class IndivProfileDetailsFragment extends Fragment {
                 address = city + ", " + prov;
             }
         }
-        updateRowText(R.id.field_address, "Address", address);
-
-        // Your current User model does not track Age and Gender natively.
-        // We set these as placeholders until you update the User.java model and backend schema to support them.
-        updateRowText(R.id.field_age, "Age", user.getAge());
-        updateRowText(R.id.field_gender, "Gender", user.getGender());
-    }
-
-    // Helper method to target the specific included XML rows, now including the label
-    private void updateRowText(int rowId, String labelText, String valueText) {
-        View row = getView();
-        if (row != null) {
-            View includeLayout = row.findViewById(rowId);
-            if (includeLayout != null) {
-                // IMPORTANT: Ensure your item_profile_field.xml has a TextView with id tv_field_label
-                TextView tvLabel = includeLayout.findViewById(R.id.tv_field_label);
-                TextView tvValue = includeLayout.findViewById(R.id.tv_field_value);
-
-                if (tvLabel != null) {
-                    tvLabel.setText(labelText);
-                }
-
-                if (tvValue != null) {
-                    tvValue.setText(valueText);
-                }
-            }
-        }
+        if (tvDetailAddress != null) tvDetailAddress.setText(address);
     }
 
     private void setUpObservers() {
@@ -130,7 +95,6 @@ public class IndivProfileDetailsFragment extends Fragment {
             }
         });
 
-        // Toggle Skeleton animation
         profileViewModel.getIsloading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading) {
                 if (skeleton != null) skeleton.showSkeleton();

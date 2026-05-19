@@ -1,408 +1,239 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FAFAFA"
-    android:fillViewport="true"
     tools:context=".ui.profile.ProfileFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/profile_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="24dp"
-        android:clipToPadding="false">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
-            android:id="@+id/profile_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/my_account_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Profile"
-                android:gravity="center"
-                android:textColor="@color/teal_primary"
-                android:textSize="28sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <com.faltenreich.skeletonlayout.SkeletonLayout
-            android:id="@+id/skeleton_profile"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:maskColor="#E0E0E0"
-            app:shimmerColor="#F5F5F5"
-            app:layout_constraintTop_toBottomOf="@id/profile_header">
+            android:orientation="vertical"
+            android:paddingBottom="80dp"
+            android:clipToPadding="false">
 
             <LinearLayout
+                android:id="@+id/profile_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:paddingTop="22dp"
-                android:paddingBottom="16dp">
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/profile_image_card"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        app:cardCornerRadius="60dp"
-                        app:cardElevation="0dp">
-
-                        <ImageView
-                            android:id="@+id/profile_image"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="@drawable/userprofile"
-                            android:scaleType="centerCrop" />
-                    </androidx.cardview.widget.CardView>
-                </RelativeLayout>
-
-                <TextView
-                    android:id="@+id/profile_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    tools:text="Bulgogi Bibbing Heredia"
-                    android:textColor="@color/black"
-                    android:fontFamily="@font/jost_bold"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/profile_email"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="heredia@example.com"
-                    android:fontFamily="@font/jost_semibold"
-                    android:textColor="@color/text_grey"
-                    android:textSize="14sp"
-                    android:layout_marginTop="2dp"/>
-
-            </LinearLayout>
-        </com.faltenreich.skeletonlayout.SkeletonLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/active_listings_header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            app:layout_constraintTop_toBottomOf="@id/skeleton_profile">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="MY LISTINGS"
-                android:fontFamily="@font/jost_semibold"
-                android:textColor="@color/text_grey"
-                android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <HorizontalScrollView
-            android:id="@+id/active_listings_scroll"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:scrollbars="none"
-            app:layout_constraintTop_toBottomOf="@id/active_listings_header">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingBottom="8dp">
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
 
-                <include
-                    layout="@layout/profile_listing_card"
-                    android:layout_width="160dp"
+                <TextView
+                    android:id="@+id/my_account_title"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="1dp" />
-                <include
-                    layout="@layout/profile_listing_card"
-                    android:layout_width="160dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="1dp" />
-                <include
-                    layout="@layout/profile_listing_card"
-                    android:layout_width="160dp"
-                    android:layout_height="wrap_content" />
-
+                    android:layout_weight="1"
+                    android:text="Profile"
+                    android:gravity="center"
+                    android:textColor="@color/teal_primary"
+                    android:textSize="28sp"
+                    android:fontFamily="@font/jost_bold"
+                    android:textStyle="bold" />
             </LinearLayout>
-        </HorizontalScrollView>
 
-        <TextView
-            android:id="@+id/account_activity_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="24dp"
-            android:text="ACCOUNT &amp; ACTIVITY"
-            android:textColor="@color/text_grey"
-            android:fontFamily="@font/jost_semibold"
-            android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/active_listings_scroll" />
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:layout_constraintTop_toBottomOf="@id/account_activity_title">
-
-            <LinearLayout
+            <com.faltenreich.skeletonlayout.SkeletonLayout
+                android:id="@+id/skeleton_profile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                app:maskColor="#E0E0E0"
+                app:shimmerColor="#F5F5F5">
 
                 <LinearLayout
-                    android:id="@+id/menu_profile_detail"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:gravity="center_vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="22dp"
+                    android:paddingBottom="16dp">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_profile"
-                        app:tint="#5BC8D3" />
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/profile_image_card"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            app:cardCornerRadius="60dp"
+                            app:cardElevation="0dp">
+
+                            <ImageView
+                                android:id="@+id/profile_image"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/userprofile"
+                                android:scaleType="centerCrop" />
+                        </androidx.cardview.widget.CardView>
+                    </RelativeLayout>
+
                     <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Profile Detail"
-                        android:textColor="@android:color/black"
-                        android:textStyle="bold" />
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="#A0A0A0" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#F0F0F0" />
-
-                <LinearLayout
-                    android:id="@+id/menu_favorites"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:gravity="center_vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_favorites"
-                        app:tint="#5BC8D3" />
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Favorites"
-                        android:textColor="@android:color/black"
-                        android:textStyle="bold" />
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="#A0A0A0" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#F0F0F0" />
-
-                <LinearLayout
-                    android:id="@+id/menu_history"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:gravity="center_vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_history"
-                        app:tint="#5BC8D3" />
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="History"
-                        android:textColor="@android:color/black"
-                        android:textStyle="bold" />
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="#A0A0A0" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#F0F0F0" />
-
-                <LinearLayout
-                    android:id="@+id/menu_help_center"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:gravity="center_vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_help"
-                        app:tint="#5BC8D3" />
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Help Center"
-                        android:textColor="@android:color/black"
-                        android:textStyle="bold" />
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="#A0A0A0" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#F0F0F0" />
-
-                <LinearLayout
-                    android:id="@+id/push_notifs_toggle"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:gravity="center_vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_notifications"
-                        app:tint="#5BC8D3" />
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Push Notifications"
-                        android:textColor="@android:color/black"
-                        android:textStyle="bold" />
-
-                    <!-- TOGGLE SWITCH -->
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switch_push_notifications"
+                        android:id="@+id/profile_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:textOn=""
-                        android:textOff=""
-                        app:thumbTint="@color/teal_primary"
-                        app:trackTint="@color/teal_light" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#F0F0F0" />
-
-                <LinearLayout
-                    android:id="@+id/menu_logout"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:gravity="center_vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_logout"
-                        app:tint="@color/strength_weak" />
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Logout"
-                        android:textColor="@color/strength_weak"
+                        android:layout_marginTop="20dp"
+                        tools:text="Bulgogi Bibbing Heredia"
+                        android:textColor="@color/black"
+                        android:fontFamily="@font/jost_bold"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/strength_weak" />
+
+                    <TextView
+                        android:id="@+id/profile_email"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="heredia@example.com"
+                        android:fontFamily="@font/jost_semibold"
+                        android:textColor="@color/text_grey"
+                        android:textSize="14sp"
+                        android:layout_marginTop="2dp"/>
+
                 </LinearLayout>
+            </com.faltenreich.skeletonlayout.SkeletonLayout>
+
+            <LinearLayout
+                android:id="@+id/active_listings_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="MY LISTINGS"
+                    android:fontFamily="@font/jost_semibold"
+                    android:textColor="@color/text_grey"
+                    android:textSize="14sp" />
 
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+            <HorizontalScrollView
+                android:id="@+id/active_listings_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:scrollbars="none"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="8dp">
+
+                    <include
+                        layout="@layout/profile_listing_card"
+                        android:layout_width="160dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp" />
+                    <include
+                        layout="@layout/profile_listing_card"
+                        android:layout_width="160dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp" />
+                    <include
+                        layout="@layout/profile_listing_card"
+                        android:layout_width="160dp"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ACCOUNT &amp; ACTIVITY" android:fontFamily="@font/jost_bold" android:textColor="#757575" android:textSize="14sp" android:layout_marginBottom="12dp" android:layout_marginHorizontal="16dp"/>
+
+            <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" app:cardCornerRadius="16dp" app:cardElevation="0dp" app:cardBackgroundColor="#FFFFFF" android:layout_marginBottom="32dp" android:layout_marginHorizontal="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+
+                    <LinearLayout android:id="@+id/menu_profile_detail" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:orientation="horizontal" android:gravity="center_vertical">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_profile" app:tint="#008080"/>
+                        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Profile Details" android:textColor="#1D1D1D" android:textSize="16sp" android:fontFamily="@font/jost_bold" android:layout_marginStart="16dp"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="#BDBDBD"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginHorizontal="16dp"/>
+
+                    <LinearLayout android:id="@+id/menu_favorites" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:orientation="horizontal" android:gravity="center_vertical">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_favorites" app:tint="#008080"/>
+                        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Favorites" android:textColor="#1D1D1D" android:textSize="16sp" android:fontFamily="@font/jost_bold" android:layout_marginStart="16dp"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="#BDBDBD"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginHorizontal="16dp"/>
+
+                    <LinearLayout android:id="@+id/menu_history" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:orientation="horizontal" android:gravity="center_vertical">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_history" app:tint="#008080"/>
+                        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="History" android:textColor="#1D1D1D" android:textSize="16sp" android:fontFamily="@font/jost_bold" android:layout_marginStart="16dp"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="#BDBDBD"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginHorizontal="16dp"/>
+
+                    <LinearLayout android:id="@+id/push_notifs_toggle" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:orientation="horizontal" android:gravity="center_vertical" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_notifications" app:tint="#008080"/>
+                        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Push Notifications" android:textColor="#1D1D1D" android:textSize="16sp" android:fontFamily="@font/jost_bold" android:layout_marginStart="16dp"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_push_notifications"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SUPPORT" android:fontFamily="@font/jost_bold" android:textColor="#757575" android:textSize="14sp" android:layout_marginBottom="12dp" android:layout_marginHorizontal="16dp"/>
+
+            <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" app:cardCornerRadius="16dp" app:cardElevation="0dp" app:cardBackgroundColor="#FFFFFF" android:layout_marginBottom="32dp" android:layout_marginHorizontal="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+
+                    <LinearLayout android:id="@+id/menu_help_center" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:orientation="horizontal" android:gravity="center_vertical">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_help" app:tint="#008080"/>
+                        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Help center" android:textColor="#1D1D1D" android:textSize="16sp" android:fontFamily="@font/jost_bold" android:layout_marginStart="16dp"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="#BDBDBD"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginHorizontal="16dp"/>
+
+                    <LinearLayout android:id="@+id/menu_logout" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:orientation="horizontal" android:gravity="center_vertical">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_logout" app:tint="#D32F2F"/>
+                        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Log out" android:textColor="#D32F2F" android:textSize="16sp" android:fontFamily="@font/jost_bold" android:layout_marginStart="16dp"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="#BDBDBD"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_switch_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_margin="24dp"
+        android:text="Switch to Owner"
+        android:textColor="@color/white"
+        app:icon="@drawable/ic_dashboard"
+        app:iconTint="@color/white"
+        app:backgroundTint="@color/teal_primary"
+        app:elevation="6dp"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

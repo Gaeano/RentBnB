@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,19 +16,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.faltenreich.skeletonlayout.Skeleton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.auth.LoginActivity;
+import com.usc.rentbnb.ui.dashboard.DashboardActivity; // Added import for DashboardActivity
 import com.usc.rentbnb.ui.history.HistoryActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 import com.usc.rentbnb.viewmodels.UserProfileViewModel;
-
-import java.util.Locale;
 
 public class ProfileFragment extends Fragment {
 
@@ -46,8 +46,7 @@ public class ProfileFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
@@ -103,7 +102,6 @@ public class ProfileFragment extends Fragment {
         tvEmail = view.findViewById(R.id.profile_email);
         ivAvatar = view.findViewById(R.id.profile_image);
         profileHeader = view.findViewById(R.id.profile_header);
-
         skeleton = view.findViewById(R.id.skeleton_profile);
     }
 
@@ -124,9 +122,27 @@ public class ProfileFragment extends Fragment {
         LinearLayout menuHistory = view.findViewById(R.id.menu_history);
         LinearLayout menuHelpCenter = view.findViewById(R.id.menu_help_center);
         LinearLayout pushNotifsToggle = view.findViewById(R.id.push_notifs_toggle);
-        com.google.android.material.materialswitch.MaterialSwitch switchPush = view.findViewById(R.id.switch_push_notifications);
+        com.google.android.material.switchmaterial.SwitchMaterial switchPush = view.findViewById(R.id.switch_push_notifications);
         LinearLayout menuLogout = view.findViewById(R.id.menu_logout);
         View btnEditProfile = view.findViewById(R.id.menu_profile_detail);
+
+        ExtendedFloatingActionButton fabSwitchMode = view.findViewById(R.id.fab_switch_mode);
+        NestedScrollView scrollView = view.findViewById(R.id.profile_scroll_view);
+
+        // hide FAB
+        scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            if (scrollY > oldScrollY && fabSwitchMode.isShown()) {
+                fabSwitchMode.hide();
+            } else if (scrollY < oldScrollY && !fabSwitchMode.isShown()) {
+                fabSwitchMode.show();
+            }
+        });
+
+        fabSwitchMode.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), DashboardActivity.class);
+            startActivity(intent);
+            requireActivity().finish();
+        });
 
         menuHistory.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), HistoryActivity.class);
@@ -146,7 +162,6 @@ public class ProfileFragment extends Fragment {
         menuLogout.setOnClickListener(v -> {
             AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
             authViewModel.logout();
-
             clearRememberMeData();
 
             Intent intent = new Intent(requireActivity(), LoginActivity.class);
@@ -157,7 +172,6 @@ public class ProfileFragment extends Fragment {
         if (btnEditProfile != null) {
             btnEditProfile.setOnClickListener(v -> {
                 Intent intent = new Intent(requireActivity(), ProfileDetailsActivity.class);
-
                 intent.putExtra("IS_COMPANY", isCompany);
                 startActivity(intent);
             });

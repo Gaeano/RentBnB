@@ -16,6 +16,8 @@ public class User {
     private String age;
     private String gender;
     private String phone;
+    private String completeAddress;
+
     private UserLocation location;
     private double rating;
     private double totalRatings;
@@ -85,6 +87,14 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getCompleteAddress() {
+        return completeAddress;
+    }
+
+    public void setCompleteAddress(String completeAddress) {
+        this.completeAddress = completeAddress;
     }
 
     public UserLocation getLocation() {

@@ -25,6 +25,7 @@ import com.faltenreich.skeletonlayout.Skeleton;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.auth.LoginActivity;
+import com.usc.rentbnb.ui.favorites.FavoritesFragment;
 import com.usc.rentbnb.ui.history.HistoryActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 import com.usc.rentbnb.viewmodels.UserProfileViewModel;
@@ -127,6 +128,7 @@ public class ProfileFragment extends Fragment {
         com.google.android.material.materialswitch.MaterialSwitch switchPush = view.findViewById(R.id.switch_push_notifications);
         LinearLayout menuLogout = view.findViewById(R.id.menu_logout);
         View btnEditProfile = view.findViewById(R.id.menu_profile_detail);
+        LinearLayout menuFavorite = view.findViewById(R.id.menu_favorites);
 
         menuHistory.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), HistoryActivity.class);
@@ -136,6 +138,19 @@ public class ProfileFragment extends Fragment {
         menuHelpCenter.setOnClickListener(v -> {
             Log.d("ProfileFragment", "Help Center button clicked");
         });
+
+        menuFavorite.setOnClickListener(v -> {
+            Fragment favoriteFrag = new FavoritesFragment();
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left)
+                    .replace(R.id.homeFeedContainer, favoriteFrag)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+
 
         if (pushNotifsToggle != null && switchPush != null) {
             pushNotifsToggle.setOnClickListener(v -> {

@@ -24,7 +24,7 @@ import com.usc.rentbnb.viewmodels.UserProfileViewModel;
 public class IndivProfileDetailsFragment extends Fragment {
 
     private UserProfileViewModel profileViewModel;
-    private TextView tvDetailName, tvDetailAge, tvDetailGender, tvDetailEmail, tvDetailPhone, tvDetailAddress;
+    private TextView tvDetailName, tvDetailAge, tvDetailGender, tvDetailEmail, tvDetailPhone, tvDetailAddress, tvDetailCity, tvDetailProvince;
     private Skeleton skeleton;
 
     @Nullable
@@ -54,6 +54,14 @@ public class IndivProfileDetailsFragment extends Fragment {
         profileViewModel.loadUserData();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (profileViewModel != null) {
+            profileViewModel.loadUserData();
+        }
+    }
+
     private void initViews(View view) {
 
         tvDetailName = view.findViewById(R.id.tv_detail_name);
@@ -62,6 +70,8 @@ public class IndivProfileDetailsFragment extends Fragment {
         tvDetailEmail = view.findViewById(R.id.tv_detail_email);
         tvDetailPhone = view.findViewById(R.id.tv_detail_phone);
         tvDetailAddress = view.findViewById(R.id.tv_detail_address);
+        tvDetailCity = view.findViewById(R.id.tv_detail_city);
+        tvDetailProvince = view.findViewById(R.id.tv_detail_province);
 
         skeleton = view.findViewById(R.id.skeleton_profile_details);
     }
@@ -76,16 +86,9 @@ public class IndivProfileDetailsFragment extends Fragment {
         if (tvDetailPhone != null) tvDetailPhone.setText(user.getPhone() != null ? "(+63) " + user.getPhone() : "Not Set");
         if (tvDetailAge != null) tvDetailAge.setText(user.getAge() != null ? user.getAge() : "Not Set");
         if (tvDetailGender != null) tvDetailGender.setText(user.getGender() != null ? user.getGender() : "Not Set");
-
-        String address = "Not Set";
-        if (user.getLocation() != null) {
-            String city = user.getLocation().getCity() != null ? user.getLocation().getCity() : "";
-            String prov = user.getLocation().getProvince() != null ? user.getLocation().getProvince() : "";
-            if (!city.isEmpty() || !prov.isEmpty()) {
-                address = city + ", " + prov;
-            }
-        }
-        if (tvDetailAddress != null) tvDetailAddress.setText(address);
+        if (tvDetailAddress != null) tvDetailAddress.setText(user.getCompleteAddress());
+        if (tvDetailCity != null) tvDetailCity.setText(user.getLocation().getCity());
+        if (tvDetailProvince != null) tvDetailProvince.setText(user.getLocation().getProvince());
     }
 
     private void setUpObservers() {

@@ -3,6 +3,7 @@ package com.usc.rentbnb.models;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.PropertyName;
+import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -189,6 +190,9 @@ public class User {
         private String yearsOfOperation;
         private boolean isVerified;
 
+        private ServiceArea serviceArea;
+
+
         public CompanyDetails() {}
 
         public CompanyDetails(String companyName, String permitNumber, String businessType, String yearsOfOperation) {
@@ -196,6 +200,14 @@ public class User {
             this.permitNumber = permitNumber;
             this.businessType = businessType;
             this.yearsOfOperation = yearsOfOperation;
+        }
+
+        public ServiceArea getServiceArea() {
+            return serviceArea;
+        }
+
+        public void setServiceArea(ServiceArea serviceArea) {
+            this.serviceArea = serviceArea;
         }
 
         public String getBusinessType() {
@@ -222,5 +234,41 @@ public class User {
 
         public boolean isVerified() { return isVerified; }
         public void setVerified(boolean verified) { isVerified = verified; }
+    }
+
+    public static class ServiceArea{
+        private String radius;
+        private String coverage;
+        private String specificAreas;
+
+        public ServiceArea(String radius, String coverage, String specificAreas) {
+            this.radius = radius;
+            this.coverage = coverage;
+            this.specificAreas = specificAreas;
+        }
+
+        public String getSpecificAreas() {
+            return specificAreas;
+        }
+
+        public void setSpecificAreas(String specificAreas) {
+            this.specificAreas = specificAreas;
+        }
+
+        public String getCoverage() {
+            return coverage;
+        }
+
+        public void setCoverage(String coverage) {
+            this.coverage = coverage;
+        }
+
+        public String getRadius() {
+            return radius;
+        }
+
+        public void setRadius(String radius) {
+            this.radius = radius;
+        }
     }
 }

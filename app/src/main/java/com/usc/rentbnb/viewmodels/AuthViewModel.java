@@ -30,6 +30,7 @@ public class AuthViewModel extends ViewModel {
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loadingLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> authStepCompletedLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> changePasswordSuccess = new MutableLiveData<>();
 
     public LiveData<FirebaseUser> getUserLiveData() {
         return userLiveData;
@@ -41,6 +42,7 @@ public class AuthViewModel extends ViewModel {
         return loadingLiveData;
     }
     public LiveData<Boolean> getAuthStepCompletedLiveData() { return authStepCompletedLiveData; }
+    public LiveData<Boolean> getChangePasswordSuccess(){return changePasswordSuccess;}
 
     private ApiService apiService = ApiClient.getApiService();
 
@@ -200,6 +202,18 @@ public class AuthViewModel extends ViewModel {
                     Log.e(TAG, t.getMessage());
                 }
             });
+        });
+    }
+
+    public void updatePassword(String currentPassword, String newPassword){
+        loadingLiveData.setValue(true);
+
+        authRepository.changePassword(currentPassword, newPassword).addOnCompleteListener(task -> {
+            loadingLiveData.setValue(false);
+            if(task.isSuccessful()){
+                changePasswordSuccess.setValue(true);
+            } else{
+                errorLiveData.setValue(task.getException().getMessage());            }
         });
     }
 

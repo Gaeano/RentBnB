@@ -48,6 +48,9 @@ public interface ApiService {
     @GET("auth/users/me")
     Call<AuthResponse> getUserData();
 
+    @PUT("auth/update")
+    Call<AuthResponse> updateProfile(@Body RegisterRequest updatedData);
+
     @POST("listings")
     Call<CreateListingResponse> createListing(@Body CreateListingRequest createListingRequest);
 

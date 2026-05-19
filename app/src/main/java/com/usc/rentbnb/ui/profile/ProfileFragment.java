@@ -24,10 +24,11 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.faltenreich.skeletonlayout.Skeleton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.auth.LoginActivity;
-import com.usc.rentbnb.ui.dashboard.DashboardActivity; // Added import for DashboardActivity
+import com.usc.rentbnb.ui.dashboard.DashboardActivity;
 import com.usc.rentbnb.ui.favorites.FavoritesFragment;
 import com.usc.rentbnb.ui.history.HistoryActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
@@ -128,7 +129,7 @@ public class ProfileFragment extends Fragment {
         LinearLayout menuHistory = view.findViewById(R.id.menu_history);
         LinearLayout menuHelpCenter = view.findViewById(R.id.menu_help_center);
         LinearLayout pushNotifsToggle = view.findViewById(R.id.push_notifs_toggle);
-        com.google.android.material.materialswitch.MaterialSwitch switchPush = view.findViewById(R.id.switch_push_notifications);
+        SwitchMaterial switchPush = view.findViewById(R.id.switch_push_notifications);
         LinearLayout menuLogout = view.findViewById(R.id.menu_logout);
         View btnEditProfile = view.findViewById(R.id.menu_profile_detail);
         LinearLayout menuFavorite = view.findViewById(R.id.menu_favorites);
@@ -170,8 +171,6 @@ public class ProfileFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
-
-
 
         if (pushNotifsToggle != null && switchPush != null) {
             pushNotifsToggle.setOnClickListener(v -> {

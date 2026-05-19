@@ -12,7 +12,10 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.viewmodels.AuthViewModel;
 
 public class ChangePassActivity extends AppCompatActivity {
 
@@ -21,6 +24,8 @@ public class ChangePassActivity extends AppCompatActivity {
     private View btnSavePass;
 
     private boolean isSaveReady = false;
+
+    private AuthViewModel authViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +40,9 @@ public class ChangePassActivity extends AppCompatActivity {
             return insets;
         });
 
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        setUpObservers();
+
         ImageView btnBack = findViewById(R.id.btn_back_pass);
         btnBack.setOnClickListener(v -> finish());
 
@@ -47,23 +55,32 @@ public class ChangePassActivity extends AppCompatActivity {
         btnSavePass.setClickable(false);
         btnSavePass.setEnabled(false);
 
+
         setupTextWatchers();
 
         btnSavePass.setOnClickListener(v -> {
             if (!isSaveReady) return;
 
-            String newPass = etNew.getText().toString();
-            String confirm = etConfirm.getText().toString();
+            String currentPass = etCurrent.getText().toString().trim();
+            String newPass = etNew.getText().toString().trim();
+            String confirmPass = etConfirm.getText().toString().trim();
 
-            if (!newPass.equals(confirm)) {
+
+            if (!newPass.equals(confirmPass)) {
+                tvErrorMatch.setText("Passwords do not match");
+                tvErrorMatch.setVisibility(View.VISIBLE);
+                return;
+            }
+
+            if (currentPass.equals(newPass)) {
+                tvErrorMatch.setText("New password cannot be the same as current");
                 tvErrorMatch.setVisibility(View.VISIBLE);
                 return;
             }
 
             tvErrorMatch.setVisibility(View.GONE);
 
-            Toast.makeText(this, "Password Updated Successfully!", Toast.LENGTH_SHORT).show();
-            finish();
+            authViewModel.updatePassword(currentPass, newPass);
         });
     }
 
@@ -94,5 +111,20 @@ public class ChangePassActivity extends AppCompatActivity {
         btnSavePass.setEnabled(isSaveReady);
         btnSavePass.setClickable(isSaveReady);
         btnSavePass.setAlpha(isSaveReady ? 1.0f : 0.5f);
+    }
+
+    private void setUpObservers(){
+        authViewModel.getChangePasswordSuccess().observe(this, isSuccess -> {
+            if (isSuccess != null && isSuccess){
+                Toast.makeText(this, "Password changed successfully!", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+
+        authViewModel.getErrorLiveData().observe(this, errorMessage -> {
+            if (errorMessage != null && !errorMessage.isEmpty()){
+                Toast.makeText(this, "Error: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

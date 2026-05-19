@@ -1,8 +1,10 @@
 package com.usc.rentbnb.repositories;
 
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
@@ -48,6 +50,24 @@ public class AuthRepository {
             return user.updateProfile(profileUpdates);
         }
         return null;
+    }
+
+    public Task<Void> changePassword(String currentPassword, String newPassword){
+        FirebaseUser user = auth.getCurrentUser();
+
+        if (user != null && user.getEmail() != null){
+            AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), currentPassword);
+
+            return user.reauthenticate(credential)
+                    .continueWithTask(task ->{
+                        if (task.isSuccessful()){
+                            return user.updatePassword(newPassword);
+                        } else {
+                            throw task.getException();
+                        }
+                    });
+        }
+        return Tasks.forException(new Exception("User session invalid!"));
     }
 
     public void logout(){

@@ -22,14 +22,6 @@
             app:tint="@color/black"
             android:layout_marginEnd="16dp"/>
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Edit Profile"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
     <androidx.fragment.app.FragmentContainerView

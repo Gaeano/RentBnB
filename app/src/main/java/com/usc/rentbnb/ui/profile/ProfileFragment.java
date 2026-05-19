@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,9 +28,12 @@ import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.dashboard.DashboardActivity; // Added import for DashboardActivity
+import com.usc.rentbnb.ui.favorites.FavoritesFragment;
 import com.usc.rentbnb.ui.history.HistoryActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 import com.usc.rentbnb.viewmodels.UserProfileViewModel;
+
+import java.util.Locale;
 
 public class ProfileFragment extends Fragment {
 
@@ -46,7 +50,8 @@ public class ProfileFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
@@ -102,6 +107,7 @@ public class ProfileFragment extends Fragment {
         tvEmail = view.findViewById(R.id.profile_email);
         ivAvatar = view.findViewById(R.id.profile_image);
         profileHeader = view.findViewById(R.id.profile_header);
+
         skeleton = view.findViewById(R.id.skeleton_profile);
     }
 
@@ -122,9 +128,10 @@ public class ProfileFragment extends Fragment {
         LinearLayout menuHistory = view.findViewById(R.id.menu_history);
         LinearLayout menuHelpCenter = view.findViewById(R.id.menu_help_center);
         LinearLayout pushNotifsToggle = view.findViewById(R.id.push_notifs_toggle);
-        com.google.android.material.switchmaterial.SwitchMaterial switchPush = view.findViewById(R.id.switch_push_notifications);
+        com.google.android.material.materialswitch.MaterialSwitch switchPush = view.findViewById(R.id.switch_push_notifications);
         LinearLayout menuLogout = view.findViewById(R.id.menu_logout);
         View btnEditProfile = view.findViewById(R.id.menu_profile_detail);
+        LinearLayout menuFavorite = view.findViewById(R.id.menu_favorites);
 
         ExtendedFloatingActionButton fabSwitchMode = view.findViewById(R.id.fab_switch_mode);
         NestedScrollView scrollView = view.findViewById(R.id.profile_scroll_view);
@@ -153,6 +160,19 @@ public class ProfileFragment extends Fragment {
             Log.d("ProfileFragment", "Help Center button clicked");
         });
 
+        menuFavorite.setOnClickListener(v -> {
+            Fragment favoriteFrag = new FavoritesFragment();
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left)
+                    .replace(R.id.homeFeedContainer, favoriteFrag)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+
+
         if (pushNotifsToggle != null && switchPush != null) {
             pushNotifsToggle.setOnClickListener(v -> {
                 switchPush.setChecked(!switchPush.isChecked());
@@ -162,6 +182,7 @@ public class ProfileFragment extends Fragment {
         menuLogout.setOnClickListener(v -> {
             AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
             authViewModel.logout();
+
             clearRememberMeData();
 
             Intent intent = new Intent(requireActivity(), LoginActivity.class);
@@ -172,6 +193,7 @@ public class ProfileFragment extends Fragment {
         if (btnEditProfile != null) {
             btnEditProfile.setOnClickListener(v -> {
                 Intent intent = new Intent(requireActivity(), ProfileDetailsActivity.class);
+
                 intent.putExtra("IS_COMPANY", isCompany);
                 startActivity(intent);
             });

@@ -24,9 +24,8 @@ import com.usc.rentbnb.viewmodels.UserProfileViewModel;
 public class CompProfileDetailsFragment extends Fragment {
 
     private UserProfileViewModel profileViewModel;
-    private ImageView profileImg;
-    private TextView tvHeaderName;
-    private TextView tvCompName, tvCompType, tvCompYears, tvCompEmail, tvCompPhone, tvCompAddress;
+
+    private TextView tvCompName, tvCompType, tvCompYears, tvCompEmail, tvCompPhone, tvCompAddress, tvCity, tvProvince;
     private TextView tvRadius, tvCoverage, tvSpecificAreas;
     private Skeleton skeleton;
 
@@ -45,7 +44,7 @@ public class CompProfileDetailsFragment extends Fragment {
         initViews(view);
         setUpObservers();
 
-        TextView btnEditProfile = view.findViewById(R.id.btn_edit_profile_toggle);
+        View btnEditProfile = view.findViewById(R.id.btn_edit_profile_toggle);
         if (btnEditProfile != null) {
             btnEditProfile.setOnClickListener(v -> {
                 Intent intent = new Intent(requireActivity(), ProfileDetailsEditActivity.class);
@@ -57,6 +56,13 @@ public class CompProfileDetailsFragment extends Fragment {
         profileViewModel.loadUserData();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (profileViewModel != null) {
+            profileViewModel.loadUserData();
+        }
+    }
     private void initViews(View view) {
 
         tvCompName = view.findViewById(R.id.tv_detail_comp_name);
@@ -65,6 +71,8 @@ public class CompProfileDetailsFragment extends Fragment {
         tvCompEmail = view.findViewById(R.id.tv_detail_comp_email);
         tvCompPhone = view.findViewById(R.id.tv_detail_comp_phone);
         tvCompAddress = view.findViewById(R.id.tv_detail_comp_address);
+        tvCity = view.findViewById(R.id.tv_detail_comp_city);
+        tvProvince = view.findViewById(R.id.tv_detail_comp_province);
 
         tvRadius = view.findViewById(R.id.tv_detail_radius);
         tvCoverage = view.findViewById(R.id.tv_detail_coverage);
@@ -77,39 +85,23 @@ public class CompProfileDetailsFragment extends Fragment {
         if (user == null) return;
 
         String nameStr = (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) ? user.getDisplayName() : "Not Set";
-        if (tvHeaderName != null) tvHeaderName.setText(nameStr);
-
-        if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty() && profileImg != null) {
-            Glide.with(this)
-                    .load(user.getPhotoUrl())
-                    .placeholder(R.drawable.profile_display_picture)
-                    .circleCrop()
-                    .into(profileImg);
-        }
 
         if (tvCompName != null) tvCompName.setText(nameStr);
         if (tvCompEmail != null) tvCompEmail.setText(user.getEmail() != null ? user.getEmail() : "Not Set");
         if (tvCompPhone != null) tvCompPhone.setText(user.getPhone() != null ? "+63 " + user.getPhone() : "Not Set");
+        if (tvCity != null) tvCity.setText(user.getLocation().getCity() != null ? user.getLocation().getCity() : "Not Set");
+        if (tvProvince != null) tvProvince.setText(user.getLocation().getProvince() != null ? user.getLocation().getProvince() : "Not Set");
 
-        String address = "Not Set";
-        if (user.getLocation() != null) {
-            String city = user.getLocation().getCity() != null ? user.getLocation().getCity() : "";
-            String prov = user.getLocation().getProvince() != null ? user.getLocation().getProvince() : "";
-            if (!city.isEmpty() || !prov.isEmpty()) {
-                address = city + ", " + prov;
-            }
-        }
-        if (tvCompAddress != null) tvCompAddress.setText(address);
+        if (tvCompAddress != null) tvCompAddress.setText(user.getCompleteAddress());
 
         if (user.getCompanyDetails() != null) {
             if (tvCompType != null) tvCompType.setText(user.getCompanyDetails().getBusinessType());
             if (tvCompYears != null) tvCompYears.setText(user.getCompanyDetails().getYearsOfOperation());
         }
 
-        // Setup service areas dynamically or via placeholders until fully supported by model schemas
-        if (tvRadius != null) tvRadius.setText("45 km");
-        if (tvCoverage != null) tvCoverage.setText("Within City");
-        if (tvSpecificAreas != null) tvSpecificAreas.setText("Lakawon Islands, Sipalay, Guimaras");
+        if (tvRadius != null) tvRadius.setText(user.getCompanyDetails().getServiceArea().getRadius() != null ? user.getCompanyDetails().getServiceArea().getRadius() : "Not Set");
+        if (tvCoverage != null) tvCoverage.setText(user.getCompanyDetails().getServiceArea().getCoverage() != null ? user.getCompanyDetails().getServiceArea().getCoverage() : "Not Set");
+        if (tvSpecificAreas != null) tvSpecificAreas.setText(user.getCompanyDetails().getServiceArea().getSpecificAreas() != null ? user.getCompanyDetails().getServiceArea().getSpecificAreas() : "Not Set");
     }
 
     private void setUpObservers() {

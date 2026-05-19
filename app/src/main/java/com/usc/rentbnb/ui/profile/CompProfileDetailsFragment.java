@@ -26,6 +26,8 @@ public class CompProfileDetailsFragment extends Fragment {
     private UserProfileViewModel profileViewModel;
     private ImageView profileImg;
     private TextView tvHeaderName;
+    private TextView tvCompName, tvCompType, tvCompYears, tvCompEmail, tvCompPhone, tvCompAddress;
+    private TextView tvRadius, tvCoverage, tvSpecificAreas;
     private Skeleton skeleton;
 
     @Nullable
@@ -52,27 +54,30 @@ public class CompProfileDetailsFragment extends Fragment {
             });
         }
 
-        // Trigger the network call via ViewModel
         profileViewModel.loadUserData();
     }
 
     private void initViews(View view) {
-        // Ensure your XML has an ImageView with this ID for the company logo/avatar
-        profileImg = view.findViewById(R.id.iv_avatar);
-        tvHeaderName = view.findViewById(R.id.tv_comp_header_name);
 
-        // IMPORTANT: Ensure you wrap your XML layout in a SkeletonLayout with this ID
+        tvCompName = view.findViewById(R.id.tv_detail_comp_name);
+        tvCompType = view.findViewById(R.id.tv_detail_comp_type);
+        tvCompYears = view.findViewById(R.id.tv_detail_comp_years);
+        tvCompEmail = view.findViewById(R.id.tv_detail_comp_email);
+        tvCompPhone = view.findViewById(R.id.tv_detail_comp_phone);
+        tvCompAddress = view.findViewById(R.id.tv_detail_comp_address);
+
+        tvRadius = view.findViewById(R.id.tv_detail_radius);
+        tvCoverage = view.findViewById(R.id.tv_detail_coverage);
+        tvSpecificAreas = view.findViewById(R.id.tv_detail_specific_areas);
+
         skeleton = view.findViewById(R.id.skeleton_comp_profile_details);
     }
 
     private void populateUI(User user) {
         if (user == null) return;
 
-        // 1. Setup Header
         String nameStr = (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) ? user.getDisplayName() : "Not Set";
-        if (tvHeaderName != null) {
-            tvHeaderName.setText(nameStr);
-        }
+        if (tvHeaderName != null) tvHeaderName.setText(nameStr);
 
         if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty() && profileImg != null) {
             Glide.with(this)
@@ -82,12 +87,10 @@ public class CompProfileDetailsFragment extends Fragment {
                     .into(profileImg);
         }
 
-        // 2. Setup Include Rows WITH LABELS
-        // Mapping the standard user fields
-        updateRowText(R.id.field_acct_name, "Account Name", nameStr);
-        updateRowText(R.id.field_comp_phone, "Phone Number", user.getPhone() != null ? user.getPhone() : "Not Set");
+        if (tvCompName != null) tvCompName.setText(nameStr);
+        if (tvCompEmail != null) tvCompEmail.setText(user.getEmail() != null ? user.getEmail() : "Not Set");
+        if (tvCompPhone != null) tvCompPhone.setText(user.getPhone() != null ? "+63 " + user.getPhone() : "Not Set");
 
-        // Format Location Safely
         String address = "Not Set";
         if (user.getLocation() != null) {
             String city = user.getLocation().getCity() != null ? user.getLocation().getCity() : "";
@@ -96,36 +99,17 @@ public class CompProfileDetailsFragment extends Fragment {
                 address = city + ", " + prov;
             }
         }
-        updateRowText(R.id.field_comp_address, "Address", address);
-        String businessType = user.getCompanyDetails().getBusinessType();
-        String yearsOperation = user.getCompanyDetails().getYearsOfOperation();
-        // Mapping Company-Specific Fields (Placeholders until User model is updated)
-        updateRowText(R.id.field_business_type, "Business Type", businessType);
-        updateRowText(R.id.field_years, "Years in Operation", yearsOperation);
-        updateRowText(R.id.field_radius, "Operational Radius", "Not Set");
-        updateRowText(R.id.field_within, "Coverage", "Not Set");
-        updateRowText(R.id.field_specific_areas, "Specific Areas", "Not Set");
-    }
+        if (tvCompAddress != null) tvCompAddress.setText(address);
 
-    // Helper method to target the specific included XML rows, including the label
-    private void updateRowText(int rowId, String labelText, String valueText) {
-        View row = getView();
-        if (row != null) {
-            View includeLayout = row.findViewById(rowId);
-            if (includeLayout != null) {
-                // IMPORTANT: Ensure your item_profile_field.xml has a TextView with id tv_field_label
-                TextView tvLabel = includeLayout.findViewById(R.id.tv_field_label);
-                TextView tvValue = includeLayout.findViewById(R.id.tv_field_value);
-
-                if (tvLabel != null) {
-                    tvLabel.setText(labelText);
-                }
-
-                if (tvValue != null) {
-                    tvValue.setText(valueText);
-                }
-            }
+        if (user.getCompanyDetails() != null) {
+            if (tvCompType != null) tvCompType.setText(user.getCompanyDetails().getBusinessType());
+            if (tvCompYears != null) tvCompYears.setText(user.getCompanyDetails().getYearsOfOperation());
         }
+
+        // Setup service areas dynamically or via placeholders until fully supported by model schemas
+        if (tvRadius != null) tvRadius.setText("45 km");
+        if (tvCoverage != null) tvCoverage.setText("Within City");
+        if (tvSpecificAreas != null) tvSpecificAreas.setText("Lakawon Islands, Sipalay, Guimaras");
     }
 
     private void setUpObservers() {
@@ -135,7 +119,6 @@ public class CompProfileDetailsFragment extends Fragment {
             }
         });
 
-        // Toggle Skeleton animation
         profileViewModel.getIsloading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading) {
                 if (skeleton != null) skeleton.showSkeleton();

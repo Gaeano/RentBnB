@@ -33,11 +33,9 @@ import java.util.Locale;
 
 public class ProfileFragment extends Fragment {
 
-    // UI Elements
     private TextView tvName, tvEmail;
     private ImageView ivAvatar;
     private LinearLayout profileHeader;
-    private TextView tvListingsCount, tvPurchasesCount, tvRatingValue, tvEarningsValue;
     private Skeleton skeleton;
 
     private UserProfileViewModel profileViewModel;
@@ -79,13 +77,12 @@ public class ProfileFragment extends Fragment {
             if (user != null) {
                 populateUI(user);
                 String userType = user.getUserType();
-                if(userType.equals("COMPANY")){
+                if ("COMPANY".equals(userType)) {
                     isCompany = true;
                 }
             }
         });
 
-        // ADDED FEATURE: Toggle Skeleton instead of ProgressBar
         profileViewModel.getIsloading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading) {
                 if (skeleton != null) skeleton.showSkeleton();
@@ -102,18 +99,11 @@ public class ProfileFragment extends Fragment {
     }
 
     private void initViews(View view) {
-        // Map the UI elements
         tvName = view.findViewById(R.id.profile_name);
         tvEmail = view.findViewById(R.id.profile_email);
         ivAvatar = view.findViewById(R.id.profile_image);
         profileHeader = view.findViewById(R.id.profile_header);
 
-        tvListingsCount = view.findViewById(R.id.tv_listings_count);
-        tvPurchasesCount = view.findViewById(R.id.tv_purchases_count);
-        tvRatingValue = view.findViewById(R.id.tv_rating_value);
-        tvEarningsValue = view.findViewById(R.id.tv_earnings_value);
-
-        // ADDED FEATURE: Map the Skeleton from your XML
         skeleton = view.findViewById(R.id.skeleton_profile);
     }
 
@@ -121,19 +111,11 @@ public class ProfileFragment extends Fragment {
         tvName.setText(user.getDisplayName() != null ? user.getDisplayName() : "N/A");
         tvEmail.setText(user.getEmail() != null ? user.getEmail() : "N/A");
 
-        tvRatingValue.setText(String.format(Locale.getDefault(), "%.1f", user.getRating()));
-        tvEarningsValue.setText(String.format(Locale.getDefault(), "P%.1f", user.getTotalEarnings()));
-
-        // Placeholders for now
-        tvListingsCount.setText("0");
-        tvPurchasesCount.setText("0");
-
-        // Bind the image using Glide
         if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
             Glide.with(this)
                     .load(user.getPhotoUrl())
-                    .placeholder(R.drawable.userprofile) // Updated placeholder name based on your code
-                    .circleCrop() // Makes the image circular
+                    .placeholder(R.drawable.userprofile)
+                    .circleCrop()
                     .into(ivAvatar);
         }
     }
@@ -141,7 +123,8 @@ public class ProfileFragment extends Fragment {
     private void setupClickListeners(View view) {
         LinearLayout menuHistory = view.findViewById(R.id.menu_history);
         LinearLayout menuHelpCenter = view.findViewById(R.id.menu_help_center);
-        LinearLayout menuAppSettings = view.findViewById(R.id.menu_app_settings);
+        LinearLayout pushNotifsToggle = view.findViewById(R.id.push_notifs_toggle);
+        com.google.android.material.materialswitch.MaterialSwitch switchPush = view.findViewById(R.id.switch_push_notifications);
         LinearLayout menuLogout = view.findViewById(R.id.menu_logout);
         View btnEditProfile = view.findViewById(R.id.menu_profile_detail);
 
@@ -154,9 +137,11 @@ public class ProfileFragment extends Fragment {
             Log.d("ProfileFragment", "Help Center button clicked");
         });
 
-        menuAppSettings.setOnClickListener(v -> {
-            Log.d("ProfileFragment", "App Settings button clicked");
-        });
+        if (pushNotifsToggle != null && switchPush != null) {
+            pushNotifsToggle.setOnClickListener(v -> {
+                switchPush.setChecked(!switchPush.isChecked());
+            });
+        }
 
         menuLogout.setOnClickListener(v -> {
             AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);

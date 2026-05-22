@@ -55,4 +55,15 @@
         <item name="checkedIconVisible">false</item>
         <item name="chipIconVisible">false</item>
     </style>
+
+    <style name="CustomMaterialCalendar" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="buttonBarPositiveButtonStyle">@style/CustomCalendarButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/CustomCalendarButton</item>
+    </style>
+
+    <style name="CustomCalendarButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/black</item>
+    </style>
 </resources>
+
+

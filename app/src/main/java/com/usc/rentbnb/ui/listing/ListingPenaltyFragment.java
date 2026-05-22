@@ -38,7 +38,7 @@ public class ListingPenaltyFragment extends Fragment {
         draft = viewModel.currentDraft();
 
         EditText etPenalty = view.findViewById(R.id.etPenaltyPrice);
-        etPenalty.setText(draft.penaltyPrice > 0 ? String.valueOf(draft.penaltyPrice) : "");
+        etPenalty.setText(draft.penaltyAmount > 0 ? String.valueOf(draft.penaltyAmount) : "");
 
         View btnHourly  = view.findViewById(R.id.btnHourlyPenalty);
         View btnDaily   = view.findViewById(R.id.btnDailyPenalty);
@@ -68,7 +68,7 @@ public class ListingPenaltyFragment extends Fragment {
                 etPenalty.setError("Penalty fee is required!");
                 return;
             }
-            draft.penaltyPrice = Double.parseDouble(penaltyStr);
+            draft.penaltyAmount = Double.parseDouble(penaltyStr);
             draft.penaltyUnit = selectedUnit;
 
             if (getActivity() instanceof AddListingActivity) {

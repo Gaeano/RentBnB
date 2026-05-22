@@ -11,8 +11,8 @@ public class ListingDraft {
     public String category     = "";
     public double price        = 0.0;
     public String priceUnit    = "hourly";
-    public double penaltyPrice = 0.0;
-    public String penaltyUnit  = "hourly";
+    public double penaltyAmount = 0.0;
+    public String penaltyUnit   = "";  // valid values: "Hourly", "Daily", "Weekly", "Monthly"
     public List<String> paymentMethods      = new ArrayList<>();
     public List<String> suggestedActivities = new ArrayList<>();
     public List<String> imageUris           = new ArrayList<>(); // local URIs before upload

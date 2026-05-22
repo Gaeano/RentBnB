@@ -187,28 +187,20 @@ public class ChatRoomActivity extends AppCompatActivity {
                 renterQuestion
         );
 
-        FirebaseAuth.getInstance().getCurrentUser().getIdToken(true)
-                .addOnSuccessListener(result -> {
-                    String token = "Bearer " + result.getToken();
+        ApiClient.getApiService().generateInquilinoReply(request).enqueue(new Callback<InquilinoResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<InquilinoResponse> call, @NonNull Response<InquilinoResponse> response) {
+                if (!response.isSuccessful() || response.body() == null || !response.body().isSuccess()) {
+                    String realError = response.body() != null ? response.body().getError() : "HTTP Error: " + response.code();
+                    Toast.makeText(ChatRoomActivity.this, "Backend Error: " + realError, Toast.LENGTH_LONG).show();
+                }
+            }
 
-                    ApiClient.getApiService().generateInquilinoReply(token, request).enqueue(new Callback<InquilinoResponse>() {
-                        @Override
-                        public void onResponse(@NonNull Call<InquilinoResponse> call, @NonNull Response<InquilinoResponse> response) {
-                            if (!response.isSuccessful() || response.body() == null || !response.body().isSuccess()) {
-                                String realError = response.body() != null ? response.body().getError() : "HTTP Error: " + response.code();
-                                Toast.makeText(ChatRoomActivity.this, "Backend Error: " + realError, Toast.LENGTH_LONG).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<InquilinoResponse> call, @NonNull Throwable t) {
-                            Toast.makeText(ChatRoomActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    });
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(ChatRoomActivity.this, "Failed to get auth token", Toast.LENGTH_SHORT).show();
-                });
+            @Override
+            public void onFailure(@NonNull Call<InquilinoResponse> call, @NonNull Throwable t) {
+                Toast.makeText(ChatRoomActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void toggleChatMode() {

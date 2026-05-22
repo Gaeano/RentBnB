@@ -259,7 +259,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         }
 
         strengthIndicator.setVisibility(View.VISIBLE);
-        com.usc.rentbnb.utils.PasswordStrengthHelper.Strength strength = 
+        com.usc.rentbnb.utils.PasswordStrengthHelper.Strength strength =
                 com.usc.rentbnb.utils.PasswordStrengthHelper.calculateStrength(password);
 
         tvStrengthLabel.setText("Strength: " + strength.label);

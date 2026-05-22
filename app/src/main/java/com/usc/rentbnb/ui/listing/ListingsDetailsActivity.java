@@ -1,323 +1,218 @@
 package com.usc.rentbnb.ui.listing;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.TextPaint;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.OvershootInterpolator;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FirebaseAuth;
+import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.usc.rentbnb.R;
-import com.usc.rentbnb.models.ChatRoom;
-import com.usc.rentbnb.models.InquilinoOpeningRequest;
-import com.usc.rentbnb.models.InquilinoResponse;
 import com.usc.rentbnb.models.Listing;
-import com.usc.rentbnb.network.ApiClient;
-import com.usc.rentbnb.repositories.ChatRepository;
-import com.usc.rentbnb.ui.chat.ChatRoomActivity;
-import com.usc.rentbnb.viewmodels.FavoriteViewModel;
+import com.usc.rentbnb.ui.booking.RentForm;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.Locale;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
+/**
+ * Activity to display detailed information about a rental listing.
+ */
 public class ListingsDetailsActivity extends AppCompatActivity {
 
-    private TextView titleView, categoryView, priceView, activitiesView;
-    private FrameLayout btnBack;
-    private TextView btnRentNow;
-    private ImageView btnFavorite, btnChat;
-    private TextView descriptionText, btnShowAllReviews;
-
-    // Architecture Variables
-    private FavoriteViewModel favoriteViewModel;
-    private boolean isFavorite = false;
-    private String currentListingId;
+    private TextView titleView, categoryView, priceView, descriptionText, ratingText, reviewCountText;
+    private TextView ownerNameView, ownerResponseTimeView;
+    private ImageView ownerAvatarView;
+    private MaterialButton btnRentNow;
+    private ChipGroup chipGroupActivities;
+    private ViewPager2 imageViewPager;
+    private TabLayout tabIndicator;
+    private ImageView btnFavorite;
+    private FloatingActionButton btnChat;
+    private Toolbar toolbar;
     private Listing currentListing;
-    private String userId;
-    private boolean isActivitiesExpanded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listings_details);
 
-        // 1. Initialize Views
+        if (getIntent().hasExtra("listing_object")) {
+            currentListing = getIntent().getParcelableExtra("listing_object");
+        } else if (getIntent().hasExtra("product_name")) {
+            // Fallback for Intent from NotificationActivity
+            currentListing = new Listing();
+            currentListing.setId(getIntent().getStringExtra("listing_id"));
+            currentListing.setProductName(getIntent().getStringExtra("product_name"));
+            currentListing.setCategory(getIntent().getStringExtra("category"));
+            
+            String priceStr = getIntent().getStringExtra("price");
+            try {
+                currentListing.setPrice(Double.parseDouble(priceStr != null ? priceStr : "0"));
+            } catch (NumberFormatException e) {
+                currentListing.setPrice(0.0);
+            }
+            currentListing.setPriceUnit(getIntent().getStringExtra("price_unit"));
+            currentListing.setDescription("Information from notification. Details may be limited.");
+        }
+
+        if (currentListing == null) {
+            Toast.makeText(this, "Listing details not found", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        initViews();
+        setupToolbar();
+        bindListingData();
+        setupListeners();
+    }
+
+    private void initViews() {
+        toolbar = findViewById(R.id.toolbar);
         titleView = findViewById(R.id.listing_title);
         categoryView = findViewById(R.id.listing_category);
         priceView = findViewById(R.id.listing_price);
-        btnBack = findViewById(R.id.btn_back_wrapper);
-        btnRentNow = findViewById(R.id.btn_rent_now);
-        activitiesView = findViewById(R.id.text_suggested_activities);
+        descriptionText = findViewById(R.id.listing_description);
+        ratingText = findViewById(R.id.rating_text);
+        reviewCountText = findViewById(R.id.review_count_text);
+        
+        ownerNameView = findViewById(R.id.owner_name);
+        ownerResponseTimeView = findViewById(R.id.owner_response_time);
+        ownerAvatarView = findViewById(R.id.owner_avatar);
 
+        btnRentNow = findViewById(R.id.btn_rent_now);
+        chipGroupActivities = findViewById(R.id.chip_group_activities);
+        imageViewPager = findViewById(R.id.image_viewpager);
+        tabIndicator = findViewById(R.id.tab_indicator);
         btnFavorite = findViewById(R.id.btn_favorite);
         btnChat = findViewById(R.id.btn_chat);
-        descriptionText = findViewById(R.id.listing_description);
-        btnShowAllReviews = findViewById(R.id.btn_show_all_reviews);
-
-        // Handle Status Bar Padding
-        ViewCompat.setOnApplyWindowInsetsListener(btnBack, (v, insets) -> {
-            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            params.topMargin = statusBarHeight + 16;
-            v.setLayoutParams(params);
-            return insets;
-        });
-
-        // 2. Retrieve Data via Parcelable
-        Intent intent = getIntent();
-        if (intent != null) {
-            currentListing = intent.getParcelableExtra("listing_object");
-
-            if (currentListing != null) {
-                currentListingId = currentListing.getId();
-
-                // Update UI from object
-                titleView.setText(currentListing.getProductName());
-                categoryView.setText(currentListing.getCategory());
-                priceView.setText("₱" + currentListing.getPrice() + " / " + currentListing.getPriceUnit());
-                descriptionText.setText(currentListing.getDescription());
-
-                // Populate activities dynamically
-                setupActivitiesList();
-            }
-        }
-
-        // 3. Setup Architecture
-        setupFavoritesObserver();
-
-        // 4. Setup Click Listeners
-        btnBack.setOnClickListener(v -> finish());
-
-        btnRentNow.setOnClickListener(v -> {
-            Toast.makeText(this, "Proceeding to checkout...", Toast.LENGTH_SHORT).show();
-        });
-
-        btnChat.setOnClickListener(v -> {
-            handleChatButtonClick();
-        });
-
-        // Animated Favorite Button
-        btnFavorite.setOnClickListener(v -> {
-            if (userId == null) {
-                Toast.makeText(this, "Please log in to save favorites.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            btnFavorite.animate()
-                    .scaleX(0.7f)
-                    .scaleY(0.7f)
-                    .setDuration(150)
-                    .withEndAction(() -> {
-                        isFavorite = !isFavorite;
-                        updateHeartUI();
-
-                        btnFavorite.animate()
-                                .scaleX(1.0f)
-                                .scaleY(1.0f)
-                                .setDuration(200)
-                                .setInterpolator(new OvershootInterpolator())
-                                .start();
-
-                        if (isFavorite) {
-                            favoriteViewModel.addFavoriteListing(userId, currentListing);
-                        } else {
-                            favoriteViewModel.deleteFavoriteListing(userId, currentListingId);
-                        }
-                    })
-                    .start();
-        });
     }
 
-    private void setupActivitiesList() {
-        List<String> activities = currentListing.getSuggestedActivities();
-
-        if (activities == null || activities.isEmpty()) {
-            activitiesView.setText("No specific activities suggested.");
-            return;
+    private void setupToolbar() {
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
-        if (activities.size() <= 3) {
-            activitiesView.setText(String.join(", ", activities));
-            return;
-        }
-
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        if (!isActivitiesExpanded) {
-            String shortText = String.join(", ", activities.subList(0, 3));
-            builder.append(shortText).append("... ");
-            int start = builder.length();
-            builder.append("See More");
-            addClickableSpan(builder, start, true);
-        } else {
-            String fullText = String.join(", ", activities);
-            builder.append(fullText).append(" ");
-            int start = builder.length();
-            builder.append("See Less");
-            addClickableSpan(builder, start, false);
-        }
-
-        activitiesView.setText(builder);
-        activitiesView.setMovementMethod(LinkMovementMethod.getInstance());
-        activitiesView.setHighlightColor(Color.TRANSPARENT);
+        toolbar.setNavigationOnClickListener(v -> finish());
     }
 
-    private void addClickableSpan(SpannableStringBuilder builder, int start, boolean expand) {
-        builder.setSpan(new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                isActivitiesExpanded = expand;
-                setupActivitiesList();
-            }
+    private void bindListingData() {
+        // Data Binding
+        titleView.setText(currentListing.getProductName() != null ? currentListing.getProductName() : "Unknown Listing");
 
-            @Override
-            public void updateDrawState(@NonNull TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setUnderlineText(false);
-                ds.setColor(ContextCompat.getColor(ListingsDetailsActivity.this, R.color.teal_primary));
-                ds.setFakeBoldText(true);
-            }
-        }, start, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-    }
-
-    private void setupFavoritesObserver() {
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            return;
+        StringBuilder categoryIsland = new StringBuilder();
+        if (currentListing.getCategory() != null) {
+            categoryIsland.append(currentListing.getCategory());
         }
-
-        favoriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavoriteViewModel.class);
-        favoriteViewModel.getFavoriteListings().observe(this, favorites -> {
-            if (favorites != null) {
-                isFavorite = false;
-                for (Listing fav : favorites) {
-                    if (fav.getId() != null && fav.getId().equals(currentListingId)) {
-                        isFavorite = true;
-                        break;
-                    }
-                }
-                updateHeartUI();
-            }
-        });
-        favoriteViewModel.loadListings(userId);
-    }
-
-    private void updateHeartUI() {
-        if (isFavorite) {
-            btnFavorite.setImageResource(R.drawable.ic_favorites_filled);
-        } else {
-            btnFavorite.setImageResource(R.drawable.ic_favorites);
+        if (currentListing.getIsland() != null) {
+            if (categoryIsland.length() > 0) categoryIsland.append(" • ");
+            categoryIsland.append(currentListing.getIsland());
         }
-    }
+        categoryView.setText(categoryIsland.toString());
 
-    private void handleChatButtonClick() {
-        if (userId == null) {
-            Toast.makeText(this, "Please log in to chat with owners.", Toast.LENGTH_SHORT).show();
-            return;
+        descriptionText.setText(currentListing.getDescription() != null ? currentListing.getDescription() : "No description available.");
+        ratingText.setText(String.format(Locale.getDefault(), "%.1f", currentListing.getRating()));
+        reviewCountText.setText("(" + currentListing.getTotalReviews() + " reviews)");
+
+        String formattedPrice = "₱" + String.format(Locale.getDefault(), "%,.0f", currentListing.getPrice());
+        if (currentListing.getPriceUnit() != null) {
+            formattedPrice += " / " + currentListing.getPriceUnit();
         }
-
-        if (currentListing == null) return;
+        priceView.setText(formattedPrice);
 
         String ownerId = currentListing.getOwnerId();
-        if (ownerId == null || ownerId.isEmpty()) {
-            Toast.makeText(this, "Owner information unavailable.", Toast.LENGTH_SHORT).show();
-            return;
+        ownerNameView.setText("Hosted by " + (ownerId != null ? "Host " + ownerId.substring(0, Math.min(5, ownerId.length())) : "Verified Host"));
+
+        setupActivities(currentListing.getCategory());
+        setupCarousel(currentListing.getImageUrls());
+    }
+
+    private void setupCarousel(List<String> imageUrls) {
+        List<Object> imagesToDisplay = new ArrayList<>();
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            imagesToDisplay.addAll(imageUrls);
+        } else {
+            imagesToDisplay.add(R.drawable.ic_no_image_placeholder);
         }
 
-        if (ownerId.equals(userId)) {
-            Toast.makeText(this, "This is your own listing!", Toast.LENGTH_SHORT).show();
-            return;
+        GalleryAdapter adapter = new GalleryAdapter(imagesToDisplay);
+        imageViewPager.setAdapter(adapter);
+        new TabLayoutMediator(tabIndicator, imageViewPager, (tab, position) -> {}).attach();
+    }
+
+    private void setupActivities(String category) {
+        chipGroupActivities.removeAllViews();
+        String[] suggestions = {"Sightseeing", "Photography", "Local Tour"};
+        if (category != null && category.toLowerCase().contains("boat")) {
+            suggestions = new String[]{"Island Hopping", "Snorkeling", "Sunset Cruise"};
         }
+        
+        for (String activity : suggestions) {
+            Chip chip = new Chip(this);
+            chip.setText(activity);
+            chip.setChipBackgroundColorResource(R.color.white);
+            chip.setChipStrokeColorResource(R.color.teal_primary);
+            chip.setChipStrokeWidth(2f);
+            chip.setTextColor(getResources().getColor(R.color.text_dark));
+            chipGroupActivities.addView(chip);
+        }
+    }
 
-        ChatRepository chatRepo = new ChatRepository();
-
-        chatRepo.findExistingChatRoom(userId, ownerId, currentListingId, existingRoom -> {
-            if (existingRoom != null) {
-                openChatRoom(existingRoom.getId(), ownerId);
-            } else {
-                generateAndCreateChatRoom(chatRepo, ownerId);
-            }
+    private void setupListeners() {
+        btnRentNow.setOnClickListener(v -> {
+            Intent intent = new Intent(this, RentForm.class);
+            intent.putExtra("listing_object", currentListing);
+            startActivity(intent);
         });
+        btnFavorite.setOnClickListener(v -> btnFavorite.setImageResource(R.drawable.ic_favorites_filled));
     }
 
-    private void generateAndCreateChatRoom(ChatRepository chatRepo, String ownerId) {
-        String imageUrl = (currentListing.getImageUrls() != null && !currentListing.getImageUrls().isEmpty())
-                ? currentListing.getImageUrls().get(0) : "";
+    private static class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
+        private final List<Object> imageSources;
+        GalleryAdapter(List<Object> imageSources) { this.imageSources = imageSources; }
 
-        chatRepo.createChatRoom(
-                userId,
-                ownerId,
-                currentListingId,
-                currentListing.getProductName(),
-                imageUrl,
-                new ChatRepository.ChatRoomCallback() {
-                    @Override
-                    public void onSuccess(ChatRoom chatRoom) {
-                        triggerInquilinoOpening(chatRoom.getId(), ownerId);
-                        openChatRoom(chatRoom.getId(), ownerId);
-                    }
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image_gallery, parent, false);
+            return new ViewHolder(view);
+        }
 
-                    @Override
-                    public void onFailure(String errorMessage) {
-                        Toast.makeText(ListingsDetailsActivity.this, "Failed to start chat: ", Toast.LENGTH_SHORT).show();
-                        Log.e("CHAT", errorMessage);
-                    }
-                }
-        );
-    }
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            Glide.with(holder.imageView.getContext())
+                .load(imageSources.get(position))
+                .centerCrop()
+                .placeholder(R.drawable.ic_no_image_placeholder)
+                .into(holder.imageView);
+        }
 
-    private void triggerInquilinoOpening(String chatRoomId, String ownerId) {
-        InquilinoOpeningRequest request = new InquilinoOpeningRequest(
-                chatRoomId, userId, ownerId, currentListing.getProductName(),
-                currentListing.getCategory(), currentListing.getIsland(),
-                String.valueOf(currentListing.getPrice()), currentListing.getDescription(),
-                currentListing.getOwnerFaq()
-        );
+        @Override
+        public int getItemCount() { return imageSources.size(); }
 
-        FirebaseAuth.getInstance().getCurrentUser().getIdToken(true)
-                .addOnSuccessListener(result -> {
-                    String token = "Bearer " + result.getToken();
-
-                    ApiClient.getApiService().generateInquilinoOpening(token, request).enqueue(new Callback<InquilinoResponse>() {
-                        @Override
-                        public void onResponse(@NonNull Call<InquilinoResponse> call, @NonNull Response<InquilinoResponse> response) { }
-                        @Override
-                        public void onFailure(@NonNull Call<InquilinoResponse> call, @NonNull Throwable t) { }
-                    });
-                });
-    }
-
-    private void openChatRoom(String roomId, String ownerId) {
-        Intent intent = new Intent(this, ChatRoomActivity.class);
-        intent.putExtra(ChatRoomActivity.EXTRA_CHAT_ROOM_ID, roomId);
-        intent.putExtra(ChatRoomActivity.EXTRA_LISTING_ID, currentListingId);
-        intent.putExtra(ChatRoomActivity.EXTRA_LISTING_TITLE, currentListing.getProductName());
-        intent.putExtra(ChatRoomActivity.EXTRA_OWNER_ID, ownerId);
-        intent.putExtra(ChatRoomActivity.EXTRA_RENTER_ID, userId);
-        intent.putExtra(ChatRoomActivity.EXTRA_CURRENT_MODE, ChatRoom.MODE_AI);
-        startActivity(intent);
+        static class ViewHolder extends RecyclerView.ViewHolder {
+            ImageView imageView;
+            ViewHolder(@NonNull View itemView) {
+                super(itemView);
+                imageView = itemView.findViewById(R.id.gallery_image);
+            }
+        }
     }
 }

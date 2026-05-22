@@ -1,5 +1,6 @@
 package com.usc.rentbnb.ui.booking;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 
@@ -10,6 +11,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.home.HomeActivity;
 
 public class ThankYouPage extends AppCompatActivity {
 
@@ -26,8 +28,8 @@ public class ThankYouPage extends AppCompatActivity {
 
         Button btnContinue = findViewById(R.id.btnContinue);
         btnContinue.setOnClickListener(v -> {
-            // Close all activities and go back to start, or just finish
-            finishAffinity();
+            Intent nextIntent = new Intent(ThankYouPage.this, HomeActivity.class);
+            startActivity(nextIntent);
         });
     }
 }

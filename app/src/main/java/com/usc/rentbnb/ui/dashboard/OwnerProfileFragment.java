@@ -5,20 +5,37 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.home.HomeActivity;
+import com.usc.rentbnb.ui.profile.ProfileDetailsActivity;
 import com.usc.rentbnb.ui.profile.ProfileDetailsEditActivity;
+import com.usc.rentbnb.viewmodels.UserProfileViewModel;
+
+// TODO: add count reviews in backend
 
 public class OwnerProfileFragment extends Fragment {
+    private UserProfileViewModel userProfileViewModel;
+    private TextView profileHeader, ownerName, memberSince, profileRating, profileReviews, profileRentals;
+    private View rowProfileDetails, rowPayoutMethod, rowHelpCenter, rowSignOut;
+    private SwitchMaterial switchPushNotifs;
+    private ShapeableImageView ownerAvatar;
+    private boolean isCompany = false;
 
     @Nullable
     @Override
@@ -30,11 +47,23 @@ public class OwnerProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        View rowProfileDetails = view.findViewById(R.id.rowProfileDetails);
-        View rowPayoutMethod = view.findViewById(R.id.rowPayoutMethod);
-        SwitchMaterial switchPushNotifs = view.findViewById(R.id.switchPushNotifications);
-        View rowHelpCenter = view.findViewById(R.id.rowHelpCenter);
-        View rowSignOut = view.findViewById(R.id.rowSignOut);
+        profileHeader = view.findViewById(R.id.profile_header);
+
+        ViewCompat.setOnApplyWindowInsetsListener(profileHeader, (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            params.topMargin = statusBarHeight + 16;
+            v.setLayoutParams(params);
+            return insets;
+        });
+
+        initViews(view);
+
+        userProfileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+
+        setUpObservers();
+
+        userProfileViewModel.loadUserData();
 
         ExtendedFloatingActionButton fabSwitchMode = view.findViewById(R.id.fab_switch_mode);
         NestedScrollView scrollView = view.findViewById(R.id.owner_profile_scroll_view);
@@ -54,8 +83,9 @@ public class OwnerProfileFragment extends Fragment {
         });
 
         rowProfileDetails.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), ProfileDetailsEditActivity.class);
-            intent.putExtra("IS_COMPANY", false);
+            Intent intent = new Intent(requireActivity(), ProfileDetailsActivity.class);
+
+            intent.putExtra("IS_COMPANY", isCompany);
             startActivity(intent);
         });
 
@@ -76,6 +106,62 @@ public class OwnerProfileFragment extends Fragment {
 
         rowSignOut.setOnClickListener(v -> {
             Toast.makeText(getContext(), "Signing out...", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void initViews(View view){
+        ownerName = view.findViewById(R.id.tvOwnerName);
+        memberSince = view.findViewById(R.id.tvOwnerSubtitle);
+        profileRating = view.findViewById(R.id.tvProfileRating);
+        profileReviews = view.findViewById(R.id.tvProfileReviews);
+        profileRentals = view.findViewById(R.id.tvProfileRentals);
+        ownerAvatar = view.findViewById(R.id.ivOwnerAvatar);
+
+        rowProfileDetails = view.findViewById(R.id.rowProfileDetails);
+        rowPayoutMethod = view.findViewById(R.id.rowPayoutMethod);
+        switchPushNotifs = view.findViewById(R.id.switchPushNotifications);
+        rowHelpCenter = view.findViewById(R.id.rowHelpCenter);
+        rowSignOut = view.findViewById(R.id.rowSignOut);
+
+    }
+    private void populateUI(User user) {
+        if (user == null) return;
+
+        if (ownerAvatar != null){
+            if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()){
+                Glide.with(this)
+                        .load(user.getPhotoUrl())
+                        .placeholder(R.drawable.userprofile)
+                        .into(ownerAvatar);
+            }
+        }
+
+        String nameStr = (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) ? user.getDisplayName() : "Not Set";
+        String dateStr = (user.getCreatedAt() != null && user.getCreatedAt().length() >= 10) ? "Member since " + user.getCreatedAt().substring(0, 10) : "New Member";
+
+        if (ownerName != null) ownerName.setText(nameStr);
+        if (memberSince != null) memberSince.setText(dateStr);
+        if (profileRating != null) profileRating.setText(String.format("%.1f", user.getRating()));
+        if (profileReviews != null) profileReviews.setText(String.valueOf((int) user.getTotalRatings()));
+        if (profileRentals != null) profileRentals.setText(String.valueOf(user.getListingsCount()));
+    }
+
+    private void setUpObservers(){
+
+        userProfileViewModel.getUserProfile().observe(getViewLifecycleOwner(), user -> {
+            if (user != null){
+                populateUI(user);
+                String userType = user.getUserType();
+                if ("COMPANY".equals(userType)) {
+                    isCompany = true;
+                }
+            }
+        });
+
+        userProfileViewModel.getErrorData().observe(getViewLifecycleOwner(), errorMssg -> {
+            if (errorMssg != null){
+                Toast.makeText(getContext(), "Error: " + errorMssg, Toast.LENGTH_LONG).show();
+            }
         });
     }
 }

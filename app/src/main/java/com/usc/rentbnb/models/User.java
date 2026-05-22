@@ -23,6 +23,7 @@ public class User {
     private double rating;
     private double totalRatings;
     private double totalEarnings;
+    private int listingsCount;
 
     @Exclude
     private String createdAt;
@@ -128,6 +129,14 @@ public class User {
 
     public void setTotalEarnings(double totalEarnings) {
         this.totalEarnings = totalEarnings;
+    }
+
+    public int getListingsCount() {
+        return listingsCount;
+    }
+
+    public void setListingsCount(int listingsCount) {
+        this.listingsCount = listingsCount;
     }
 
     public String getCreatedAt() {

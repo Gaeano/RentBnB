@@ -6,6 +6,7 @@ import com.usc.rentbnb.models.BookingResponse;
 import com.usc.rentbnb.models.BookingRequest;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
+import com.usc.rentbnb.models.EarningsResponse;
 import com.usc.rentbnb.models.InquilinoOpeningRequest;
 import com.usc.rentbnb.models.InquilinoReplyRequest;
 import com.usc.rentbnb.models.InquilinoResponse;
@@ -58,6 +59,9 @@ public interface ApiService {
 
     @GET("listings")
     Call<ListingResponse> getListings(@Query("island") String island);
+
+    @GET("listings/owner/{ownerId}")
+    Call<ListingResponse> getOwnerListings(@Path("ownerId") String ownerId);
 
     @GET("weather")
     Call<WeatherResponse> getCurrentWeather(
@@ -144,9 +148,18 @@ public interface ApiService {
     @POST("bookings")
     Call<BookingResponse> createBooking(@Body BookingRequest bookingRequest);
 
+    @GET("bookings/owner/{ownerId}")
+    Call<BookingResponse> getOwnerBookings(@Path("ownerId") String ownerId);
+
+    @GET("bookings/owner/{ownerId}/earnings")
+    Call<EarningsResponse> getOwnerEarnings(@Path("ownerId") String ownerId);
+
     @GET("bookings/user/{userId}")
     Call<BookingResponse> getBookingsByUser(@Path("userId") String userId);
 
-    @PATCH("bookings/{bookingId}/status")
-    Call<BookingResponse> updateBookingStatus(@Path("bookingId") String bookingId, @Body Map<String, String> status);
+    @PUT("bookings/{bookingId}/status")
+    Call<BookingResponse> updateBookingStatus(
+            @Path("bookingId") String bookingId,
+            @Body Map<String, String> status
+    );
 }

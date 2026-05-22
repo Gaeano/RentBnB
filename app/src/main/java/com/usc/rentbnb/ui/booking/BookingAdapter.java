@@ -34,30 +34,46 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Booking booking = bookingList.get(position);
-        
-        if (booking.getListing() != null) {
-            holder.tvTitle.setText(booking.getListing().getProductName());
-            if (booking.getListing().getImageUrls() != null && !booking.getListing().getImageUrls().isEmpty()) {
-                Glide.with(holder.itemView.getContext())
-                        .load(booking.getListing().getImageUrls().get(0))
-                        .placeholder(R.drawable.ic_no_image_placeholder)
-                        .into(holder.ivImage);
-            }
-        } else {
-            holder.tvTitle.setText("Booking #" + booking.getId().substring(0, 8));
+
+        // Title
+        holder.tvTitle.setText(
+                booking.getListingTitle() != null ? booking.getListingTitle() : "Booking #" + booking.getId().substring(0, 8)
+        );
+
+        // Image
+        if (booking.getListingImageUrl() != null) {
+            Glide.with(holder.itemView.getContext())
+                    .load(booking.getListingImageUrl())
+                    .placeholder(R.drawable.ic_no_image_placeholder)
+                    .into(holder.ivImage);
         }
 
-        holder.tvDates.setText(booking.getStartDate() + " - " + booking.getEndDate());
-        holder.tvPrice.setText("₱" + booking.getTotalPrice());
-        holder.tvStatus.setText(booking.getStatus());
+        // Dates
+        if (booking.getSchedule() != null) {
+            holder.tvDates.setText(booking.getSchedule().getStartDate() + " - " + booking.getSchedule().getEndDate());
+        } else {
+            holder.tvDates.setText("No dates available");
+        }
 
-        // Simple color coding for status
-        switch (booking.getStatus().toLowerCase()) {
+        // Price
+        if (booking.getFinancialSummary() != null) {
+            holder.tvPrice.setText("₱" + booking.getFinancialSummary().getTotalCharged());
+        } else {
+            holder.tvPrice.setText("₱0.00");
+        }
+
+        // Status
+        String status = booking.getStatus() != null ? booking.getStatus() : "unknown";
+        holder.tvStatus.setText(status);
+
+        switch (status.toLowerCase()) {
             case "pending":
+            case "pending_owner_approval":
                 holder.tvStatus.setBackgroundResource(R.drawable.status_pending_bg);
                 break;
             case "approved":
             case "accepted":
+            case "active":
                 holder.tvStatus.setBackgroundResource(R.drawable.status_accepted_bg);
                 break;
             case "rejected":

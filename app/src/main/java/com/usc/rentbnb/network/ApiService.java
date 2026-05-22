@@ -113,10 +113,10 @@ public interface ApiService {
     );
 
     // history
-    @GET("users/{userId}/history")
+    @GET("bookings/users/{userId}/history")
     Call<BookingResponse> getMyBookings(@Path("userId") String userId);
 
-    @GET("users/{userId}/lent-history")
+    @GET("bookings/users/{userId}/lent-history")
     Call<BookingResponse> getMyLentItems(@Path("userId") String userId);
 
     // notifs

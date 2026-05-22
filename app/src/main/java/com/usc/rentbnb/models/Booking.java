@@ -2,54 +2,42 @@ package com.usc.rentbnb.models;
 
 public class Booking {
     private String id;
-    private String productName;
-    private String category;
-    private String ownerName;
-    private String price;
-    private String imageUrl;
-    private String status;    // "UPCOMING" or "PAST"
-    private String renterId;
+    private String listingTitle;
+    private String listingImageUrl;
     private String ownerId;
+    private String ownerName;
+    private String renterId;
     private String listingId;
-    private String startDate;
-    private String endDate;
-    private double totalPrice;
-    private Listing listing;
+    private String status;
+    private FinancialSummary financialSummary;
+    private Schedule schedule;
 
-    public Booking(String id, String productName, String category, String ownerName, String price, String imageUrl, String dateRange, String status, String renterId, String ownerId, String listingId, String startDate, String endDate, double totalPrice, Listing listing) {
-        this.id = id;
-        this.productName = productName;
-        this.category = category;
-        this.ownerName = ownerName;
-        this.price = price;
-        this.imageUrl = imageUrl;
-        this.status = status;
-        this.renterId = renterId;
-        this.ownerId = ownerId;
-        this.listingId = listingId;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.totalPrice = totalPrice;
-        this.listing = listing;
+    // nested classes
+    public static class FinancialSummary {
+        private double totalCharged;
+        public double getTotalCharged() { return totalCharged; }
     }
-    public Booking() {}
 
+    public static class Schedule {
+        private String startDate;
+        private String endDate;
+        private int totalDays;
+        public String getStartDate() { return startDate; }
+        public String getEndDate() { return endDate; }
+    }
+
+    // getters
     public String getId() { return id; }
-    public String getRenterId() { return renterId; }
+    public String getListingTitle() { return listingTitle; }
+    public String getListingImageUrl() { return listingImageUrl; }
     public String getOwnerId() { return ownerId; }
-    public String getListingId() { return listingId; }
-    public String getStartDate() { return startDate; }
-    public String getEndDate() { return endDate; }
-    public double getTotalPrice() { return totalPrice; }
-    public String getProductName() { return productName; }
-    public String getCategory() { return category; }
-    public String getOwnerName() { return ownerName; }
-    public String getPrice() { return price; }
-    public String getStatus() { return status; }
 
-    public Listing getListing() {
-        return listing;
+    public String getOwnerName() {
+        return ownerName;
     }
 
-    public void setStatus(String status) { this.status = status; }
+    public String getRenterId() { return renterId; }
+    public String getStatus() { return status; }
+    public FinancialSummary getFinancialSummary() { return financialSummary; }
+    public Schedule getSchedule() { return schedule; }
 }

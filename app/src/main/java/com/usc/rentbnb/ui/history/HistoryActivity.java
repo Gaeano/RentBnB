@@ -3,49 +3,27 @@ package com.usc.rentbnb.ui.history;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
-import retrofit2.Response;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
-import com.usc.rentbnb.adapters.HistoryAdapter;
-import com.usc.rentbnb.models.Booking;
-import com.usc.rentbnb.models.BookingResponse;
-import com.usc.rentbnb.network.ApiClient;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
 
 public class HistoryActivity extends AppCompatActivity {
 
-    private TextView tabRented, tabLent;
-    private boolean isShowingRented = true;
-
-    private RecyclerView rvHistory;
-    private HistoryAdapter historyAdapter;
-    private LinearLayout emptyStateLayout;
     private EditText searchBar;
-    //private TextView emptyStateMessage;
-
-    private List<Booking> myBookingsList = new ArrayList<>();
-    private List<Booking> lentItemsList = new ArrayList<>();
+    private TextView chipActive, chipPending, chipCompleted, chipOverdue;
+    private String currentStatus = "Active";
+    private HistoryStatusFragment currentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +33,12 @@ public class HistoryActivity extends AppCompatActivity {
 
         ImageView backButton = findViewById(R.id.back_button);
         LinearLayout historyHeader = findViewById(R.id.history_header);
-
-        tabRented = findViewById(R.id.tab_rented);
-        tabLent = findViewById(R.id.tab_lent);
-        rvHistory = findViewById(R.id.rvHistory);
-        emptyStateLayout = findViewById(R.id.empty_state_layout);
         searchBar = findViewById(R.id.search_bar);
+
+        chipActive = findViewById(R.id.chip_active);
+        chipPending = findViewById(R.id.chip_pending);
+        chipCompleted = findViewById(R.id.chip_completed);
+        chipOverdue = findViewById(R.id.chip_overdue);
 
         ViewCompat.setOnApplyWindowInsetsListener(historyHeader, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
@@ -70,16 +48,65 @@ public class HistoryActivity extends AppCompatActivity {
 
         backButton.setOnClickListener(v -> finish());
 
-        rvHistory.setLayoutManager(new LinearLayoutManager(this));
-        historyAdapter = new HistoryAdapter();
-        rvHistory.setAdapter(historyAdapter);
-
-        setupTabs();
+        setupChips();
         setupSearch();
 
-        updateListUI(new ArrayList<>(), "Loading...");
+        // Set initial chip style
+        updateChipStyles();
 
-        fetchHistoryData();
+        // Load initial fragment
+        loadFragment("Active");
+    }
+
+    private void setupChips() {
+        chipActive.setOnClickListener(v -> selectStatus("Active"));
+        chipCompleted.setOnClickListener(v -> selectStatus("Completed"));
+        chipOverdue.setOnClickListener(v -> selectStatus("Overdue"));
+        chipPending.setOnClickListener(v->selectStatus("Pending"));
+    }
+
+    private void selectStatus(String status) {
+        if (currentStatus.equals(status)) return;
+        currentStatus = status;
+
+        updateChipStyles();
+        loadFragment(status);
+    }
+
+    private void updateChipStyles() {
+        resetChipStyle(chipActive);
+        resetChipStyle(chipCompleted);
+        resetChipStyle(chipOverdue);
+        resetChipStyle(chipPending);
+
+        TextView selectedChip;
+        if ("Active".equals(currentStatus)) selectedChip = chipActive;
+        else if ("Completed".equals(currentStatus)) selectedChip = chipCompleted;
+        else if ("Pending".equals(currentStatus)) selectedChip = chipPending;
+        else selectedChip = chipOverdue;
+
+        selectedChip.setBackgroundResource(R.drawable.bg_tab_active);
+        selectedChip.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+    }
+
+    private void resetChipStyle(TextView chip) {
+        chip.setBackgroundResource(R.drawable.chip_background);
+        chip.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
+    }
+
+    private void loadFragment(String status) {
+        currentFragment = HistoryStatusFragment.newInstance(status);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.history_fragment_container, currentFragment);
+        transaction.commit();
+
+        // Use a small delay or post to ensure fragment is added before setting query if needed,
+        // but setSearchQuery already checks isAdded().
+        searchBar.post(() -> {
+            if (currentFragment != null && searchBar != null) {
+                currentFragment.setSearchQuery(searchBar.getText().toString());
+            }
+        });
     }
 
     private void setupSearch() {
@@ -89,118 +116,13 @@ public class HistoryActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filter(s.toString());
+                if (currentFragment != null) {
+                    currentFragment.setSearchQuery(s.toString());
+                }
             }
 
             @Override
             public void afterTextChanged(Editable s) {}
         });
-    }
-
-    private void filter(String query) {
-        List<Booking> currentList = isShowingRented ? myBookingsList : lentItemsList;
-        if (query.isEmpty()) {
-            updateListUI(currentList, isShowingRented ? "You haven't rented any items yet." : "No one has rented your items yet.");
-        } else {
-            List<Booking> filteredList = new ArrayList<>();
-            for (Booking booking : currentList) {
-                if (booking.getProductName().toLowerCase().contains(query.toLowerCase()) ||
-                    booking.getCategory().toLowerCase().contains(query.toLowerCase())) {
-                    filteredList.add(booking);
-                }
-            }
-            updateListUI(filteredList, "No matching items found.");
-        }
-    }
-
-    private void setupTabs() {
-        tabRented.setOnClickListener(v -> {
-            if (!isShowingRented) {
-                isShowingRented = true;
-                updateTabUI();
-                updateListUI(myBookingsList, "You haven't rented any items yet.");
-            }
-        });
-
-        tabLent.setOnClickListener(v -> {
-            if (isShowingRented) {
-                isShowingRented = false;
-                updateTabUI();
-                updateListUI(lentItemsList, "No one has rented your items yet.");
-            }
-        });
-    }
-
-    private void updateTabUI() {
-        if (isShowingRented) {
-            tabRented.setBackgroundResource(R.drawable.bg_tab_active);
-            tabRented.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
-            tabLent.setBackgroundResource(android.R.color.transparent);
-            tabLent.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
-        } else {
-            tabLent.setBackgroundResource(R.drawable.bg_tab_active);
-            tabLent.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
-            tabRented.setBackgroundResource(android.R.color.transparent);
-            tabRented.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
-        }
-    }
-
-    private void fetchHistoryData() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
-            updateListUI(new ArrayList<>(), "Please log in to view history.");
-            return;
-        }
-        String userId = user.getUid();
-
-        updateListUI(new ArrayList<>(), "Loading your history...");
-
-        ApiClient.getApiService().getMyBookings(userId).enqueue(new Callback<BookingResponse>() {
-            @Override
-            public void onResponse(Call<BookingResponse> call, Response<BookingResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    myBookingsList = response.body().getData();
-                    if (isShowingRented) updateListUI(myBookingsList, "You haven't rented any items yet.");
-                }
-            }
-            @Override
-            public void onFailure(Call<BookingResponse> call, Throwable t) {
-                Toast.makeText(HistoryActivity.this, "Failed to load bookings", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        ApiClient.getApiService().getMyLentItems(userId).enqueue(new Callback<BookingResponse>() {
-            @Override
-            public void onResponse(Call<BookingResponse> call, Response<BookingResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    lentItemsList = response.body().getData();
-                    if (!isShowingRented) updateListUI(lentItemsList, "No one has rented your items yet.");
-                }
-            }
-            @Override
-            public void onFailure(Call<BookingResponse> call, Throwable t) { }
-        });
-    }
-
-    private void updateListUI(List<Booking> bookings, String emptyMessage) {
-        if (bookings == null || bookings.isEmpty()) {
-            rvHistory.setVisibility(View.GONE);
-            emptyStateLayout.setVisibility(View.VISIBLE);
-            
-            TextView messageTextView = emptyStateLayout.findViewById(R.id.empty_state_message);
-            TextView descriptionTextView = emptyStateLayout.findViewById(R.id.empty_state_description);
-            
-            if (messageTextView != null) {
-                messageTextView.setText(emptyMessage);
-            }
-            if (descriptionTextView != null) {
-                descriptionTextView.setVisibility(emptyMessage.contains("Loading") ? View.GONE : View.VISIBLE);
-            }
-        } else {
-            emptyStateLayout.setVisibility(View.GONE);
-            rvHistory.setVisibility(View.VISIBLE);
-            historyAdapter.setBookings(bookings);
-            historyAdapter.notifyDataSetChanged();
-        }
     }
 }

@@ -1,11 +1,14 @@
 package com.usc.rentbnb.ui.favorites;
 
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentContainerView;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.faltenreich.skeletonlayout.Skeleton;
@@ -23,6 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.ui.home.RentalsFragment;
 import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 
 import java.util.ArrayList;
@@ -37,6 +42,8 @@ public class FavoritesRentalsFragment extends Fragment {
     private FirebaseAuth auth;
     private FirebaseUser user;
     private LinearLayout emptyStateLayout;
+    private TextView findFaveBtn;
+
 
     public FavoritesRentalsFragment() {
         // Required empty public constructor
@@ -65,6 +72,7 @@ public class FavoritesRentalsFragment extends Fragment {
 
         rv = view.findViewById(R.id.rentalsRecyclerView);
         emptyStateLayout = view.findViewById(R.id.empty_state_layout);
+        findFaveBtn = view.findViewById(R.id.find_fave_btn);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(),2);
 
         rv.setLayoutManager(gridLayoutManager);
@@ -84,6 +92,7 @@ public class FavoritesRentalsFragment extends Fragment {
 
         setUpObservers();
         favoriteViewModel.loadListings(userId);
+
 
     }
 

@@ -166,7 +166,7 @@ public class ProfileFragment extends Fragment {
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left)
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                     .replace(R.id.homeFeedContainer, favoriteFrag)
                     .addToBackStack(null)
                     .commit();

@@ -216,6 +216,8 @@ public class ListingSummaryFragment extends Fragment {
                 draft.island,
                 draft.price,
                 draft.priceUnit,
+                draft.penaltyPrice,
+                draft.penaltyUnit,
                 draft.paymentMethods,
                 draft.suggestedActivities,
                 imageUrls

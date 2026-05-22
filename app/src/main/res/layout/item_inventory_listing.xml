@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivItemThumb"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:background="#F4F5F7"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:id="@+id/tvItemTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="DeWalt Hammer Drill" android:textColor="#1D1D1D" android:textSize="16sp" android:fontFamily="@font/jost_bold" android:layout_alignParentStart="true" android:layout_toStartOf="@id/ivOptions"/>
+                <ImageView android:id="@+id/ivOptions" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_more_horiz" app:tint="#BDBDBD" android:layout_alignParentEnd="true" android:padding="2dp"/>
+            </RelativeLayout>
+
+            <TextView android:id="@+id/tvCategory" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Tools" android:textColor="#757575" android:textSize="12sp" android:layout_marginTop="2dp"/>
+            <TextView android:id="@+id/tvPrice" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="$18/day" android:textColor="#1D1D1D" android:textSize="14sp" android:fontFamily="@font/jost_bold" android:layout_marginTop="4dp"/>
+
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
+                <TextView android:id="@+id/tvStats" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="14 bookings • ★ 4.9" android:textColor="#757575" android:textSize="12sp" android:layout_centerVertical="true"/>
+                <TextView android:id="@+id/tvStatus" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="👁 Active" android:textColor="#008080" android:textSize="12sp" android:background="@drawable/chip_background_teal" android:paddingHorizontal="10dp" android:paddingVertical="4dp" android:layout_alignParentEnd="true" android:textStyle="bold"/>
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -3,6 +3,7 @@ package com.usc.rentbnb.network;
 import com.google.gson.JsonObject;
 import com.usc.rentbnb.models.AuthResponse;
 import com.usc.rentbnb.models.BookingResponse;
+import com.usc.rentbnb.models.BookingRequest;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
 import com.usc.rentbnb.models.InquilinoOpeningRequest;
@@ -16,6 +17,8 @@ import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.RegisterRequest;
 import com.usc.rentbnb.models.WeatherResponse;
 
+import java.util.Map;
+
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -23,7 +26,6 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
@@ -130,13 +132,21 @@ public interface ApiService {
     // Inquilino (AI Chatbot)
     @POST("chat/inquilino/opening")
     Call<InquilinoResponse> generateInquilinoOpening(
-            @Header("Authorization") String token,
             @Body InquilinoOpeningRequest request
     );
 
     @POST("chat/inquilino/reply")
     Call<InquilinoResponse> generateInquilinoReply(
-            @Header("Authorization") String token,
             @Body InquilinoReplyRequest request
     );
+
+    // Booking Endpoints
+    @POST("bookings")
+    Call<BookingResponse> createBooking(@Body BookingRequest bookingRequest);
+
+    @GET("bookings/user/{userId}")
+    Call<BookingResponse> getBookingsByUser(@Path("userId") String userId);
+
+    @PATCH("bookings/{bookingId}/status")
+    Call<BookingResponse> updateBookingStatus(@Path("bookingId") String bookingId, @Body Map<String, String> status);
 }

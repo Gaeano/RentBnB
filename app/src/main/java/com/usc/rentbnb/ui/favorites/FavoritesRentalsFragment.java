@@ -42,8 +42,6 @@ public class FavoritesRentalsFragment extends Fragment {
     private FirebaseAuth auth;
     private FirebaseUser user;
     private LinearLayout emptyStateLayout;
-    private TextView findFaveBtn;
-
 
     public FavoritesRentalsFragment() {
         // Required empty public constructor
@@ -72,7 +70,6 @@ public class FavoritesRentalsFragment extends Fragment {
 
         rv = view.findViewById(R.id.rentalsRecyclerView);
         emptyStateLayout = view.findViewById(R.id.empty_state_layout);
-        findFaveBtn = view.findViewById(R.id.find_fave_btn);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(),2);
 
         rv.setLayoutManager(gridLayoutManager);

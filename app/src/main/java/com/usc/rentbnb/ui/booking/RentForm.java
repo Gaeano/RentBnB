@@ -3,27 +3,23 @@ package com.usc.rentbnb.ui.booking;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.util.Pair;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.BookingRequest;
 import com.usc.rentbnb.models.BookingResponse;
@@ -31,6 +27,9 @@ import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.network.ApiClient;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -42,174 +41,338 @@ import retrofit2.Response;
 public class RentForm extends AppCompatActivity {
 
     private static final String TAG = "RentForm";
-    private EditText etStartDate, etEndDate, etContactNumber;
+
+    private ViewFlipper vfCheckout;
+    private TextView tvRentFormHeader, tvSummaryTitle, tvSummaryPrice, tvTotalPrice, tvQrTotal;
+    private TextInputEditText etStartDate, etEndDate, etContactNumber, etCardNumber;
     private AutoCompleteTextView actvPaymentMode;
-    private TextView tvDurationPrompt, tvBoatName, tvOwnerName, tvPrice;
+
+    private MaterialButton btnNext, btnConfirmQr, btnConfirmCc, btnViewReceipt;
     private ImageButton btnBack;
-    private Long startDateMillis, endDateMillis;
+
     private Listing currentListing;
-    private double calculatedTotal = 0;
+    private FirebaseUser currentUser;
+
+    private long selectedStartMillis = 0;
+    private long selectedEndMillis = 0;
+
+    private String formattedStartDate = "";
+    private String formattedEndDate = "";
+    private double calculatedTotal = 0.0;
+    private int calculatedTotalDays = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_rent_form);
-        
-        View mainView = findViewById(R.id.main);
-        if (mainView != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
-        }
 
-        currentListing = (Listing) getIntent().getSerializableExtra("listing_object");
+        currentListing = (Listing) getIntent().getParcelableExtra("listing_object");
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Initialize Views
-        btnBack = findViewById(R.id.btnBack);
-        tvBoatName = findViewById(R.id.tvBoatName);
-        tvOwnerName = findViewById(R.id.tvOwnerName);
-        tvPrice = findViewById(R.id.tvPrice);
-        tvDurationPrompt = findViewById(R.id.tvDurationPrompt);
-        etStartDate = findViewById(R.id.etStartDate);
-        etEndDate = findViewById(R.id.etEndDate);
-        etContactNumber = findViewById(R.id.etContactNumber);
-        actvPaymentMode = findViewById(R.id.actvPaymentMode);
-        Button btnRent = findViewById(R.id.btnRent);
-
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
-        }
-
-        if (currentListing != null) {
-            tvBoatName.setText(currentListing.getProductName());
-            tvOwnerName.setText("👤 Owner ID: " + currentListing.getOwnerId());
-            tvPrice.setText("₱" + String.format(Locale.US, "%,.0f", currentListing.getPrice()) + " / " + currentListing.getPriceUnit());
-        }
-
-        setupDatePickers();
-        setupPaymentDropdown();
-
-        btnRent.setOnClickListener(v -> {
-            if (validateFields()) {
-                submitBooking();
-            }
-        });
-    }
-
-    private boolean validateFields() {
-        if (startDateMillis == null || endDateMillis == null) {
-            Toast.makeText(this, "Please select rental dates", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (etContactNumber.getText().toString().trim().isEmpty()) {
-            etContactNumber.setError("Contact Number is required");
-            return false;
-        }
-        if (actvPaymentMode.getText().toString().trim().isEmpty()) {
-            Toast.makeText(this, "Please select a Payment Mode", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
-    }
-
-    private void setupDatePickers() {
-        View.OnClickListener dateListener = v -> {
-            CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
-            constraintsBuilder.setValidator(DateValidatorPointForward.now());
-
-            MaterialDatePicker<Pair<Long, Long>> dateRangePicker =
-                    MaterialDatePicker.Builder.dateRangePicker()
-                            .setTitleText("Select Dates")
-                            .setCalendarConstraints(constraintsBuilder.build())
-                            .build();
-
-            dateRangePicker.show(getSupportFragmentManager(), "DATE_RANGE_PICKER");
-
-            dateRangePicker.addOnPositiveButtonClickListener(selection -> {
-                startDateMillis = selection.first;
-                endDateMillis = selection.second;
-
-                SimpleDateFormat displayFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
-                displayFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-                etStartDate.setText(displayFormat.format(startDateMillis));
-                etEndDate.setText(displayFormat.format(endDateMillis));
-
-                calculateAndShowDuration();
-            });
-        };
-
-        etStartDate.setOnClickListener(dateListener);
-        etEndDate.setOnClickListener(dateListener);
-    }
-
-    private void calculateAndShowDuration() {
-        if (startDateMillis != null && endDateMillis != null) {
-            long diffInMillis = endDateMillis - startDateMillis;
-            long diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis);
-            long rentalDays = diffInDays + 1;
-            
-            if (currentListing != null) {
-                calculatedTotal = rentalDays * currentListing.getPrice();
-                tvDurationPrompt.setText("Rented for " + rentalDays + " day(s). Total: ₱" + String.format(Locale.US, "%,.0f", calculatedTotal));
-            } else {
-                tvDurationPrompt.setText("Rented for " + rentalDays + " day(s)");
-            }
-            tvDurationPrompt.setVisibility(View.VISIBLE);
-        } else {
-            tvDurationPrompt.setVisibility(View.GONE);
-        }
-    }
-
-    private void setupPaymentDropdown() {
-        String[] paymentOptions = {"GCash", "PayPal", "Cash"};
-        if (actvPaymentMode != null) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                    android.R.layout.simple_dropdown_item_1line, paymentOptions);
-            actvPaymentMode.setAdapter(adapter);
-        }
-    }
-
-    private void submitBooking() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null || currentListing == null) {
-            Toast.makeText(this, "Error: User or Listing not found", Toast.LENGTH_SHORT).show();
+        if (currentListing == null || currentUser == null) {
+            Toast.makeText(this, "Session invalid or missing listing data.", Toast.LENGTH_SHORT).show();
+            finish();
             return;
         }
 
-        SimpleDateFormat apiFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        apiFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        initViews();
+        populateListingSummary();
+        setupDropdown();
+        setupDatePickers();
+        setupClickListeners();
+    }
 
-        String renterId = user.getUid();
-        String ownerId = currentListing.getOwnerId();
-        String listingId = currentListing.getId();
-        String startDate = apiFormat.format(startDateMillis);
-        String endDate = apiFormat.format(endDateMillis);
-        String status = "pending";
+    private void initViews() {
+        vfCheckout = findViewById(R.id.vfCheckout);
+        tvRentFormHeader = findViewById(R.id.tvRentFormHeader);
 
-        BookingRequest request = new BookingRequest(renterId, ownerId, listingId, startDate, endDate, calculatedTotal, status);
+        btnBack = findViewById(R.id.btnBack);
+        btnNext = findViewById(R.id.btnNext);
+        btnConfirmQr = findViewById(R.id.btnConfirmQr);
+        btnConfirmCc = findViewById(R.id.btnConfirmCc);
+        btnViewReceipt = findViewById(R.id.btnViewReceipt);
+
+        etStartDate = findViewById(R.id.etStartDate);
+        etEndDate = findViewById(R.id.etEndDate);
+        etContactNumber = findViewById(R.id.etContactNumber);
+        etCardNumber = findViewById(R.id.etCardNumber);
+        actvPaymentMode = findViewById(R.id.actvPaymentMode);
+
+        tvSummaryTitle = findViewById(R.id.tvSummaryTitle);
+        tvSummaryPrice = findViewById(R.id.tvSummaryPrice);
+        tvTotalPrice = findViewById(R.id.tvTotalPrice);
+        tvQrTotal = findViewById(R.id.tvQrTotal);
+    }
+
+    private void populateListingSummary() {
+        tvSummaryTitle.setText(currentListing.getProductName() != null ? currentListing.getProductName() : "Item");
+
+        String unit = currentListing.getPriceUnit() != null ? currentListing.getPriceUnit() : "day";
+        tvSummaryPrice.setText(String.format(Locale.getDefault(), "₱%,.0f / %s", currentListing.getPrice(), unit));
+        tvTotalPrice.setText("₱0.00");
+    }
+
+    private void setupDropdown() {
+        List<String> listingPayments = currentListing.getPaymentMethods();
+        if (listingPayments == null) {
+            listingPayments = new ArrayList<>();
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, listingPayments);
+        actvPaymentMode.setAdapter(adapter);
+    }
+
+    private void setupDatePickers() {
+        SimpleDateFormat sdfDisplay = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+        SimpleDateFormat sdfApi = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        etStartDate.setOnClickListener(v -> {
+            CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder()
+                    .setValidator(DateValidatorPointForward.now());
+
+            MaterialDatePicker<Long> startDatePicker = MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Select Start Date")
+                    .setTheme(R.style.CustomMaterialCalendar)
+                    .setSelection(selectedStartMillis == 0 ? MaterialDatePicker.todayInUtcMilliseconds() : selectedStartMillis)
+                    .setCalendarConstraints(constraintsBuilder.build())
+                    .build();
+
+            startDatePicker.addOnPositiveButtonClickListener(selection -> {
+                selectedStartMillis = selection;
+                long adjustedMillis = selection + TimeZone.getDefault().getOffset(selection);
+                Date date = new Date(adjustedMillis);
+
+                etStartDate.setText(sdfDisplay.format(date));
+                formattedStartDate = sdfApi.format(date);
+                etStartDate.setError(null);
+
+                if (selectedEndMillis != 0 && selectedEndMillis < selectedStartMillis) {
+                    selectedEndMillis = 0;
+                    etEndDate.setText("");
+                    formattedEndDate = "";
+                    calculatedTotalDays = 0;
+                    tvTotalPrice.setText("₱0.00");
+                    Toast.makeText(this, "End date reset because it was before start date.", Toast.LENGTH_SHORT).show();
+                } else if (selectedEndMillis != 0) {
+                    calculateTotalPrice();
+                }
+            });
+
+            if (!startDatePicker.isAdded()) startDatePicker.show(getSupportFragmentManager(), "START_DATE_PICKER");
+        });
+
+        etEndDate.setOnClickListener(v -> {
+            if (selectedStartMillis == 0) {
+                Toast.makeText(this, "Please select a start date first.", Toast.LENGTH_SHORT).show();
+                etStartDate.setError("Required");
+                return;
+            }
+
+            CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder()
+                    .setValidator(DateValidatorPointForward.from(selectedStartMillis));
+
+            MaterialDatePicker<Long> endDatePicker = MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Select End Date")
+                    .setTheme(R.style.CustomMaterialCalendar)
+                    .setSelection(selectedEndMillis == 0 ? selectedStartMillis : selectedEndMillis)
+                    .setCalendarConstraints(constraintsBuilder.build())
+                    .build();
+
+            endDatePicker.addOnPositiveButtonClickListener(selection -> {
+                selectedEndMillis = selection;
+                long adjustedMillis = selection + TimeZone.getDefault().getOffset(selection);
+                Date date = new Date(adjustedMillis);
+
+                etEndDate.setText(sdfDisplay.format(date));
+                formattedEndDate = sdfApi.format(date);
+                etEndDate.setError(null);
+
+                calculateTotalPrice();
+            });
+
+            if (!endDatePicker.isAdded()) endDatePicker.show(getSupportFragmentManager(), "END_DATE_PICKER");
+        });
+    }
+
+    private void calculateTotalPrice() {
+        if (selectedStartMillis == 0 || selectedEndMillis == 0) return;
+
+        long diffInMillis = selectedEndMillis - selectedStartMillis;
+        long days = TimeUnit.MILLISECONDS.toDays(diffInMillis);
+        if (days == 0) days = 1;
+
+        calculatedTotalDays = (int) days;
+        calculatedTotal = days * currentListing.getPrice();
+        String formattedPrice = String.format(Locale.getDefault(), "₱%,.2f", calculatedTotal);
+        tvTotalPrice.setText(formattedPrice);
+        if (tvQrTotal != null) tvQrTotal.setText(formattedPrice);
+    }
+
+    private void setupClickListeners() {
+        btnBack.setOnClickListener(v -> {
+            if (vfCheckout.getDisplayedChild() == 1 || vfCheckout.getDisplayedChild() == 2) {
+                vfCheckout.setDisplayedChild(0);
+                tvRentFormHeader.setText("Confirm Request");
+            } else {
+                finish();
+            }
+        });
+
+        btnNext.setOnClickListener(v -> {
+            if (validateFormInputs()) {
+                String paymentMode = actvPaymentMode.getText().toString().toLowerCase();
+
+                if (paymentMode.contains("qr") || paymentMode.contains("gcash") || paymentMode.contains("paymaya") || paymentMode.contains("maya")) {
+                    tvRentFormHeader.setText("QR Payment");
+                    vfCheckout.setDisplayedChild(1);
+                } else if (paymentMode.contains("card") || paymentMode.contains("credit") || paymentMode.contains("visa") || paymentMode.contains("mastercard")) {
+                    tvRentFormHeader.setText("Card Payment");
+                    vfCheckout.setDisplayedChild(2);
+                } else {
+                    // Cash or other direct payment — fetch profile and submit immediately
+                    fetchProfileAndSubmit(btnNext, null);
+                }
+            }
+        });
+
+        btnConfirmQr.setOnClickListener(v -> fetchProfileAndSubmit(btnConfirmQr, null));
+
+        btnConfirmCc.setOnClickListener(v -> {
+            String cardNumberRaw = etCardNumber != null && etCardNumber.getText() != null
+                    ? etCardNumber.getText().toString().trim() : "";
+
+            if (cardNumberRaw.length() < 4) {
+                if (etCardNumber != null) etCardNumber.setError("Enter a valid card number");
+                return;
+            }
+
+            String cardLast4 = cardNumberRaw.substring(cardNumberRaw.length() - 4);
+            fetchProfileAndSubmit(btnConfirmCc, cardLast4);
+        });
+
+        btnViewReceipt.setOnClickListener(v -> {
+            Intent intent = new Intent(RentForm.this, DigitalReceipt.class);
+            intent.putExtra("FULL_NAME", currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "User");
+            intent.putExtra("CONTACT", "+63 " + etContactNumber.getText().toString());
+            intent.putExtra("PAYMENT_MODE", actvPaymentMode.getText().toString());
+            intent.putExtra("TOTAL_PRICE", calculatedTotal);
+            startActivity(intent);
+            finish();
+        });
+    }
+
+    /**
+     * Fetches the current user's Firestore profile to populate renterDetails,
+     * then builds and submits the BookingRequest. This is done asynchronously
+     * to avoid blocking the main thread. The button is disabled during the
+     * fetch to prevent duplicate submissions. If the Firestore fetch fails,
+     * the booking is still submitted with whatever data is available from
+     * FirebaseAuth (name, email), and the address fields are left empty.
+     */
+    private void fetchProfileAndSubmit(MaterialButton triggeringButton, String cardLast4) {
+        setLoadingState(true, triggeringButton);
+
+        String uid = currentUser.getUid();
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (isDestroyed()) return;
+
+                    String name = currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "";
+                    String email = currentUser.getEmail() != null ? currentUser.getEmail() : "";
+                    String contactNumber = etContactNumber.getText() != null
+                            ? etContactNumber.getText().toString().trim() : "";
+                    String address = "";
+                    String city = "";
+                    String province = "";
+
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        String firestoreName = documentSnapshot.getString("displayName");
+                        if (firestoreName != null && !firestoreName.isEmpty()) name = firestoreName;
+
+                        String firestoreAddress = documentSnapshot.getString("address");
+                        if (firestoreAddress != null) address = firestoreAddress;
+
+                        // location is a nested map: { city: "", province: "" }
+                        Object locationObj = documentSnapshot.get("location");
+                        if (locationObj instanceof java.util.Map) {
+                            @SuppressWarnings("unchecked")
+                            java.util.Map<String, Object> locationMap = (java.util.Map<String, Object>) locationObj;
+                            Object cityObj = locationMap.get("city");
+                            Object provinceObj = locationMap.get("province");
+                            if (cityObj instanceof String) city = (String) cityObj;
+                            if (provinceObj instanceof String) province = (String) provinceObj;
+                        }
+                    }
+
+                    submitBookingRequest(triggeringButton, name, email, contactNumber,
+                            address, city, province, cardLast4);
+                })
+                .addOnFailureListener(e -> {
+                    if (isDestroyed()) return;
+
+                    Log.w(TAG, "Firestore profile fetch failed, proceeding with Firebase Auth data only: " + e.getMessage());
+
+                    // Degrade gracefully — submit with available data
+                    String name = currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "";
+                    String email = currentUser.getEmail() != null ? currentUser.getEmail() : "";
+                    String contactNumber = etContactNumber.getText() != null
+                            ? etContactNumber.getText().toString().trim() : "";
+
+                    submitBookingRequest(triggeringButton, name, email, contactNumber,
+                            "", "", "", cardLast4);
+                });
+    }
+
+    private void submitBookingRequest(MaterialButton triggeringButton, String name, String email,
+                                      String contactNumber, String address, String city,
+                                      String province, String cardLast4) {
+        String targetOwner = currentListing.getOwnerId() != null ? currentListing.getOwnerId() : "";
+        String paymentMethod = actvPaymentMode.getText() != null
+                ? actvPaymentMode.getText().toString() : "";
+
+        BookingRequest.FinancialSummary financialSummary =
+                new BookingRequest.FinancialSummary(calculatedTotal);
+
+        BookingRequest.RenterDetails renterDetails = new BookingRequest.RenterDetails(
+                name,
+                email,
+                contactNumber,
+                address,
+                city,
+                province
+        );
+
+        BookingRequest request = new BookingRequest(
+                currentListing.getId(),
+                targetOwner,
+                formattedStartDate,
+                formattedEndDate,
+                calculatedTotalDays,
+                financialSummary,
+                renterDetails,
+                paymentMethod,
+                cardLast4
+        );
 
         ApiClient.getApiService().createBooking(request).enqueue(new Callback<BookingResponse>() {
             @Override
             public void onResponse(Call<BookingResponse> call, Response<BookingResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(RentForm.this, "Booking Requested Successfully!", Toast.LENGTH_LONG).show();
-                    
-                    Intent intent = new Intent(RentForm.this, DigitalReceipt.class);
-                    intent.putExtra("FULL_NAME", user.getDisplayName() != null ? user.getDisplayName() : "User");
-                    intent.putExtra("CONTACT", etContactNumber.getText().toString());
-                    intent.putExtra("PAYMENT_MODE", actvPaymentMode.getText().toString());
-                    intent.putExtra("TOTAL_PRICE", calculatedTotal);
-                    startActivity(intent);
-                    finish();
+                if (isDestroyed()) return;
+                setLoadingState(false, triggeringButton);
+
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    tvRentFormHeader.setText("Success");
+                    vfCheckout.setDisplayedChild(3);
                 } else {
                     try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                        String errorBody = response.errorBody() != null
+                                ? response.errorBody().string() : "Unknown error";
                         Log.e(TAG, "Booking failed: " + response.code() + " - " + errorBody);
-                        Toast.makeText(RentForm.this, "Booking failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RentForm.this, "Booking failed. Please try again.", Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         Log.e(TAG, "Error reading error body", e);
                     }
@@ -218,9 +381,57 @@ public class RentForm extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<BookingResponse> call, Throwable t) {
+                if (isDestroyed()) return;
+                setLoadingState(false, triggeringButton);
                 Log.e(TAG, "API Error: " + t.getMessage());
-                Toast.makeText(RentForm.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(RentForm.this, "Network error. Please check your connection.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private boolean validateFormInputs() {
+        boolean isValid = true;
+
+        if (selectedStartMillis == 0) {
+            etStartDate.setError("Required");
+            isValid = false;
+        }
+        if (selectedEndMillis == 0) {
+            etEndDate.setError("Required");
+            isValid = false;
+        }
+
+        if (etContactNumber.getText() == null
+                || etContactNumber.getText().toString().trim().isEmpty()
+                || etContactNumber.getText().length() < 10) {
+            etContactNumber.setError("Valid contact number required");
+            isValid = false;
+        } else {
+            etContactNumber.setError(null);
+        }
+
+        if (actvPaymentMode.getText() == null || actvPaymentMode.getText().toString().trim().isEmpty()) {
+            actvPaymentMode.setError("Please select a payment method");
+            isValid = false;
+        } else {
+            actvPaymentMode.setError(null);
+        }
+
+        return isValid;
+    }
+
+    private void setLoadingState(boolean isLoading, MaterialButton button) {
+        button.setEnabled(!isLoading);
+        if (isLoading) {
+            button.setText("Processing...");
+            button.setAlpha(0.7f);
+        } else {
+            if (button == btnNext) {
+                button.setText("Request Booking");
+            } else {
+                button.setText("Confirm Payment");
+            }
+            button.setAlpha(1.0f);
+        }
     }
 }

@@ -209,6 +209,18 @@ public class ListingSummaryFragment extends Fragment {
                                      AtomicInteger completedDrafts,
                                      AtomicInteger failedDrafts,
                                      int totalDrafts) {
+
+        CreateListingRequest.Penalties penalties = null;
+        boolean hasPenalty = draft.penaltyAmount > 0
+                && draft.penaltyUnit != null
+                && !draft.penaltyUnit.isEmpty();
+        if (hasPenalty) {
+            penalties = new CreateListingRequest.Penalties(
+                    draft.penaltyUnit,
+                    draft.penaltyAmount
+            );
+        }
+
         CreateListingRequest request = new CreateListingRequest(
                 draft.productName,
                 draft.description,
@@ -216,11 +228,10 @@ public class ListingSummaryFragment extends Fragment {
                 draft.island,
                 draft.price,
                 draft.priceUnit,
-                draft.penaltyPrice,
-                draft.penaltyUnit,
                 draft.paymentMethods,
                 draft.suggestedActivities,
-                imageUrls
+                imageUrls,
+                penalties
         );
 
         ApiClient.getApiService().createListing(request)

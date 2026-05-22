@@ -5,13 +5,16 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -19,171 +22,448 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.callbacks.FavoriteListingsCallback;
+import com.usc.rentbnb.models.ChatRoom;
 import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.models.Review;
+import com.usc.rentbnb.repositories.ChatRepository;
+import com.usc.rentbnb.repositories.FavoritesRepository;
 import com.usc.rentbnb.ui.booking.RentForm;
+import com.usc.rentbnb.ui.chat.ChatRoomActivity;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Activity to display detailed information about a rental listing.
- */
 public class ListingsDetailsActivity extends AppCompatActivity {
 
-    private TextView titleView, categoryView, priceView, descriptionText, ratingText, reviewCountText;
-    private TextView ownerNameView, ownerResponseTimeView;
+    private TextView titleView, priceView, descriptionText, ratingText, reviewCountText;
+    private TextView ownerNameView, ownerTypeView, locationView, pricePerDayView;
     private ImageView ownerAvatarView;
-    private MaterialButton btnRentNow;
-    private ChipGroup chipGroupActivities;
+    private ChipGroup paymentMethodsChipGroup;
     private ViewPager2 imageViewPager;
-    private TabLayout tabIndicator;
-    private ImageView btnFavorite;
-    private FloatingActionButton btnChat;
-    private Toolbar toolbar;
+    private LinearLayout galleryIndicatorLayout;
+
+    // Reviews views
+    private CardView cardReviewPreview;
+    private ShapeableImageView ivReviewerAvatar;
+    private TextView tvReviewerName, tvReviewDate, tvReviewRating, tvReviewComment;
+    private TextView tvNoReviews, tvSeeAllReviews, tvReviewsCountLabel;
+
     private Listing currentListing;
+    private String currentUserId;
+    private boolean isFavorited = false;
+
+    private FavoritesRepository favoritesRepository;
+    private ChatRepository chatRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listings_details);
 
-        if (getIntent().hasExtra("listing_object")) {
-            currentListing = getIntent().getParcelableExtra("listing_object");
-        } else if (getIntent().hasExtra("product_name")) {
-            // Fallback for Intent from NotificationActivity
-            currentListing = new Listing();
-            currentListing.setId(getIntent().getStringExtra("listing_id"));
-            currentListing.setProductName(getIntent().getStringExtra("product_name"));
-            currentListing.setCategory(getIntent().getStringExtra("category"));
-            
-            String priceStr = getIntent().getStringExtra("price");
-            try {
-                currentListing.setPrice(Double.parseDouble(priceStr != null ? priceStr : "0"));
-            } catch (NumberFormatException e) {
-                currentListing.setPrice(0.0);
-            }
-            currentListing.setPriceUnit(getIntent().getStringExtra("price_unit"));
-            currentListing.setDescription("Information from notification. Details may be limited.");
-        }
+        currentListing = (Listing) getIntent().getParcelableExtra("listing_object");
 
         if (currentListing == null) {
-            Toast.makeText(this, "Listing details not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error loading listing details.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        favoritesRepository = new FavoritesRepository();
+        chatRepository = new ChatRepository();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            currentUserId = user.getUid();
+        }
+
         initViews();
-        setupToolbar();
-        bindListingData();
-        setupListeners();
+        populateListingDetails();
+        setupImageGallery();
+        loadOwnerAvatar();
+        loadReviewPreview();
+        setupClickListeners();
     }
 
     private void initViews() {
-        toolbar = findViewById(R.id.toolbar);
-        titleView = findViewById(R.id.listing_title);
-        categoryView = findViewById(R.id.listing_category);
+        titleView = findViewById(R.id.tv_listing_title);
         priceView = findViewById(R.id.listing_price);
-        descriptionText = findViewById(R.id.listing_description);
-        ratingText = findViewById(R.id.rating_text);
-        reviewCountText = findViewById(R.id.review_count_text);
-        
-        ownerNameView = findViewById(R.id.owner_name);
-        ownerResponseTimeView = findViewById(R.id.owner_response_time);
-        ownerAvatarView = findViewById(R.id.owner_avatar);
+        pricePerDayView = findViewById(R.id.tv_listing_price_per_day);
+        descriptionText = findViewById(R.id.tv_listing_description);
+        ratingText = findViewById(R.id.tv_listing_rating);
+        reviewCountText = findViewById(R.id.tv_listing_reviews);
 
-        btnRentNow = findViewById(R.id.btn_rent_now);
-        chipGroupActivities = findViewById(R.id.chip_group_activities);
+        ownerNameView = findViewById(R.id.tv_owner_name);
+        ownerTypeView = findViewById(R.id.tv_owner_type);
+        ownerAvatarView = findViewById(R.id.iv_owner_avatar);
+
+        locationView = findViewById(R.id.tv_listing_location);
+        paymentMethodsChipGroup = findViewById(R.id.chip_group_payments);
         imageViewPager = findViewById(R.id.image_viewpager);
-        tabIndicator = findViewById(R.id.tab_indicator);
-        btnFavorite = findViewById(R.id.btn_favorite);
-        btnChat = findViewById(R.id.btn_chat);
+        galleryIndicatorLayout = findViewById(R.id.gallery_indicator_layout);
+
+        cardReviewPreview = findViewById(R.id.card_review_preview);
+        ivReviewerAvatar = findViewById(R.id.iv_reviewer_avatar);
+        tvReviewerName = findViewById(R.id.tv_reviewer_name);
+        tvReviewDate = findViewById(R.id.tv_review_date);
+        tvReviewRating = findViewById(R.id.tv_review_rating);
+        tvReviewComment = findViewById(R.id.tv_review_comment);
+        tvNoReviews = findViewById(R.id.tv_no_reviews);
+        tvSeeAllReviews = findViewById(R.id.tv_see_all_reviews);
+        tvReviewsCountLabel = findViewById(R.id.tv_reviews_count_label);
     }
 
-    private void setupToolbar() {
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    private void populateListingDetails() {
+        if (titleView != null) titleView.setText(currentListing.getProductName() != null ? currentListing.getProductName() : "Unknown Item");
+
+        double price = currentListing.getPrice();
+        String unit = currentListing.getPriceUnit() != null ? currentListing.getPriceUnit() : "day";
+
+        if (priceView != null) priceView.setText(String.format(Locale.getDefault(), "₱%,.0f", price));
+        if (pricePerDayView != null) pricePerDayView.setText(String.format(Locale.getDefault(), "₱%,.0f / %s", price, unit));
+
+        if (descriptionText != null) descriptionText.setText(currentListing.getDescription());
+
+        if (ratingText != null) ratingText.setText(String.format(Locale.getDefault(), "%.1f", currentListing.getRating()));
+        if (reviewCountText != null) reviewCountText.setText(String.format(Locale.getDefault(), "(%d reviews)", currentListing.getTotalReviews()));
+
+        if (tvReviewsCountLabel != null) {
+            int total = currentListing.getTotalReviews();
+            tvReviewsCountLabel.setText(String.format(Locale.getDefault(), "%d %s", total, total == 1 ? "review" : "reviews"));
         }
-        toolbar.setNavigationOnClickListener(v -> finish());
+
+        if (locationView != null) locationView.setText(currentListing.getIsland());
+
+        Chip categoryChip = findViewById(R.id.chip_category);
+        if (categoryChip != null) categoryChip.setText(currentListing.getCategory());
+
+        Chip conditionChip = findViewById(R.id.chip_condition);
+        if (conditionChip != null) conditionChip.setVisibility(View.GONE);
+
+        if (paymentMethodsChipGroup != null) {
+            paymentMethodsChipGroup.removeAllViews();
+            List<String> payments = currentListing.getPaymentMethods();
+            if (payments != null && !payments.isEmpty()) {
+                for (String method : payments) {
+                    Chip chip = new Chip(this);
+                    chip.setText(method);
+                    chip.setClickable(false);
+                    chip.setCheckable(false);
+                    paymentMethodsChipGroup.addView(chip);
+                }
+            } else {
+                paymentMethodsChipGroup.setVisibility(View.GONE);
+            }
+        }
+
+        if (ownerNameView != null) ownerNameView.setText(currentListing.getOwnerName() != null ? currentListing.getOwnerName() : "Unknown");
+
+        if (ownerTypeView != null) ownerTypeView.setVisibility(View.GONE);
     }
 
-    private void bindListingData() {
-        // Data Binding
-        titleView.setText(currentListing.getProductName() != null ? currentListing.getProductName() : "Unknown Listing");
-
-        StringBuilder categoryIsland = new StringBuilder();
-        if (currentListing.getCategory() != null) {
-            categoryIsland.append(currentListing.getCategory());
-        }
-        if (currentListing.getIsland() != null) {
-            if (categoryIsland.length() > 0) categoryIsland.append(" • ");
-            categoryIsland.append(currentListing.getIsland());
-        }
-        categoryView.setText(categoryIsland.toString());
-
-        descriptionText.setText(currentListing.getDescription() != null ? currentListing.getDescription() : "No description available.");
-        ratingText.setText(String.format(Locale.getDefault(), "%.1f", currentListing.getRating()));
-        reviewCountText.setText("(" + currentListing.getTotalReviews() + " reviews)");
-
-        String formattedPrice = "₱" + String.format(Locale.getDefault(), "%,.0f", currentListing.getPrice());
-        if (currentListing.getPriceUnit() != null) {
-            formattedPrice += " / " + currentListing.getPriceUnit();
-        }
-        priceView.setText(formattedPrice);
-
+    private void loadOwnerAvatar() {
         String ownerId = currentListing.getOwnerId();
-        ownerNameView.setText("Hosted by " + (ownerId != null ? "Host " + ownerId.substring(0, Math.min(5, ownerId.length())) : "Verified Host"));
 
-        setupActivities(currentListing.getCategory());
-        setupCarousel(currentListing.getImageUrls());
+        if (ownerAvatarView != null) {
+            ownerAvatarView.setImageResource(R.drawable.userprofile);
+        }
+
+        if (ownerId != null && !ownerId.isEmpty()) {
+            FirebaseFirestore.getInstance().collection("users").document(ownerId)
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists() && !isDestroyed()) {
+                            String photoUrl = documentSnapshot.getString("photoUrl");
+                            if (photoUrl != null && !photoUrl.isEmpty() && ownerAvatarView != null) {
+                                Glide.with(ListingsDetailsActivity.this)
+                                        .load(photoUrl)
+                                        .placeholder(R.drawable.userprofile)
+                                        .error(R.drawable.userprofile)
+                                        .circleCrop()
+                                        .into(ownerAvatarView);
+                            }
+                        }
+                    });
+        }
     }
 
-    private void setupCarousel(List<String> imageUrls) {
-        List<Object> imagesToDisplay = new ArrayList<>();
-        if (imageUrls != null && !imageUrls.isEmpty()) {
-            imagesToDisplay.addAll(imageUrls);
+    private void setupImageGallery() {
+        if (imageViewPager == null) return;
+
+        List<Object> imageSources = new ArrayList<>();
+        List<String> modelImages = currentListing.getImageUrls();
+
+        if (modelImages != null && !modelImages.isEmpty()) {
+            imageSources.addAll(modelImages);
         } else {
-            imagesToDisplay.add(R.drawable.ic_no_image_placeholder);
+            imageSources.add(R.drawable.ic_no_image_placeholder);
         }
 
-        GalleryAdapter adapter = new GalleryAdapter(imagesToDisplay);
+        GalleryAdapter adapter = new GalleryAdapter(imageSources);
         imageViewPager.setAdapter(adapter);
-        new TabLayoutMediator(tabIndicator, imageViewPager, (tab, position) -> {}).attach();
-    }
 
-    private void setupActivities(String category) {
-        chipGroupActivities.removeAllViews();
-        String[] suggestions = {"Sightseeing", "Photography", "Local Tour"};
-        if (category != null && category.toLowerCase().contains("boat")) {
-            suggestions = new String[]{"Island Hopping", "Snorkeling", "Sunset Cruise"};
-        }
-        
-        for (String activity : suggestions) {
-            Chip chip = new Chip(this);
-            chip.setText(activity);
-            chip.setChipBackgroundColorResource(R.color.white);
-            chip.setChipStrokeColorResource(R.color.teal_primary);
-            chip.setChipStrokeWidth(2f);
-            chip.setTextColor(getResources().getColor(R.color.text_dark));
-            chipGroupActivities.addView(chip);
-        }
-    }
+        setupGalleryIndicators(imageSources.size());
 
-    private void setupListeners() {
-        btnRentNow.setOnClickListener(v -> {
-            Intent intent = new Intent(this, RentForm.class);
-            intent.putExtra("listing_object", currentListing);
-            startActivity(intent);
+        imageViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                updateGalleryIndicators(position);
+            }
         });
-        btnFavorite.setOnClickListener(v -> btnFavorite.setImageResource(R.drawable.ic_favorites_filled));
     }
 
+    private void setupGalleryIndicators(int count) {
+        if (galleryIndicatorLayout == null) return;
+
+        galleryIndicatorLayout.removeAllViews();
+
+        // Only show indicators when there is more than one image
+        if (count <= 1) {
+            galleryIndicatorLayout.setVisibility(View.GONE);
+            return;
+        }
+
+        galleryIndicatorLayout.setVisibility(View.VISIBLE);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(8, 0, 8, 0);
+
+        for (int i = 0; i < count; i++) {
+            ImageView dot = new ImageView(this);
+            dot.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.indicator_inactive));
+            dot.setLayoutParams(params);
+            galleryIndicatorLayout.addView(dot);
+        }
+
+        updateGalleryIndicators(0);
+    }
+
+    private void updateGalleryIndicators(int activePosition) {
+        if (galleryIndicatorLayout == null) return;
+
+        int childCount = galleryIndicatorLayout.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            ImageView dot = (ImageView) galleryIndicatorLayout.getChildAt(i);
+            if (i == activePosition) {
+                dot.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.indicator_active));
+            } else {
+                dot.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.indicator_inactive));
+            }
+        }
+    }
+
+    private void loadReviewPreview() {
+        String listingId = currentListing.getId();
+        if (listingId == null || listingId.isEmpty()) {
+            showNoReviews();
+            return;
+        }
+
+        FirebaseFirestore.getInstance()
+                .collection("reviews")
+                .whereEqualTo("listingId", listingId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (isDestroyed()) return;
+
+                    if (querySnapshot == null || querySnapshot.isEmpty()) {
+                        showNoReviews();
+                        return;
+                    }
+
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        Review review = doc.toObject(Review.class);
+                        bindReviewPreview(review);
+                        break;
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (!isDestroyed()) {
+                        showNoReviews();
+                    }
+                });
+    }
+
+    private void bindReviewPreview(Review review) {
+        if (review == null) {
+            showNoReviews();
+            return;
+        }
+
+        if (cardReviewPreview != null) cardReviewPreview.setVisibility(View.VISIBLE);
+        if (tvNoReviews != null) tvNoReviews.setVisibility(View.GONE);
+        if (tvSeeAllReviews != null) tvSeeAllReviews.setVisibility(View.VISIBLE);
+
+        if (tvReviewerName != null) {
+            tvReviewerName.setText(review.getRenterName() != null ? review.getRenterName() : "Renter");
+        }
+
+        if (tvReviewRating != null) {
+            tvReviewRating.setText(String.format(Locale.getDefault(), "%.1f", review.getRating()));
+        }
+
+        if (tvReviewComment != null) {
+            String comment = review.getComment();
+            tvReviewComment.setText(comment != null ? comment : "");
+        }
+
+        if (tvReviewDate != null) {
+            if (review.getCreatedAt() != null) {
+                Date date = review.getCreatedAt().toDate();
+                SimpleDateFormat sdf = new SimpleDateFormat("MMM yyyy", Locale.getDefault());
+                tvReviewDate.setText(sdf.format(date));
+            } else {
+                tvReviewDate.setText("");
+            }
+        }
+
+        if (ivReviewerAvatar != null) {
+            String photoUrl = review.getRenterPhotoUrl();
+            if (photoUrl != null && !photoUrl.isEmpty()) {
+                Glide.with(this)
+                        .load(photoUrl)
+                        .placeholder(R.drawable.userprofile)
+                        .error(R.drawable.userprofile)
+                        .circleCrop()
+                        .into(ivReviewerAvatar);
+            } else {
+                ivReviewerAvatar.setImageResource(R.drawable.userprofile);
+            }
+        }
+    }
+
+    private void showNoReviews() {
+        if (cardReviewPreview != null) cardReviewPreview.setVisibility(View.GONE);
+        if (tvSeeAllReviews != null) tvSeeAllReviews.setVisibility(View.GONE);
+        if (tvNoReviews != null) tvNoReviews.setVisibility(View.VISIBLE);
+    }
+
+    private void updateFavoriteIcon() {
+        ImageButton btnFavorite = findViewById(R.id.btn_favorite);
+        if (btnFavorite != null) {
+            btnFavorite.setImageResource(isFavorited ? R.drawable.ic_favorites_filled : R.drawable.ic_favorites);
+        }
+    }
+
+    private void setupClickListeners() {
+        ImageButton btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
+
+        MaterialButton btnRentNow = findViewById(R.id.btn_rent_now);
+        if (btnRentNow != null) {
+            btnRentNow.setOnClickListener(v -> {
+                Intent intent = new Intent(this, RentForm.class);
+                intent.putExtra("listing_object", currentListing);
+                startActivity(intent);
+            });
+        }
+
+        ImageButton btnFavorite = findViewById(R.id.btn_favorite);
+        if (btnFavorite != null) {
+            btnFavorite.setOnClickListener(v -> {
+                if (currentUserId == null) return;
+
+                if (isFavorited) {
+                    favoritesRepository.removeFavoriteListing(currentUserId, currentListing.getId(), new FavoriteListingsCallback() {
+                        @Override
+                        public void onSuccess(List<Listing> favorites) {
+                            isFavorited = false;
+                            updateFavoriteIcon();
+                        }
+
+                        @Override
+                        public void onError(String error) {}
+                    });
+                } else {
+                    favoritesRepository.addFavoriteListing(currentUserId, currentListing, new FavoriteListingsCallback() {
+                        @Override
+                        public void onSuccess(List<Listing> favorites) {
+                            isFavorited = true;
+                            updateFavoriteIcon();
+                        }
+
+                        @Override
+                        public void onError(String error) {}
+                    });
+                }
+            });
+        }
+
+        if (tvSeeAllReviews != null) {
+            tvSeeAllReviews.setOnClickListener(v ->
+                    Toast.makeText(this, "All reviews coming soon.", Toast.LENGTH_SHORT).show());
+        }
+
+        ImageButton btnOwnerChat = findViewById(R.id.btn_owner_chat);
+        if (btnOwnerChat != null) {
+            btnOwnerChat.setOnClickListener(v -> {
+                if (currentUserId == null) {
+                    Toast.makeText(this, "Please log in to chat.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String ownerId = currentListing.getOwnerId();
+                if (ownerId == null || ownerId.equals(currentUserId)) {
+                    Toast.makeText(this, "Cannot message this host.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                btnOwnerChat.setEnabled(false);
+                Toast.makeText(this, "Loading chat...", Toast.LENGTH_SHORT).show();
+
+                chatRepository.findExistingChatRoom(currentUserId, ownerId, currentListing.getId(), new ChatRepository.ExistingRoomCallback() {
+                    @Override
+                    public void onResult(ChatRoom chatRoom) {
+                        if (chatRoom != null) {
+                            btnOwnerChat.setEnabled(true);
+                            openChatRoom(chatRoom.getId());
+                        } else {
+                            String imageUrl = (currentListing.getImageUrls() != null && !currentListing.getImageUrls().isEmpty())
+                                    ? currentListing.getImageUrls().get(0) : "";
+
+                            chatRepository.createChatRoom(currentUserId, ownerId, currentListing.getId(),
+                                    currentListing.getProductName(), imageUrl, new ChatRepository.ChatRoomCallback() {
+                                        @Override
+                                        public void onSuccess(ChatRoom newRoom) {
+                                            btnOwnerChat.setEnabled(true);
+                                            openChatRoom(newRoom.getId());
+                                        }
+
+                                        @Override
+                                        public void onFailure(String errorMessage) {
+                                            btnOwnerChat.setEnabled(true);
+                                            Toast.makeText(ListingsDetailsActivity.this, "Failed to start chat.", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    }
+                });
+            });
+        }
+    }
+
+    private void openChatRoom(String chatRoomId) {
+        Intent intent = new Intent(this, ChatRoomActivity.class);
+        intent.putExtra("chatRoomId", chatRoomId);
+        startActivity(intent);
+    }
+
+    // --- Inner ViewPager Adapter ---
     private static class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
         private final List<Object> imageSources;
         GalleryAdapter(List<Object> imageSources) { this.imageSources = imageSources; }
@@ -198,10 +478,10 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Glide.with(holder.imageView.getContext())
-                .load(imageSources.get(position))
-                .centerCrop()
-                .placeholder(R.drawable.ic_no_image_placeholder)
-                .into(holder.imageView);
+                    .load(imageSources.get(position))
+                    .centerCrop()
+                    .placeholder(R.drawable.ic_no_image_placeholder)
+                    .into(holder.imageView);
         }
 
         @Override

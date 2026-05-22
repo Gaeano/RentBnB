@@ -1,160 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/teal_primary"
     tools:context=".ui.booking.DigitalReceipt">
 
     <TextView
         android:id="@+id/tvReceiptHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Receipt"
+        android:layout_marginTop="48dp"
+        android:text="Digital Receipt"
         android:textColor="@color/white"
-        android:textSize="20sp"
+        android:textSize="22sp"
+        android:fontFamily="@font/jost_bold"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/llReceiptContent"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvReceiptBody"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="24dp"
-        android:layout_marginTop="80dp"
-        android:background="@drawable/individual_content_bg"
-        android:elevation="4dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:paddingTop="32dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="32dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/tvReceiptHeader">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="IskoBoat"
-            android:textColor="@color/teal_primary"
-            android:textSize="32sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="👤 Nicole Filo"
-            android:textColor="@color/text_dark_grey"
-            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="24dp"
-            android:background="#F8F8F8"
             android:orientation="vertical"
             android:padding="24dp">
 
             <TextView
-                android:id="@+id/tvReceiptFullName"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvReceiptItemName"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="FULL NAME"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                tools:text="DeWalt Hammer Drill"
+                android:textColor="@color/text_dark"
+                android:textSize="20sp"
+                android:fontFamily="@font/jost_bold"
+                android:textStyle="bold"
+                android:gravity="center" />
 
             <TextView
-                android:id="@+id/tvReceiptContact"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvReceiptDates"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="8dp"
-                android:background="#E0E0E0"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp"
-                android:text="+1234567890"
-                android:textColor="@color/black"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tvReceiptPaymentMode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="8dp"
-                android:text="via modeofpayment"
-                android:textColor="@color/text_grey"
-                android:textSize="12sp" />
+                android:layout_marginTop="4dp"
+                tools:text="12 Sep 2023 - 15 Sep 2023"
+                android:textColor="@color/teal_primary"
+                android:textSize="14sp"
+                android:fontFamily="@font/jost_bold"
+                android:gravity="center" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="24dp"
-                android:background="#EEEEEE" />
+                android:layout_marginBottom="24dp"
+                android:background="#DDDDDD" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Renter Name"
+                android:textColor="@color/text_grey"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/tvReceiptFullName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="JOHN DOE"
+                android:textColor="@color/text_dark"
+                android:textSize="16sp"
+                android:fontFamily="@font/jost_bold"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contact Number"
+                android:textColor="@color/text_grey"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/tvReceiptContact"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="+63 912 345 6789"
+                android:textColor="@color/text_dark"
+                android:textSize="16sp"
+                android:fontFamily="@font/jost_bold"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Payment Method"
+                android:textColor="@color/text_grey"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/tvReceiptPaymentMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="via GCash"
+                android:textColor="@color/text_dark"
+                android:textSize="16sp"
+                android:fontFamily="@font/jost_bold" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
+                android:background="#DDDDDD" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Amount"
-                    android:textColor="@color/black"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:text="7,590.00"
-                    android:textColor="@color/black" />
-            </RelativeLayout>
+                android:layout_height="wrap_content">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Amount Sent"
-                    android:textColor="@color/black"
+                    android:text="Total Amount"
+                    android:textColor="@color/text_dark"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:fontFamily="@font/jost_bold"
+                    android:textStyle="bold"
+                    android:layout_centerVertical="true"/>
+
                 <TextView
+                    android:id="@+id/tvReceiptTotalAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:text="7,590.00"
-                    android:textColor="@color/black"
-                    android:textSize="18sp"
+                    tools:text="₱ 7,590.00"
+                    android:textColor="@color/teal_primary"
+                    android:textSize="22sp"
+                    android:fontFamily="@font/jost_bold"
                     android:textStyle="bold" />
             </RelativeLayout>
 
         </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:background="@android:color/transparent" />
-
-    </LinearLayout>
-
-    <androidx.appcompat.widget.AppCompatButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDownloadReceipt"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_height="56dp"
         android:layout_marginHorizontal="24dp"
-        android:background="@drawable/button_background"
-        android:text="DOWNLOAD RECEIPT"
-        android:textAllCaps="true"
-        android:textColor="@color/white"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="@color/white"
+        android:text="Save &amp; Continue"
+        android:textAllCaps="false"
+        android:textColor="@color/teal_primary"
         android:textSize="18sp"
-        android:textStyle="bold"
+        android:fontFamily="@font/jost_bold"
+        app:cornerRadius="12dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

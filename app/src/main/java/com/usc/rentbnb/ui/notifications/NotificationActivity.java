@@ -258,6 +258,7 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
         // Navigation Logic
         if ("rent".equals(type) || "listing".equals(type)) {
             Intent intent = new Intent(this, ListingsDetailsActivity.class);
+            intent.putExtra("listing_id", notification.getListingId());
             intent.putExtra("product_name", notification.getProductName() != null ? notification.getProductName() : "Product");
             intent.putExtra("category", notification.getProductCategory() != null ? notification.getProductCategory() : "Category");
             intent.putExtra("price", notification.getPrice() != null ? notification.getPrice() : "0");

@@ -3,9 +3,9 @@ package com.usc.rentbnb.network;
 import com.google.gson.JsonObject;
 import com.usc.rentbnb.models.AuthResponse;
 import com.usc.rentbnb.models.BookingResponse;
+import com.usc.rentbnb.models.BookingRequest;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
-import com.usc.rentbnb.models.FAQ;
 import com.usc.rentbnb.models.InquilinoOpeningRequest;
 import com.usc.rentbnb.models.InquilinoReplyRequest;
 import com.usc.rentbnb.models.InquilinoResponse;
@@ -17,7 +17,7 @@ import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.RegisterRequest;
 import com.usc.rentbnb.models.WeatherResponse;
 
-import java.util.List;
+import java.util.Map;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -26,7 +26,6 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
@@ -50,6 +49,9 @@ public interface ApiService {
 
     @GET("auth/users/me")
     Call<AuthResponse> getUserData();
+
+    @PUT("auth/update")
+    Call<AuthResponse> updateProfile(@Body RegisterRequest updatedData);
 
     @POST("listings")
     Call<CreateListingResponse> createListing(@Body CreateListingRequest createListingRequest);
@@ -111,18 +113,15 @@ public interface ApiService {
     );
 
     // history
-    @GET("users/{userId}/history")
+    @GET("bookings/users/{userId}/history")
     Call<BookingResponse> getMyBookings(@Path("userId") String userId);
 
-    @GET("users/{userId}/lent-history")
+    @GET("bookings/users/{userId}/lent-history")
     Call<BookingResponse> getMyLentItems(@Path("userId") String userId);
 
     // notifs
     @GET("notifications")
     Call<NotificationResponse> getNotifications();
-
-    @PATCH("notifications/read-all")
-    Call<ResponseBody> markAllAsRead();
 
     @PATCH("notifications/{id}/read")
     Call<ResponseBody> markAsRead(@Path("id") String notificationId);
@@ -130,29 +129,24 @@ public interface ApiService {
     @DELETE("notifications/{id}")
     Call<ResponseBody> deleteNotification(@Path("id") String notificationId);
 
-    // FAQs
-    @GET("faqs/defaults")
-    Call<List<FAQ>> getDefaultFaqs();
-
-    @POST("faqs/defaults")
-    Call<FAQ> addDefaultFaq(@Body FAQ faq);
-
-    @PUT("faqs/defaults/{id}")
-    Call<FAQ> updateDefaultFaq(@Path("id") String id, @Body FAQ faq);
-
-    @DELETE("faqs/defaults/{id}")
-    Call<ResponseBody> deleteDefaultFaq(@Path("id") String id);
-
     // Inquilino (AI Chatbot)
     @POST("chat/inquilino/opening")
     Call<InquilinoResponse> generateInquilinoOpening(
-            @Header("Authorization") String token,
             @Body InquilinoOpeningRequest request
     );
 
     @POST("chat/inquilino/reply")
     Call<InquilinoResponse> generateInquilinoReply(
-            @Header("Authorization") String token,
             @Body InquilinoReplyRequest request
     );
+
+    // Booking Endpoints
+    @POST("bookings")
+    Call<BookingResponse> createBooking(@Body BookingRequest bookingRequest);
+
+    @GET("bookings/user/{userId}")
+    Call<BookingResponse> getBookingsByUser(@Path("userId") String userId);
+
+    @PATCH("bookings/{bookingId}/status")
+    Call<BookingResponse> updateBookingStatus(@Path("bookingId") String bookingId, @Body Map<String, String> status);
 }

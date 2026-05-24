@@ -17,14 +17,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.faltenreich.skeletonlayout.Skeleton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.auth.LoginActivity;
+import com.usc.rentbnb.ui.dashboard.DashboardActivity;
+import com.usc.rentbnb.ui.favorites.FavoritesFragment;
 import com.usc.rentbnb.ui.history.HistoryActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 import com.usc.rentbnb.viewmodels.UserProfileViewModel;
@@ -33,11 +38,9 @@ import java.util.Locale;
 
 public class ProfileFragment extends Fragment {
 
-    // UI Elements
     private TextView tvName, tvEmail;
     private ImageView ivAvatar;
     private LinearLayout profileHeader;
-    private TextView tvListingsCount, tvPurchasesCount, tvRatingValue, tvEarningsValue;
     private Skeleton skeleton;
 
     private UserProfileViewModel profileViewModel;
@@ -79,13 +82,12 @@ public class ProfileFragment extends Fragment {
             if (user != null) {
                 populateUI(user);
                 String userType = user.getUserType();
-                if(userType.equals("COMPANY")){
+                if ("COMPANY".equals(userType)) {
                     isCompany = true;
                 }
             }
         });
 
-        // ADDED FEATURE: Toggle Skeleton instead of ProgressBar
         profileViewModel.getIsloading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading) {
                 if (skeleton != null) skeleton.showSkeleton();
@@ -102,18 +104,11 @@ public class ProfileFragment extends Fragment {
     }
 
     private void initViews(View view) {
-        // Map the UI elements
         tvName = view.findViewById(R.id.profile_name);
         tvEmail = view.findViewById(R.id.profile_email);
         ivAvatar = view.findViewById(R.id.profile_image);
         profileHeader = view.findViewById(R.id.profile_header);
 
-        tvListingsCount = view.findViewById(R.id.tv_listings_count);
-        tvPurchasesCount = view.findViewById(R.id.tv_purchases_count);
-        tvRatingValue = view.findViewById(R.id.tv_rating_value);
-        tvEarningsValue = view.findViewById(R.id.tv_earnings_value);
-
-        // ADDED FEATURE: Map the Skeleton from your XML
         skeleton = view.findViewById(R.id.skeleton_profile);
     }
 
@@ -121,39 +116,44 @@ public class ProfileFragment extends Fragment {
         tvName.setText(user.getDisplayName() != null ? user.getDisplayName() : "N/A");
         tvEmail.setText(user.getEmail() != null ? user.getEmail() : "N/A");
 
-        tvRatingValue.setText(String.format(Locale.getDefault(), "%.1f", user.getRating()));
-        tvEarningsValue.setText(String.format(Locale.getDefault(), "P%.1f", user.getTotalEarnings()));
-
-        // Placeholders for now
-        tvListingsCount.setText("0");
-        tvPurchasesCount.setText("0");
-
-        // Bind the image using Glide
         if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
             Glide.with(this)
                     .load(user.getPhotoUrl())
-                    .placeholder(R.drawable.userprofile) // Updated placeholder name based on your code
-                    .circleCrop() // Makes the image circular
+                    .placeholder(R.drawable.userprofile)
+                    .circleCrop()
                     .into(ivAvatar);
         }
     }
 
     private void setupClickListeners(View view) {
         LinearLayout menuHistory = view.findViewById(R.id.menu_history);
-        LinearLayout menuManageFaqs = view.findViewById(R.id.menu_manage_faqs);
         LinearLayout menuHelpCenter = view.findViewById(R.id.menu_help_center);
-        LinearLayout menuAppSettings = view.findViewById(R.id.menu_app_settings);
+        LinearLayout pushNotifsToggle = view.findViewById(R.id.push_notifs_toggle);
+        SwitchMaterial switchPush = view.findViewById(R.id.switch_push_notifications);
         LinearLayout menuLogout = view.findViewById(R.id.menu_logout);
         View btnEditProfile = view.findViewById(R.id.menu_profile_detail);
+        LinearLayout menuFavorite = view.findViewById(R.id.menu_favorites);
+
+        ExtendedFloatingActionButton fabSwitchMode = view.findViewById(R.id.fab_switch_mode);
+        NestedScrollView scrollView = view.findViewById(R.id.profile_scroll_view);
+
+        // hide FAB
+        scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            if (scrollY > oldScrollY && fabSwitchMode.isShown()) {
+                fabSwitchMode.hide();
+            } else if (scrollY < oldScrollY && !fabSwitchMode.isShown()) {
+                fabSwitchMode.show();
+            }
+        });
+
+        fabSwitchMode.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), DashboardActivity.class);
+            startActivity(intent);
+            requireActivity().finish();
+        });
 
         menuHistory.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), HistoryActivity.class);
-            startActivity(intent);
-        });
-
-        menuManageFaqs.setOnClickListener(v -> {
-            Log.d("ProfileFragment", "Manage FAQs button clicked");
-            Intent intent = new Intent(requireActivity(), ManageFaqsActivity.class);
             startActivity(intent);
         });
 
@@ -161,11 +161,22 @@ public class ProfileFragment extends Fragment {
             Log.d("ProfileFragment", "Help Center button clicked");
         });
 
-        menuAppSettings.setOnClickListener(v -> {
-            Log.d("ProfileFragment", "App Settings button clicked");
-            Intent intent = new Intent(requireActivity(), SettingsActivity.class);
-            startActivity(intent);
+        menuFavorite.setOnClickListener(v -> {
+            Fragment favoriteFrag = new FavoritesFragment();
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.homeFeedContainer, favoriteFrag)
+                    .addToBackStack(null)
+                    .commit();
         });
+
+        if (pushNotifsToggle != null && switchPush != null) {
+            pushNotifsToggle.setOnClickListener(v -> {
+                switchPush.setChecked(!switchPush.isChecked());
+            });
+        }
 
         menuLogout.setOnClickListener(v -> {
             AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);

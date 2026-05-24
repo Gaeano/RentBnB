@@ -92,6 +92,9 @@ public class RegisterRequest {
         @SerializedName("yearsOfOperation")
         private String yearsOfOperation;
 
+        @SerializedName("serviceArea")
+        private ServiceArea serviceArea;
+
         // You can add your radius, specificAreas, and coverage variables here later
         // if you want to store them nested inside the company object on Firestore.
 
@@ -100,6 +103,14 @@ public class RegisterRequest {
             this.permitNumber = permitNumber;
             this.businessType = businessType;
             this.yearsOfOperation = yearsOfOperation;
+        }
+
+        public ServiceArea getServiceArea() {
+            return serviceArea;
+        }
+
+        public void setServiceArea(ServiceArea serviceArea) {
+            this.serviceArea = serviceArea;
         }
 
         public String getBusinessType() {
@@ -123,5 +134,44 @@ public class RegisterRequest {
 
         public String getPermitNumber() { return permitNumber; }
         public void setPermitNumber(String permitNumber) { this.permitNumber = permitNumber; }
+    }
+
+    public static class ServiceArea{
+        @SerializedName("radius")
+        private String radius;
+        @SerializedName("coverage")
+        private String coverage;
+        @SerializedName("specificAreas")
+        private String specificAreas;
+
+        public ServiceArea(String radius, String coverage, String specificAreas) {
+            this.radius = radius;
+            this.coverage = coverage;
+            this.specificAreas = specificAreas;
+        }
+
+        public String getSpecificAreas() {
+            return specificAreas;
+        }
+
+        public void setSpecificAreas(String specificAreas) {
+            this.specificAreas = specificAreas;
+        }
+
+        public String getCoverage() {
+            return coverage;
+        }
+
+        public void setCoverage(String coverage) {
+            this.coverage = coverage;
+        }
+
+        public String getRadius() {
+            return radius;
+        }
+
+        public void setRadius(String radius) {
+            this.radius = radius;
+        }
     }
 }

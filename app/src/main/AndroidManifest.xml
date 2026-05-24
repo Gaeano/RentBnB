@@ -47,6 +47,12 @@
         <activity
             android:name=".ui.booking.RentForm"
             android:exported="false" />
+
+        <activity
+            android:name=".ui.booking.MyBookingsActivity"
+            android:exported="false"
+            android:label="My Bookings" />
+
         <activity
             android:name=".ui.listing.ListingsDetailsActivity"
             android:exported="false" />
@@ -62,10 +68,26 @@
         </activity>
         <activity
             android:name=".ui.listing.AddListingActivity"
-            android:exported="false" />
+            android:exported="false">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
+        </activity>
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="true" />
+            android:exported="true">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
+        </activity>
         <activity
             android:name=".ui.auth.verifyAndForgetActivity"
             android:exported="false" />
@@ -99,13 +121,7 @@
             android:name=".ui.notifications.NotificationActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.ManageFaqsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.profile.SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.profile.LegalContentActivity"
+            android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
     </application>
 

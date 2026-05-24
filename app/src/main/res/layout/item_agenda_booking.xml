@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:contentPadding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivAgendaAvatar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="centerCrop"
+            android:background="#E0E0E0"
+            app:shapeAppearanceOverlay="@style/CircleImageView" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <TextView android:id="@+id/tvAgendaName" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Maya Chen" android:textColor="#1D1D1D" android:textSize="16sp" android:fontFamily="@font/jost_bold"/>
+            <TextView android:id="@+id/tvAgendaItem" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="DeWalt Power Drill" android:textColor="#757575" android:textSize="12sp"/>
+            <TextView android:id="@+id/tvAgendaStatus" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Day 2 of 3" android:textColor="#008080" android:textSize="10sp" android:background="@drawable/chip_background_teal" android:paddingHorizontal="8dp" android:paddingVertical="2dp" android:layout_marginTop="4dp" android:textStyle="bold"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btnAgendaChat"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_chat"
+            app:tint="@color/white"
+            android:padding="8dp"
+            android:background="@drawable/circular_teal_bg" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

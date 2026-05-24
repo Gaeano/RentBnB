@@ -7,7 +7,7 @@
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
     app:cardUseCompatPadding="true"
-    app:cardBackgroundColor="#F5F5F5">
+    app:cardBackgroundColor="@color/card_background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -29,14 +29,13 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="Item Title"
-            android:textColor="@android:color/black"
+            android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/status_card"
             app:layout_constraintStart_toEndOf="@id/item_image"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- NEW: Status Badge -->
         <androidx.cardview.widget.CardView
             android:id="@+id/status_card"
             android:layout_width="wrap_content"
@@ -63,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="2dp"
-            android:textColor="#555555"
+            android:textColor="@color/text_dark_grey"
             android:fontFamily="monospace"
             android:textSize="11sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -75,20 +74,19 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:textColor="@android:color/black"
+            android:textColor="@color/black"
             android:fontFamily="monospace"
             android:textSize="11sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/item_image"
             app:layout_constraintTop_toBottomOf="@id/item_category" />
 
-        <!-- NEW: Dates -->
         <TextView
             android:id="@+id/item_dates"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:textColor="#757575"
+            android:textColor="@color/text_grey"
             android:textSize="11sp"
             android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
@@ -101,11 +99,27 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="2dp"
-            android:textColor="#5BC8D3"
+            android:textColor="@color/teal_primary"
             android:textStyle="bold"
             android:textSize="13sp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_leave_review"
             app:layout_constraintStart_toEndOf="@id/item_image"
+            app:layout_constraintTop_toBottomOf="@id/item_dates" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_leave_review"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:text="Leave Review"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:cornerRadius="8dp"
+            app:backgroundTint="@color/teal_primary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_dates" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

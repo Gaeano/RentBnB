@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,65 +11,63 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="#20000000"
+        android:background="@color/teal_primary"
         app:layout_constraintHeight_percent="0.35"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/teal_primary"
         android:gravity="center"
         android:orientation="vertical"
-        android:paddingVertical="48dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/ivThankYouLogo"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/rentbnb_thank_you_logo"
-            tools:srcCompat="@android:drawable/ic_dialog_info" />
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottieSuccess"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            app:lottie_rawRes="@raw/success"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="false" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:text="Thank You!"
-            android:textColor="@color/teal_primary"
-            android:textSize="32sp"
+            android:textColor="@color/white"
+            android:textSize="42sp"
+            android:fontFamily="@font/jost_bold"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:gravity="center"
-            android:text="Thank you for Renting in RentBnB,\nsee you on your next island hop!"
+            android:text="Your booking request has been submitted\nand will be processed by the owner!"
+            android:fontFamily="@font/inconsolata"
             android:textColor="@color/text_grey"
-            android:textSize="12sp" />
+            android:textSize="16sp" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnContinue"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginHorizontal="60dp"
-            android:layout_marginTop="32dp"
-            android:background="@drawable/button_background"
-            android:text="Continue"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginTop="48dp"
+            android:backgroundTint="@color/white"
+            android:text="Continue to Dashboard"
             android:textAllCaps="false"
-            android:textColor="@color/white"
+            android:textColor="@color/teal_primary"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:fontFamily="@font/jost_bold"
+            app:cornerRadius="12dp" />
 
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="#20000000"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHeight_percent="0.25" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

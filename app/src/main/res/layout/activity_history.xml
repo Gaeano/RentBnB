@@ -5,183 +5,172 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FAFAFA"
-    android:clipChildren="false"
+    android:padding="16dp"
     tools:context=".ui.history.HistoryActivity">
 
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/history_header"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:fillViewport="true"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_back"
+            app:tint="@color/black"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/history_title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:clipToPadding="false">
+            android:layout_marginStart="16dp"
+            android:text="History"
+            android:textColor="#5BC8D3"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/history_header"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/search_bar_container"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#EEEEEE"
+        app:layout_constraintTop_toBottomOf="@id/history_header">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="22dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_search"
+                app:tint="@color/black" />
+
+            <EditText
+                android:id="@+id/search_bar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_height="match_parent"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:background="@null"
+                android:hint="Search"
+                android:textColorHint="@color/text_grey"
+                android:textSize="16sp"
+                android:inputType="text"
+                android:fontFamily="@font/inconsolata" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-                <ImageView
-                    android:id="@+id/back_button"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_back"
-                    app:tint="@color/black"
-                    android:clickable="true"
-                    android:focusable="true" />
+    <HorizontalScrollView
+        android:id="@+id/history_chips_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/search_bar_container">
 
-                <TextView
-                    android:id="@+id/history_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="History"
-                    android:textColor="#5BC8D3"
-                    android:textSize="36sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/search_bar_container"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="#EEEEEE"
-                app:layout_constraintTop_toBottomOf="@id/history_header">
+            <TextView
+                android:id="@+id/chip_active"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_background"
+                android:text="Active"
+                android:textColor="@color/teal_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:paddingHorizontal="16dp" />
+            <TextView
+                android:id="@+id/chip_pending"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_background"
+                android:text="Pending"
+                android:textColor="@color/text_grey"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:paddingHorizontal="16dp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="22dp">
+            <TextView
+                android:id="@+id/chip_completed"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_background"
+                android:text="Completed"
+                android:textColor="@color/text_grey"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:paddingHorizontal="16dp" />
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_search"
-                        app:tint="@color/black" />
+            <TextView
+                android:id="@+id/chip_overdue"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_background"
+                android:text="Overdue"
+                android:textColor="@color/text_grey"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:paddingHorizontal="16dp" />
 
-                    <EditText
-                        android:id="@+id/search_bar"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:background="@null"
-                        android:hint="Search"
-                        android:textColorHint="@color/text_grey"
-                        android:textSize="16sp"
-                        android:inputType="text"
-                        android:fontFamily="@font/inconsolata" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </HorizontalScrollView>
 
-            <LinearLayout
-                android:id="@+id/feed_toggle_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                app:layout_constraintTop_toBottomOf="@id/search_bar_container">
+    <!-- Fragment container for booking list -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/history_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/history_chips_scroll"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-                <TextView
-                    android:id="@+id/tab_rented"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_tab_active"
-                    android:text="MY BOOKINGS"
-                    android:textColor="@color/teal_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/jost_bold"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp" />
+    <!-- Loading overlay — sits on top of everything, hidden by default -->
+    <FrameLayout
+        android:id="@+id/loading_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/white"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/history_chips_scroll"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-                <TextView
-                    android:id="@+id/tab_lent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@android:color/transparent"
-                    android:text="LENT ITEMS"
-                    android:textColor="@color/text_grey"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/jost_bold"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp" />
-            </LinearLayout>
+        <ProgressBar
+            android:id="@+id/loading_spinner"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/teal_primary" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:layout_constraintTop_toBottomOf="@id/feed_toggle_row"
-                app:layout_constraintBottom_toBottomOf="parent">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvHistory"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:nestedScrollingEnabled="false" />
-
-                <LinearLayout
-                    android:id="@+id/empty_state_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="48dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:visibility="gone">
-
-                    <com.airbnb.lottie.LottieAnimationView
-                        android:id="@+id/empty_animation"
-                        android:layout_width="150dp"
-                        android:layout_height="150dp"
-                        app:lottie_rawRes="@raw/no_data_found"
-                        app:lottie_autoPlay="true"
-                        app:lottie_loop="true"
-                        android:alpha="0.8" />
-
-                    <TextView
-                        android:id="@+id/empty_state_message"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="No bookings found"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#9E9E9E" />
-
-                    <TextView
-                        android:id="@+id/empty_state_description"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="You haven't rented any items yet."
-                        android:textSize="14sp"
-                        android:textColor="#9E9E9E" />
-                </LinearLayout>
-
-            </FrameLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
-
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

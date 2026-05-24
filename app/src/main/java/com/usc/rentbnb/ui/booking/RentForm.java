@@ -17,10 +17,13 @@ import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.models.Booking;
 import com.usc.rentbnb.models.BookingRequest;
 import com.usc.rentbnb.models.BookingResponse;
 import com.usc.rentbnb.models.Listing;
@@ -39,7 +42,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RentForm extends AppCompatActivity {
-
     private static final String TAG = "RentForm";
 
     private ViewFlipper vfCheckout;
@@ -47,7 +49,7 @@ public class RentForm extends AppCompatActivity {
     private TextInputEditText etStartDate, etEndDate, etContactNumber, etCardNumber;
     private AutoCompleteTextView actvPaymentMode;
 
-    private MaterialButton btnNext, btnConfirmQr, btnConfirmCc, btnViewReceipt;
+    private MaterialButton btnNext, btnConfirmQr, btnConfirmCc;
     private ImageButton btnBack;
 
     private Listing currentListing;
@@ -60,6 +62,8 @@ public class RentForm extends AppCompatActivity {
     private String formattedEndDate = "";
     private double calculatedTotal = 0.0;
     private int calculatedTotalDays = 0;
+
+    private List<Booking> existingBookings = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,11 +79,34 @@ public class RentForm extends AppCompatActivity {
             return;
         }
 
+        if (currentListing.getOwnerId() != null && currentListing.getOwnerId().equals(currentUser.getUid())) {
+            Toast.makeText(this, "You cannot rent your own listing.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         initViews();
         populateListingSummary();
         setupDropdown();
         setupDatePickers();
         setupClickListeners();
+        fetchExistingBookings();
+    }
+
+    private void fetchExistingBookings() {
+        ApiClient.getApiService().getBookingsByUser(currentUser.getUid()).enqueue(new Callback<BookingResponse>() {
+            @Override
+            public void onResponse(Call<BookingResponse> call, Response<BookingResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    existingBookings = response.body().getData();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BookingResponse> call, Throwable t) {
+                Log.e(TAG, "Failed to fetch existing bookings: " + t.getMessage());
+            }
+        });
     }
 
     private void initViews() {
@@ -90,7 +117,6 @@ public class RentForm extends AppCompatActivity {
         btnNext = findViewById(R.id.btnNext);
         btnConfirmQr = findViewById(R.id.btnConfirmQr);
         btnConfirmCc = findViewById(R.id.btnConfirmCc);
-        btnViewReceipt = findViewById(R.id.btnViewReceipt);
 
         etStartDate = findViewById(R.id.etStartDate);
         etEndDate = findViewById(R.id.etEndDate);
@@ -123,8 +149,8 @@ public class RentForm extends AppCompatActivity {
     }
 
     private void setupDatePickers() {
-        SimpleDateFormat sdfDisplay = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-        SimpleDateFormat sdfApi = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat sdfDisplay = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
+        SimpleDateFormat sdfApi = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
         etStartDate.setOnClickListener(v -> {
             CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder()
@@ -138,24 +164,43 @@ public class RentForm extends AppCompatActivity {
                     .build();
 
             startDatePicker.addOnPositiveButtonClickListener(selection -> {
-                selectedStartMillis = selection;
-                long adjustedMillis = selection + TimeZone.getDefault().getOffset(selection);
-                Date date = new Date(adjustedMillis);
+                MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
+                        .setTimeFormat(TimeFormat.CLOCK_12H)
+                        .setHour(12)
+                        .setMinute(0)
+                        .setTitleText("Select Start Time")
+                        .build();
 
-                etStartDate.setText(sdfDisplay.format(date));
-                formattedStartDate = sdfApi.format(date);
-                etStartDate.setError(null);
+                timePicker.addOnPositiveButtonClickListener(v2 -> {
+                    long adjustedMillis = selection + TimeZone.getDefault().getOffset(selection);
+                    // Reset to midnight first
+                    java.util.Calendar cal = java.util.Calendar.getInstance();
+                    cal.setTimeInMillis(adjustedMillis);
+                    cal.set(java.util.Calendar.HOUR_OF_DAY, timePicker.getHour());
+                    cal.set(java.util.Calendar.MINUTE, timePicker.getMinute());
+                    cal.set(java.util.Calendar.SECOND, 0);
+                    cal.set(java.util.Calendar.MILLISECOND, 0);
 
-                if (selectedEndMillis != 0 && selectedEndMillis < selectedStartMillis) {
-                    selectedEndMillis = 0;
-                    etEndDate.setText("");
-                    formattedEndDate = "";
-                    calculatedTotalDays = 0;
-                    tvTotalPrice.setText("₱0.00");
-                    Toast.makeText(this, "End date reset because it was before start date.", Toast.LENGTH_SHORT).show();
-                } else if (selectedEndMillis != 0) {
-                    calculateTotalPrice();
-                }
+                    selectedStartMillis = cal.getTimeInMillis();
+                    Date date = cal.getTime();
+
+                    etStartDate.setText(sdfDisplay.format(date));
+                    formattedStartDate = sdfApi.format(date);
+                    etStartDate.setError(null);
+
+                    if (selectedEndMillis != 0 && selectedEndMillis < selectedStartMillis) {
+                        selectedEndMillis = 0;
+                        etEndDate.setText("");
+                        formattedEndDate = "";
+                        calculatedTotalDays = 0;
+                        tvTotalPrice.setText("₱0.00");
+                        Toast.makeText(this, "End date reset because it was before start date.", Toast.LENGTH_SHORT).show();
+                    } else if (selectedEndMillis != 0) {
+                        calculateTotalPrice();
+                    }
+                });
+
+                timePicker.show(getSupportFragmentManager(), "START_TIME_PICKER");
             });
 
             if (!startDatePicker.isAdded()) startDatePicker.show(getSupportFragmentManager(), "START_DATE_PICKER");
@@ -179,15 +224,33 @@ public class RentForm extends AppCompatActivity {
                     .build();
 
             endDatePicker.addOnPositiveButtonClickListener(selection -> {
-                selectedEndMillis = selection;
-                long adjustedMillis = selection + TimeZone.getDefault().getOffset(selection);
-                Date date = new Date(adjustedMillis);
+                MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
+                        .setTimeFormat(TimeFormat.CLOCK_12H)
+                        .setHour(12)
+                        .setMinute(0)
+                        .setTitleText("Select End Time")
+                        .build();
 
-                etEndDate.setText(sdfDisplay.format(date));
-                formattedEndDate = sdfApi.format(date);
-                etEndDate.setError(null);
+                timePicker.addOnPositiveButtonClickListener(v2 -> {
+                    long adjustedMillis = selection + TimeZone.getDefault().getOffset(selection);
+                    java.util.Calendar cal = java.util.Calendar.getInstance();
+                    cal.setTimeInMillis(adjustedMillis);
+                    cal.set(java.util.Calendar.HOUR_OF_DAY, timePicker.getHour());
+                    cal.set(java.util.Calendar.MINUTE, timePicker.getMinute());
+                    cal.set(java.util.Calendar.SECOND, 0);
+                    cal.set(java.util.Calendar.MILLISECOND, 0);
 
-                calculateTotalPrice();
+                    selectedEndMillis = cal.getTimeInMillis();
+                    Date date = cal.getTime();
+
+                    etEndDate.setText(sdfDisplay.format(date));
+                    formattedEndDate = sdfApi.format(date);
+                    etEndDate.setError(null);
+
+                    calculateTotalPrice();
+                });
+
+                timePicker.show(getSupportFragmentManager(), "END_TIME_PICKER");
             });
 
             if (!endDatePicker.isAdded()) endDatePicker.show(getSupportFragmentManager(), "END_DATE_PICKER");
@@ -198,11 +261,25 @@ public class RentForm extends AppCompatActivity {
         if (selectedStartMillis == 0 || selectedEndMillis == 0) return;
 
         long diffInMillis = selectedEndMillis - selectedStartMillis;
-        long days = TimeUnit.MILLISECONDS.toDays(diffInMillis);
-        if (days == 0) days = 1;
+        if (diffInMillis < 0) diffInMillis = 0;
 
-        calculatedTotalDays = (int) days;
-        calculatedTotal = days * currentListing.getPrice();
+        String unit = currentListing.getPriceUnit() != null ? currentListing.getPriceUnit().toLowerCase() : "day";
+        
+        if (unit.contains("hour")) {
+            long hours = TimeUnit.MILLISECONDS.toHours(diffInMillis);
+            // If less than an hour but more than 0, charge for 1 hour
+            if (hours == 0 && diffInMillis > 0) hours = 1;
+            
+            calculatedTotalDays = (int) hours; // Reusing field to store hours
+            calculatedTotal = hours * currentListing.getPrice();
+        } else {
+            long days = TimeUnit.MILLISECONDS.toDays(diffInMillis);
+            if (days == 0 && diffInMillis >= 0) days = 1;
+
+            calculatedTotalDays = (int) days;
+            calculatedTotal = days * currentListing.getPrice();
+        }
+
         String formattedPrice = String.format(Locale.getDefault(), "₱%,.2f", calculatedTotal);
         tvTotalPrice.setText(formattedPrice);
         if (tvQrTotal != null) tvQrTotal.setText(formattedPrice);
@@ -248,16 +325,6 @@ public class RentForm extends AppCompatActivity {
 
             String cardLast4 = cardNumberRaw.substring(cardNumberRaw.length() - 4);
             fetchProfileAndSubmit(btnConfirmCc, cardLast4);
-        });
-
-        btnViewReceipt.setOnClickListener(v -> {
-            Intent intent = new Intent(RentForm.this, DigitalReceipt.class);
-            intent.putExtra("FULL_NAME", currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "User");
-            intent.putExtra("CONTACT", "+63 " + etContactNumber.getText().toString());
-            intent.putExtra("PAYMENT_MODE", actvPaymentMode.getText().toString());
-            intent.putExtra("TOTAL_PRICE", calculatedTotal);
-            startActivity(intent);
-            finish();
         });
     }
 
@@ -365,8 +432,7 @@ public class RentForm extends AppCompatActivity {
                 setLoadingState(false, triggeringButton);
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    tvRentFormHeader.setText("Success");
-                    vfCheckout.setDisplayedChild(3);
+                    navigateToDigitalReceipt();
                 } else {
                     try {
                         String errorBody = response.errorBody() != null
@@ -401,6 +467,33 @@ public class RentForm extends AppCompatActivity {
             isValid = false;
         }
 
+        // Check for overlaps with same user and same listing
+        if (isValid && existingBookings != null) {
+            for (Booking b : existingBookings) {
+                if (b.getListingId() != null && b.getListingId().equals(currentListing.getId())) {
+                    try {
+                        SimpleDateFormat sdfApi = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                        Date bStart = sdfApi.parse(b.getStartDate());
+                        Date bEnd = sdfApi.parse(b.getEndDate());
+
+                        if (bStart != null && bEnd != null) {
+                            long bStartMillis = bStart.getTime();
+                            long bEndMillis = bEnd.getTime();
+
+                            // Overlap condition: (StartA <= EndB) and (EndA >= StartB)
+                            if (selectedStartMillis <= bEndMillis && selectedEndMillis >= bStartMillis) {
+                                Toast.makeText(this, "You already have a booking for these dates.", Toast.LENGTH_LONG).show();
+                                isValid = false;
+                                break;
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing existing booking date", e);
+                    }
+                }
+            }
+        }
+
         if (etContactNumber.getText() == null
                 || etContactNumber.getText().toString().trim().isEmpty()
                 || etContactNumber.getText().length() < 10) {
@@ -418,6 +511,22 @@ public class RentForm extends AppCompatActivity {
         }
 
         return isValid;
+    }
+
+    private void navigateToDigitalReceipt() {
+        Intent intent = new Intent(RentForm.this, DigitalReceipt.class);
+        intent.putExtra("FULL_NAME", currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "User");
+        intent.putExtra("CONTACT", "+63 " + etContactNumber.getText().toString());
+        intent.putExtra("PAYMENT_MODE", actvPaymentMode.getText().toString());
+        intent.putExtra("TOTAL_PRICE", calculatedTotal);
+
+        // Pass missing fields
+        intent.putExtra("PRODUCT_NAME", currentListing.getProductName());
+        intent.putExtra("START_DATE", etStartDate.getText().toString());
+        intent.putExtra("END_DATE", etEndDate.getText().toString());
+
+        startActivity(intent);
+        finish();
     }
 
     private void setLoadingState(boolean isLoading, MaterialButton button) {

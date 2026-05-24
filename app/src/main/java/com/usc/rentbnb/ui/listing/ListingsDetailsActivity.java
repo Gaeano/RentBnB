@@ -166,7 +166,13 @@ public class ListingsDetailsActivity extends AppCompatActivity {
             }
         }
 
-        if (ownerNameView != null) ownerNameView.setText(currentListing.getOwnerName() != null ? currentListing.getOwnerName() : "Unknown");
+        if (ownerNameView != null) {
+            String name = currentListing.getOwnerName();
+            if (name == null || name.isEmpty() || name.equalsIgnoreCase("Unknown")) {
+                name = currentListing.getOwnerId();
+            }
+            ownerNameView.setText(name != null ? name : "Host");
+        }
 
         if (ownerTypeView != null) ownerTypeView.setVisibility(View.GONE);
     }
@@ -174,6 +180,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
     private void loadOwnerAvatar() {
         String ownerId = currentListing.getOwnerId();
 
+        // Initial placeholder
         if (ownerAvatarView != null) {
             ownerAvatarView.setImageResource(R.drawable.userprofile);
         }
@@ -183,6 +190,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists() && !isDestroyed()) {
+                            // 1. Handle Avatar
                             String photoUrl = documentSnapshot.getString("photoUrl");
                             if (photoUrl != null && !photoUrl.isEmpty() && ownerAvatarView != null) {
                                 Glide.with(ListingsDetailsActivity.this)
@@ -191,6 +199,23 @@ public class ListingsDetailsActivity extends AppCompatActivity {
                                         .error(R.drawable.userprofile)
                                         .circleCrop()
                                         .into(ownerAvatarView);
+                            } else if (ownerAvatarView != null) {
+                                ownerAvatarView.setImageResource(R.drawable.userprofile);
+                            }
+
+                            // 2. Handle Name/UserId
+                            String name = documentSnapshot.getString("displayName");
+                            if (name == null || name.isEmpty()) {
+                                name = documentSnapshot.getString("name");
+                            }
+                            
+                            if (ownerNameView != null) {
+                                if (name != null && !name.isEmpty()) {
+                                    ownerNameView.setText(name);
+                                } else {
+                                    // Fallback to userId if no name found
+                                    ownerNameView.setText(ownerId);
+                                }
                             }
                         }
                     });

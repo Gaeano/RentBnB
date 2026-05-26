@@ -13,12 +13,14 @@ import com.usc.rentbnb.models.InquilinoReplyRequest;
 import com.usc.rentbnb.models.InquilinoResponse;
 import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.models.IslandResponse;
+import com.usc.rentbnb.models.FAQ;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.RegisterRequest;
 import com.usc.rentbnb.models.WeatherResponse;
 
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.MultipartBody;
@@ -49,6 +51,9 @@ public interface ApiService {
 
     @POST("auth/google")
     Call<AuthResponse> googleSignIn();
+
+    @POST("auth/fcm-token")
+    Call<ResponseBody> saveFcmToken(@Body Map<String, String> body);
 
     @GET("auth/users/me")
     Call<AuthResponse> getUserData();
@@ -141,6 +146,9 @@ public interface ApiService {
     @PATCH("notifications/{id}/read")
     Call<ResponseBody> markAsRead(@Path("id") String notificationId);
 
+    @PATCH("notifications/read-all")
+    Call<ResponseBody> markAllAsRead();
+
     @DELETE("notifications/{id}")
     Call<ResponseBody> deleteNotification(@Path("id") String notificationId);
 
@@ -182,4 +190,17 @@ public interface ApiService {
             @Path("bookingId") String bookingId,
             @Body Map<String, Object> body
     );
+
+    // FAQs
+    @GET("faqs")
+    Call<List<FAQ>> getDefaultFaqs();
+
+    @POST("faqs")
+    Call<FAQ> addDefaultFaq(@Body FAQ faq);
+
+    @PUT("faqs/{id}")
+    Call<FAQ> updateDefaultFaq(@Path("id") String id, @Body FAQ faq);
+
+    @DELETE("faqs/{id}")
+    Call<ResponseBody> deleteDefaultFaq(@Path("id") String id);
 }

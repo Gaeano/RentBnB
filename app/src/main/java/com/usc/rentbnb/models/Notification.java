@@ -21,6 +21,9 @@ public class Notification {
     @SerializedName("timestamp")
     private String timestamp;
 
+    @SerializedName("listingId")
+    private String listingId;
+
     // Optional fields for different notification types
     private String productName;
     private String productCategory;
@@ -40,6 +43,7 @@ public class Notification {
     // Extended constructor for Renter UI
     public Notification(String id, String type, String productName, String productCategory, String productImage, String price, String priceUnit) {
         this.id = id;
+        this.listingId = id; // For listing notifications, id is usually the listingId
         this.type = type;
         this.productName = productName;
         this.productCategory = productCategory;
@@ -65,6 +69,7 @@ public class Notification {
     public String getType() { return type; }
     public boolean isRead() { return isRead; }
     public String getTimestamp() { return timestamp; }
+    public String getListingId() { return listingId; }
 
     public String getProductName() { return productName; }
     public String getProductCategory() { return productCategory; }

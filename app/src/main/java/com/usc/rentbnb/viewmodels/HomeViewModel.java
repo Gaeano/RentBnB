@@ -169,4 +169,24 @@ public class HomeViewModel extends ViewModel {
     public void clearFilters() {
         listings.setValue(new ArrayList<>(allListings));
     }
+
+    public void filterByCategories(List<String> categories) {
+        if (categories == null || categories.isEmpty()) {
+            listings.setValue(new ArrayList<>(allListings));
+            return;
+        }
+
+        List<Listing> filtered = new ArrayList<>();
+        for (Listing listing : allListings) {
+            if (listing.getCategory() != null) {
+                for (String category : categories) {
+                    if (category.equalsIgnoreCase(listing.getCategory())) {
+                        filtered.add(listing);
+                        break;
+                    }
+                }
+            }
+        }
+        listings.setValue(filtered);
+    }
 }

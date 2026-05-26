@@ -152,7 +152,29 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> serverList = response.body().getData();
                     if (serverList != null) {
-                        notificationList.addAll(serverList);
+                        for (Notification n : serverList) {
+                            // Only add if it has valid content for its type
+                            if (n.getType() == null) {
+                                if (n.getMessage() != null && !n.getMessage().isEmpty()) {
+                                    notificationList.add(n);
+                                }
+                            } else {
+                                switch (n.getType()) {
+                                    case "rent":
+                                    case "listing":
+                                        if (n.getProductName() != null) notificationList.add(n);
+                                        break;
+                                    case "chat":
+                                        if (n.getUsername() != null) notificationList.add(n);
+                                        break;
+                                    default:
+                                        if (n.getMessage() != null && !n.getMessage().isEmpty()) {
+                                            notificationList.add(n);
+                                        }
+                                        break;
+                                }
+                            }
+                        }
                     }
                     
                     fetchNewListingsAsNotifications();

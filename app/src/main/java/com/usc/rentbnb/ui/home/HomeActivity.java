@@ -77,6 +77,10 @@ public class HomeActivity extends AppCompatActivity {
     private FilterCriteria lastCriteria = null;
     private ListenerRegistration chatListener;
 
+    private boolean hasUnreadNotifs = false;
+    private boolean hasUnreadChats = false;
+    private boolean hasNewListings = false;
+
     // saerch debouncing lkogic
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
@@ -104,6 +108,7 @@ public class HomeActivity extends AppCompatActivity {
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
+        com.usc.rentbnb.services.MyFirebaseMessagingService.refreshAndSaveToken();
 
         setupFilterChips();
         setupTitleToggle();
@@ -124,6 +129,7 @@ public class HomeActivity extends AppCompatActivity {
         switchFeed(true);
 
         fetchUserLocation();
+        requestNotificationPermission();
 
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
@@ -230,12 +236,13 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupFilterChips() {
-        TextView chipNearYou = findViewById(R.id.chip_near_you);
-        TextView chipTrending = findViewById(R.id.chip_trending);
-        TextView chipNew = findViewById(R.id.chip_new);
-        TextView chipTopRated = findViewById(R.id.chip_top_rated);
+        TextView chipWheels = findViewById(R.id.chip_wheels);
+        TextView chipWater = findViewById(R.id.chip_water);
+        TextView chipOutdoors = findViewById(R.id.chip_outdoors);
+        TextView chipElectronics = findViewById(R.id.chip_electronics);
+        TextView chipBeachLeisure = findViewById(R.id.chip_beach_leisure);
 
-        filterChips = new TextView[]{chipNearYou, chipTrending, chipNew, chipTopRated};
+        filterChips = new TextView[]{chipWheels, chipWater, chipOutdoors, chipElectronics, chipBeachLeisure};
 
         for (TextView chip : filterChips) {
             if (chip != null) {
@@ -254,6 +261,14 @@ public class HomeActivity extends AppCompatActivity {
         } else {
             selectedChip.setBackgroundResource(R.drawable.chip_background);
         }
+
+        java.util.List<String> selectedCategories = new java.util.ArrayList<>();
+        for (TextView chip : filterChips) {
+            if (chip != null && chip.isSelected()) {
+                selectedCategories.add(chip.getText().toString());
+            }
+        }
+        homeViewModel.filterByCategories(selectedCategories);
     }
 
     private void setupBottomNavigation(View homeHeader) {
@@ -400,6 +415,14 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    private void requestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -427,28 +450,29 @@ public class HomeActivity extends AppCompatActivity {
         ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
             @Override
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
-                boolean hasUnread = false;
+                hasUnreadNotifs = false;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> notifications = response.body().getData();
                     if (notifications != null) {
                         for (Notification n : notifications) {
                             if (!n.isRead()) {
-                                hasUnread = true;
+                                hasUnreadNotifs = true;
                                 break;
                             }
                         }
                     }
                 }
 
-                if (hasUnread) {
-                    updateNotificationBadge(true);
-                } else {
+                if (!hasUnreadNotifs) {
                     checkNewListingsForBadge();
+                } else {
+                    updateNotificationBadge();
                 }
             }
 
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                hasUnreadNotifs = false;
                 checkNewListingsForBadge();
             }
         });
@@ -458,26 +482,33 @@ public class HomeActivity extends AppCompatActivity {
         ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
             @Override
             public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
-                boolean hasNew = false;
+                hasNewListings = false;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Listing> listings = response.body().getData();
                     if (listings != null) {
                         for (Listing l : listings) {
                             if (l.isNew()) {
-                                hasNew = true;
+                                hasNewListings = true;
                                 break;
                             }
                         }
                     }
                 }
-                updateNotificationBadge(hasNew);
+                updateNotificationBadge();
             }
 
             @Override
             public void onFailure(Call<ListingResponse> call, Throwable t) {
-                updateNotificationBadge(false);
+                hasNewListings = false;
+                updateNotificationBadge();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkUnreadNotifications();
     }
 
     @Override
@@ -496,16 +527,14 @@ public class HomeActivity extends AppCompatActivity {
         chatListener = chatRepo.listenToChatRoomsForUser(currentUserId, new ChatRepository.ChatRoomsListCallback() {
             @Override
             public void onUpdate(List<ChatRoom> chatRooms) {
-                boolean hasUnreadChat = false;
+                hasUnreadChats = false;
                 for (ChatRoom room : chatRooms) {
                     if (room.getUnreadCountForUser(currentUserId) > 0) {
-                        hasUnreadChat = true;
+                        hasUnreadChats = true;
                         break;
                     }
                 }
-                if (hasUnreadChat) {
-                    updateNotificationBadge(true);
-                }
+                updateNotificationBadge();
             }
 
             @Override
@@ -513,9 +542,10 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private void updateNotificationBadge(boolean visible) {
+    private void updateNotificationBadge() {
         View badge = findViewById(R.id.notification_badge);
         if (badge != null) {
+            boolean visible = hasUnreadNotifs || hasUnreadChats || hasNewListings;
             badge.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }

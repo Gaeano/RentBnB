@@ -103,6 +103,13 @@ public class ChatRoomActivity extends AppCompatActivity {
         ownerId = getIntent().getStringExtra(EXTRA_OWNER_ID);
         renterId = getIntent().getStringExtra(EXTRA_RENTER_ID);
         currentMode = getIntent().getStringExtra(EXTRA_CURRENT_MODE);
+
+        if (chatRoomId == null) {
+            Toast.makeText(this, "Error: Chat Room ID is missing", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         if (currentMode == null) currentMode = ChatRoom.MODE_AI;
     }
 

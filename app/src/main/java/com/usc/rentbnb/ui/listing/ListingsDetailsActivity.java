@@ -483,8 +483,13 @@ public class ListingsDetailsActivity extends AppCompatActivity {
     }
 
     private void openChatRoom(String chatRoomId) {
+        if (currentListing == null) return;
         Intent intent = new Intent(this, ChatRoomActivity.class);
-        intent.putExtra("chatRoomId", chatRoomId);
+        intent.putExtra(ChatRoomActivity.EXTRA_CHAT_ROOM_ID, chatRoomId);
+        intent.putExtra(ChatRoomActivity.EXTRA_LISTING_ID, currentListing.getId());
+        intent.putExtra(ChatRoomActivity.EXTRA_LISTING_TITLE, currentListing.getProductName());
+        intent.putExtra(ChatRoomActivity.EXTRA_OWNER_ID, currentListing.getOwnerId());
+        intent.putExtra(ChatRoomActivity.EXTRA_RENTER_ID, currentUserId);
         startActivity(intent);
     }
 

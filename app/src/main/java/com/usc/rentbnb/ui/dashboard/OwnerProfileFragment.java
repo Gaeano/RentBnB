@@ -1,6 +1,7 @@
 package com.usc.rentbnb.ui.dashboard;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,8 +23,10 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.User;
+import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.profile.ProfileDetailsActivity;
+import com.usc.rentbnb.viewmodels.AuthViewModel;
 import com.usc.rentbnb.viewmodels.UserProfileViewModel;
 
 // TODO: add count reviews in backend
@@ -35,6 +38,7 @@ public class OwnerProfileFragment extends Fragment {
     private SwitchMaterial switchPushNotifs;
     private ShapeableImageView ownerAvatar;
     private boolean isCompany = false;
+    private AuthViewModel authViewModel;
 
     @Nullable
     @Override
@@ -55,6 +59,8 @@ public class OwnerProfileFragment extends Fragment {
             v.setLayoutParams(params);
             return insets;
         });
+
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
         initViews(view);
 
@@ -105,6 +111,13 @@ public class OwnerProfileFragment extends Fragment {
 
         rowSignOut.setOnClickListener(v -> {
             Toast.makeText(getContext(), "Signing out...", Toast.LENGTH_SHORT).show();
+            authViewModel.logout();
+
+            clearRememberMeData();
+
+            Intent intent = new Intent(requireActivity(), LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         });
     }
 
@@ -127,12 +140,18 @@ public class OwnerProfileFragment extends Fragment {
         if (user == null) return;
 
         if (ownerAvatar != null){
-            if (user.getPhotoUrl() != null &&   user.getPhotoUrl().isEmpty()){
+            if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()){
                 Glide.with(this)
                         .load(user.getPhotoUrl())
                         .placeholder(R.drawable.userprofile)
                         .into(ownerAvatar);
+            }else{
+                Glide.with(this)
+                        .load(R.drawable.userprofile)
+                        .into(ownerAvatar);
             }
+
+
         }
 
         String nameStr = (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) ? user.getDisplayName() : "Not Set";
@@ -162,5 +181,13 @@ public class OwnerProfileFragment extends Fragment {
                 Toast.makeText(getContext(), "Error: " + errorMssg, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void clearRememberMeData() {
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("RentBnBPrefs", requireActivity().MODE_PRIVATE);
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        edit.putBoolean("IS_REMEMBERED", false);
+        edit.putString("SAVED_EMAIL", "");
+        edit.apply();
     }
 }

@@ -77,10 +77,6 @@ public class Notification {
     public String getUsername() { return username; }
     public String getPrice() { return price; }
     public String getPriceUnit() { return priceUnit; }
-    
-    public String getListingId() {
-        return listingId != null ? listingId : id;
-    }
 
     // Setter for local UI updates
     public void setRead(boolean read) { isRead = read; }

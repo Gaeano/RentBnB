@@ -154,18 +154,7 @@
             app:layout_constraintTop_toBottomOf="@id/item_category"
             tools:text="₱300/day" />
 
-        <TextView
-            android:id="@+id/item_rent_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/inconsolata"
-            android:textColor="#888888"
-            android:textSize="11sp"
-            android:maxLines="1"
-            app:layout_constraintBottom_toBottomOf="@id/item_price"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/item_price"
-            tools:text="14 rents" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

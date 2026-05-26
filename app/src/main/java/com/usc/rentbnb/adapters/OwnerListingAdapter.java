@@ -3,6 +3,8 @@ package com.usc.rentbnb.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,7 +21,16 @@ import java.util.Locale;
 
 public class OwnerListingAdapter extends RecyclerView.Adapter<OwnerListingAdapter.ViewHolder> {
 
+    public interface ListingActionListener {
+        void onTogglePause(Listing listing);
+    }
+
     private final List<Listing> items = new ArrayList<>();
+    private ListingActionListener actionListener;
+
+    public void setActionListener(ListingActionListener listener) {
+        this.actionListener = listener;
+    }
 
     public void setItems(List<Listing> newItems) {
         items.clear();
@@ -39,25 +50,37 @@ public class OwnerListingAdapter extends RecyclerView.Adapter<OwnerListingAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Listing listing = items.get(position);
 
-        // R.id.tvItemTitle — verified from item_inventory_listing.xml
         holder.tvTitle.setText(listing.getProductName() != null ? listing.getProductName() : "Item");
-
-        // R.id.tvCategory — verified from item_inventory_listing.xml
         holder.tvCategory.setText(listing.getCategory() != null ? listing.getCategory() : "");
-
-        // R.id.tvPrice — verified from item_inventory_listing.xml
         holder.tvPrice.setText(String.format(Locale.getDefault(), "₱%,.0f / %s",
                 listing.getPrice(),
                 listing.getPriceUnit() != null ? listing.getPriceUnit() : "day"));
-
-        // R.id.tvStats — bookings count and rating
         holder.tvStats.setText(String.format(Locale.getDefault(),
                 "%d bookings · ★ %.1f", listing.getTimesRented(), listing.getRating()));
 
-        // R.id.tvStatus — always "Active" since getAllListings only returns active
-        holder.tvStatus.setText("Active");
+        // Status badge — priority: paused > being booked > active
+        if (listing.isPaused()) {
+            holder.tvStatus.setText("Paused");
+            holder.tvStatus.setTextColor(holder.tvStatus.getContext().getColor(android.R.color.white));
+            holder.tvStatus.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#757575")));
+        } else if (listing.isBeingBooked()) {
+            holder.tvStatus.setText("Being booked");
+            holder.tvStatus.setTextColor(holder.tvStatus.getContext().getColor(android.R.color.white));
+            holder.tvStatus.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFA500")));
+        } else {
+            String rawStatus = listing.getStatus();
+            String displayStatus = (rawStatus != null && !rawStatus.isEmpty())
+                    ? rawStatus.substring(0, 1).toUpperCase() + rawStatus.substring(1).toLowerCase()
+                    : "Active";
+            holder.tvStatus.setText(displayStatus);
+            holder.tvStatus.setTextColor(holder.tvStatus.getContext().getColor(android.R.color.white));
+            holder.tvStatus.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#3DCFCF")));
+        }
 
-        // R.id.ivItemThumb — verified from item_inventory_listing.xml
+        // Thumbnail
         List<String> images = listing.getImageUrls();
         if (images != null && !images.isEmpty()) {
             Glide.with(holder.ivThumb.getContext())
@@ -68,6 +91,24 @@ public class OwnerListingAdapter extends RecyclerView.Adapter<OwnerListingAdapte
         } else {
             holder.ivThumb.setImageResource(R.drawable.ic_no_image_placeholder);
         }
+
+        // Three-dot options menu — pause / unpause
+        holder.ivOptions.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(v.getContext(), v);
+            if (listing.isPaused()) {
+                popup.getMenu().add(0, 1, 0, "Reactivate listing");
+            } else {
+                popup.getMenu().add(0, 1, 0, "Pause listing");
+            }
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == 1 && actionListener != null) {
+                    actionListener.onTogglePause(listing);
+                    return true;
+                }
+                return false;
+            });
+            popup.show();
+        });
     }
 
     @Override
@@ -75,11 +116,13 @@ public class OwnerListingAdapter extends RecyclerView.Adapter<OwnerListingAdapte
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ShapeableImageView ivThumb;
+        ImageView ivOptions;
         TextView tvTitle, tvCategory, tvPrice, tvStats, tvStatus;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivThumb    = itemView.findViewById(R.id.ivItemThumb);
+            ivOptions  = itemView.findViewById(R.id.ivOptions);
             tvTitle    = itemView.findViewById(R.id.tvItemTitle);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvPrice    = itemView.findViewById(R.id.tvPrice);

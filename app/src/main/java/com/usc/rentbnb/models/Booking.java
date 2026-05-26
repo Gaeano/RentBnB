@@ -1,6 +1,10 @@
 package com.usc.rentbnb.models;
 
-import com.google.gson.annotations.SerializedName;
+import com.google.firebase.Timestamp;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class Booking {
     private String id;
@@ -11,7 +15,7 @@ public class Booking {
     private String ownerId;
     private String status;
 
-    // Populated locally after fetching from Firestore users collection
+    // Populated locally after fetching renter profile from Firestore
     private String renterName;
     private String renterPhotoUrl;
 
@@ -19,7 +23,7 @@ public class Booking {
     private FinancialSummary financialSummary;
     private RenterDetails renterDetails;
 
-    // Legacy flat fields kept for backward compatibility with BookingAdapter
+    // Legacy flat fields for BookingAdapter compatibility
     private String productName;
     private String category;
     private String ownerName;
@@ -30,47 +34,44 @@ public class Booking {
 
     public Booking() {}
 
-    // ---------------------------------------------------------------------------
-    // Nested Schedule
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Nested — NO @SerializedName annotations.
+    // Firestore deserializer uses reflection on field names directly and ignores
+    // Gson annotations. Field names already match Firestore document keys, so
+    // both Gson (Retrofit) and Firestore toObject() work without annotations.
+    // -------------------------------------------------------------------------
+
     public static class Schedule {
-        @SerializedName("startDate")
-        private String startDate;
-        @SerializedName("endDate")
-        private String endDate;
-        @SerializedName("totalDays")
+        private Object startDate;
+        private Object endDate;
         private int totalDays;
 
-        public String getStartDate() { return startDate; }
-        public String getEndDate() { return endDate; }
+        public String getStartDate() { return convertDateToString(startDate); }
+        public String getEndDate() { return convertDateToString(endDate); }
         public int getTotalDays() { return totalDays; }
+
+        private String convertDateToString(Object dateObj) {
+            if (dateObj == null) return null;
+            if (dateObj instanceof String) return (String) dateObj;
+            if (dateObj instanceof Timestamp) {
+                Date d = ((Timestamp) dateObj).toDate();
+                return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(d);
+            }
+            return String.valueOf(dateObj);
+        }
     }
 
-    // ---------------------------------------------------------------------------
-    // Nested FinancialSummary
-    // ---------------------------------------------------------------------------
     public static class FinancialSummary {
-        @SerializedName("totalCharged")
         private double totalCharged;
-
         public double getTotalCharged() { return totalCharged; }
     }
 
-    // ---------------------------------------------------------------------------
-    // Nested RenterDetails
-    // ---------------------------------------------------------------------------
     public static class RenterDetails {
-        @SerializedName("name")
         private String name;
-        @SerializedName("email")
         private String email;
-        @SerializedName("contactNumber")
         private String contactNumber;
-        @SerializedName("address")
         private String address;
-        @SerializedName("city")
         private String city;
-        @SerializedName("province")
         private String province;
 
         public String getName() { return name; }
@@ -81,9 +82,9 @@ public class Booking {
         public String getProvince() { return province; }
     }
 
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Getters
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     public String getId() { return id; }
     public String getListingId() { return listingId; }
     public String getListingTitle() { return listingTitle; }
@@ -97,7 +98,7 @@ public class Booking {
     public FinancialSummary getFinancialSummary() { return financialSummary; }
     public RenterDetails getRenterDetails() { return renterDetails; }
 
-    // Legacy getters preserved for BookingAdapter compatibility
+    // Legacy getters
     public String getProductName() { return productName != null ? productName : listingTitle; }
     public String getCategory() { return category; }
     public String getOwnerName() { return ownerName; }
@@ -109,7 +110,6 @@ public class Booking {
     }
     public Listing getListing() { return listing; }
 
-    // Convenience: flat start/end for legacy callers
     public String getStartDate() {
         if (schedule != null) return schedule.getStartDate();
         return null;
@@ -119,11 +119,19 @@ public class Booking {
         return null;
     }
 
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Setters
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     public void setId(String id) { this.id = id; }
     public void setStatus(String status) { this.status = status; }
     public void setRenterName(String renterName) { this.renterName = renterName; }
     public void setRenterPhotoUrl(String renterPhotoUrl) { this.renterPhotoUrl = renterPhotoUrl; }
+
+    /**
+     * Called by RentedOutAdapter and BookingRequestAdapter after a successful
+     * Firestore listing lookup. Persists the result onto the object so
+     * subsequent RecyclerView rebinds do not re-issue the Firestore call.
+     */
+    public void setCachedListingTitle(String title) { this.listingTitle = title; }
+    public void setCachedListingImageUrl(String url) { this.listingImageUrl = url; }
 }

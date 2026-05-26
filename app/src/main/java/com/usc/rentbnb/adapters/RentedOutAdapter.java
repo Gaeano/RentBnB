@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.Booking;
 
@@ -25,14 +26,14 @@ import java.util.concurrent.TimeUnit;
 
 public class RentedOutAdapter extends RecyclerView.Adapter<RentedOutAdapter.ViewHolder> {
 
-    public interface CompleteListener {
-        void onMarkComplete(Booking booking);
+    public interface CardClickListener {
+        void onCardClick(Booking booking);
     }
 
     private final List<Booking> items = new ArrayList<>();
-    private final CompleteListener listener;
+    private final CardClickListener listener;
 
-    public RentedOutAdapter(CompleteListener listener) {
+    public RentedOutAdapter(CardClickListener listener) {
         this.listener = listener;
     }
 
@@ -54,63 +55,89 @@ public class RentedOutAdapter extends RecyclerView.Adapter<RentedOutAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Booking booking = items.get(position);
 
-        // Title
+        // --- Title with Firestore fallback ---
         String title = booking.getListingTitle();
         if (title == null || title.isEmpty()) title = booking.getProductName();
-        if (title == null) title = "Item";
-        holder.tvItemName.setText(title);
 
-        // Rented by
+        if (title != null && !title.isEmpty()) {
+            holder.tvItemName.setText(title);
+        } else if (booking.getListingId() != null && !booking.getListingId().isEmpty()) {
+            holder.tvItemName.setText("Loading...");
+            String listingId = booking.getListingId();
+            FirebaseFirestore.getInstance()
+                    .collection("listings").document(listingId).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc == null || !doc.exists()) return;
+                        String fetched = doc.getString("productName");
+                        String fetchedImg = null;
+                        List<String> imgs = (List<String>) doc.get("imageUrls");
+                        if (imgs != null && !imgs.isEmpty()) fetchedImg = imgs.get(0);
+                        if (fetched != null) booking.setCachedListingTitle(fetched);
+                        if (fetchedImg != null) booking.setCachedListingImageUrl(fetchedImg);
+                        if (holder.getAdapterPosition() != RecyclerView.NO_ID) {
+                            holder.tvItemName.setText(fetched != null ? fetched : "Item");
+                            if (fetchedImg != null && !fetchedImg.isEmpty()) {
+                                Glide.with(holder.ivItemThumbnail.getContext())
+                                        .load(fetchedImg).placeholder(R.drawable.ic_no_image_placeholder)
+                                        .centerCrop().into(holder.ivItemThumbnail);
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> holder.tvItemName.setText("Item"));
+        } else {
+            holder.tvItemName.setText("Item");
+        }
+
+        // --- Rented by ---
         String renterName = booking.getRenterName();
-        if (renterName == null || renterName.isEmpty()) {
-            if (booking.getRenterDetails() != null) renterName = booking.getRenterDetails().getName();
+        if ((renterName == null || renterName.isEmpty()) && booking.getRenterDetails() != null) {
+            renterName = booking.getRenterDetails().getName();
         }
         holder.tvRentedBy.setText("Rented by " + (renterName != null ? renterName : "Renter"));
 
-        // Status pill
+        // --- Status pill ---
         applyStatusPill(holder.tvStatusPill, booking);
 
-        // Thumbnail
+        // --- Thumbnail ---
         String imageUrl = booking.getListingImageUrl();
         if (imageUrl == null || imageUrl.isEmpty()) imageUrl = booking.getImageUrl();
         if (imageUrl != null && !imageUrl.isEmpty()) {
             Glide.with(holder.ivItemThumbnail.getContext())
-                    .load(imageUrl)
-                    .placeholder(R.drawable.ic_no_image_placeholder)
-                    .centerCrop()
-                    .into(holder.ivItemThumbnail);
+                    .load(imageUrl).placeholder(R.drawable.ic_no_image_placeholder)
+                    .centerCrop().into(holder.ivItemThumbnail);
         } else {
             holder.ivItemThumbnail.setImageResource(R.drawable.ic_no_image_placeholder);
         }
 
-        // Long-press to mark complete
-        holder.itemView.setOnLongClickListener(v -> {
-            if ("ACTIVE".equals(booking.getStatus()) || "OVERDUE".equals(booking.getStatus())) {
-                if (listener != null) listener.onMarkComplete(booking);
-            }
-            return true;
+        // --- Click opens confirm-return / action dialog ---
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onCardClick(booking);
         });
     }
 
     private void applyStatusPill(TextView pill, Booking booking) {
         String status  = booking.getStatus();
-        String endDate = booking.getEndDate();
-        long daysLeft  = getDaysUntil(endDate);
+        long daysLeft  = getDaysUntil(booking.getEndDate());
 
-        if ("OVERDUE".equals(status)) {
-            pill.setText("Overdue");
+        if ("OVERDUE".equals(status) || "RETURN_PENDING".equals(status)) {
+            String label = "RETURN_PENDING".equals(status) ? "Pending return" : "Overdue";
+            pill.setText(label);
             pill.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FEE2E2")));
             pill.setTextColor(Color.parseColor("#FF4B4B"));
         } else if (daysLeft == 0) {
             pill.setText("Returns today");
             pill.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FEF3C7")));
             pill.setTextColor(Color.parseColor("#FFA500"));
-        } else if (daysLeft <= 2) {
+        } else if (daysLeft > 0 && daysLeft <= 2) {
             pill.setText("Returns in " + daysLeft + " day" + (daysLeft == 1 ? "" : "s"));
             pill.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FEF3C7")));
             pill.setTextColor(Color.parseColor("#FFA500"));
-        } else {
+        } else if (daysLeft > 2) {
             pill.setText("Returns in " + daysLeft + " days");
+            pill.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#EFEFEF")));
+            pill.setTextColor(Color.parseColor("#616161"));
+        } else {
+            pill.setText(status != null ? status : "Active");
             pill.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#EFEFEF")));
             pill.setTextColor(Color.parseColor("#616161"));
         }
@@ -119,12 +146,10 @@ public class RentedOutAdapter extends RecyclerView.Adapter<RentedOutAdapter.View
     private long getDaysUntil(String isoDate) {
         if (isoDate == null || isoDate.isEmpty()) return -1;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            Date end  = sdf.parse(isoDate.substring(0, 10));
-            Date now  = new Date();
+            Date end = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    .parse(isoDate.substring(0, 10));
             if (end == null) return -1;
-            long diff = end.getTime() - now.getTime();
-            return TimeUnit.MILLISECONDS.toDays(diff);
+            return TimeUnit.MILLISECONDS.toDays(end.getTime() - new Date().getTime());
         } catch (ParseException e) {
             return -1;
         }

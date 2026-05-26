@@ -30,6 +30,10 @@ public class Listing implements Parcelable {
     private int totalReviews;
     private int timesRented;
     private Penalties penalties;
+    // "active" | "paused" — stored in Firestore by createListing controller
+    private String status;
+    // "booked" | null — set by backend when a booking is ACTIVE
+    private String bookingStatus;
 
     @Exclude
     private String createdAt;
@@ -37,8 +41,11 @@ public class Listing implements Parcelable {
     private String ownerName;
     private String ownerFaq;
 
+    // -------------------------------------------------------------------------
+    // Nested Penalties
+    // -------------------------------------------------------------------------
     public static class Penalties implements Parcelable {
-        private String penaltyUnit;  // "Hourly" | "Daily" | "Weekly" | "Monthly"
+        private String penaltyUnit;
         private double penaltyAmount;
 
         public Penalties() {}
@@ -54,10 +61,8 @@ public class Listing implements Parcelable {
         }
 
         public static final Creator<Penalties> CREATOR = new Creator<Penalties>() {
-            @Override
-            public Penalties createFromParcel(Parcel in) { return new Penalties(in); }
-            @Override
-            public Penalties[] newArray(int size) { return new Penalties[size]; }
+            @Override public Penalties createFromParcel(Parcel in) { return new Penalties(in); }
+            @Override public Penalties[] newArray(int size) { return new Penalties[size]; }
         };
 
         public String getPenaltyUnit() { return penaltyUnit; }
@@ -65,8 +70,7 @@ public class Listing implements Parcelable {
         public void setPenaltyUnit(String penaltyUnit) { this.penaltyUnit = penaltyUnit; }
         public void setPenaltyAmount(double penaltyAmount) { this.penaltyAmount = penaltyAmount; }
 
-        @Override
-        public int describeContents() { return 0; }
+        @Override public int describeContents() { return 0; }
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -75,10 +79,11 @@ public class Listing implements Parcelable {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Firestore createdAt handling
+    // -------------------------------------------------------------------------
     @PropertyName("createdAt")
-    public Object getFirestoreCreatedAt() {
-        return null;
-    }
+    public Object getFirestoreCreatedAt() { return null; }
 
     @PropertyName("createdAt")
     public void setFirestoreCreatedAt(Object value) {
@@ -92,11 +97,14 @@ public class Listing implements Parcelable {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
     public Listing(String id, String productName, String description, String category, String island,
                    double price, String priceUnit, double rating, int totalReviews,
                    List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls,
                    String createdAt, int timesRented, String ownerId, String ownerName,
-                   String ownerFaq, Penalties penalties) {
+                   String ownerFaq, Penalties penalties, String status, String bookingStatus) {
         this.id = id;
         this.productName = productName;
         this.description = description;
@@ -115,6 +123,8 @@ public class Listing implements Parcelable {
         this.ownerName = ownerName;
         this.ownerFaq = ownerFaq;
         this.penalties = penalties;
+        this.status = status;
+        this.bookingStatus = bookingStatus;
     }
 
     public Listing() {}
@@ -138,15 +148,18 @@ public class Listing implements Parcelable {
         ownerName = in.readString();
         ownerFaq = in.readString();
         penalties = in.readParcelable(Penalties.class.getClassLoader());
+        status = in.readString();
+        bookingStatus = in.readString();
     }
 
     public static final Creator<Listing> CREATOR = new Creator<Listing>() {
-        @Override
-        public Listing createFromParcel(Parcel in) { return new Listing(in); }
-        @Override
-        public Listing[] newArray(int size) { return new Listing[size]; }
+        @Override public Listing createFromParcel(Parcel in) { return new Listing(in); }
+        @Override public Listing[] newArray(int size) { return new Listing[size]; }
     };
 
+    // -------------------------------------------------------------------------
+    // Getters
+    // -------------------------------------------------------------------------
     public String getId() { return id; }
     public String getProductName() { return productName; }
     public String getDescription() { return description; }
@@ -157,8 +170,7 @@ public class Listing implements Parcelable {
     public double getRating() { return rating; }
     public int getTotalReviews() { return totalReviews; }
     public List<String> getImageUrls() { return imageUrls; }
-    @Exclude
-    public String getCreatedAt() { return createdAt; }
+    @Exclude public String getCreatedAt() { return createdAt; }
     public int getTimesRented() { return timesRented; }
     public List<String> getPaymentMethods() { return paymentMethods; }
     public List<String> getSuggestedActivities() { return suggestedActivities; }
@@ -166,7 +178,14 @@ public class Listing implements Parcelable {
     public String getOwnerName() { return ownerName; }
     public String getOwnerFaq() { return ownerFaq; }
     public Penalties getPenalties() { return penalties; }
+    public String getStatus() { return status; }
+    public String getBookingStatus() { return bookingStatus; }
+    public boolean isBeingBooked() { return "booked".equals(bookingStatus); }
+    public boolean isPaused() { return "paused".equals(status); }
 
+    // -------------------------------------------------------------------------
+    // Setters
+    // -------------------------------------------------------------------------
     public void setId(String id) { this.id = id; }
     public void setProductName(String productName) { this.productName = productName; }
     public void setDescription(String description) { this.description = description; }
@@ -180,13 +199,17 @@ public class Listing implements Parcelable {
     public void setRating(double rating) { this.rating = rating; }
     public void setTotalReviews(int totalReviews) { this.totalReviews = totalReviews; }
     public void setTimesRented(int timesRented) { this.timesRented = timesRented; }
-    @Exclude
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    @Exclude public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
     public void setOwnerId(String ownerId) { this.ownerId = ownerId; }
     public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
     public void setOwnerFaq(String ownerFaq) { this.ownerFaq = ownerFaq; }
     public void setPenalties(Penalties penalties) { this.penalties = penalties; }
+    public void setStatus(String status) { this.status = status; }
+    public void setBookingStatus(String bookingStatus) { this.bookingStatus = bookingStatus; }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
     public boolean isNew() {
         if (createdAt == null || createdAt.isEmpty()) return false;
         try {
@@ -204,8 +227,7 @@ public class Listing implements Parcelable {
         return false;
     }
 
-    @Override
-    public int describeContents() { return 0; }
+    @Override public int describeContents() { return 0; }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -227,5 +249,7 @@ public class Listing implements Parcelable {
         dest.writeString(ownerName);
         dest.writeString(ownerFaq);
         dest.writeParcelable(penalties, flags);
+        dest.writeString(status);
+        dest.writeString(bookingStatus);
     }
 }

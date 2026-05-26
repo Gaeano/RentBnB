@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.usc.rentbnb.models.AuthResponse;
 import com.usc.rentbnb.models.BookingResponse;
 import com.usc.rentbnb.models.BookingRequest;
+import com.usc.rentbnb.models.ConfirmReturnResponse;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
 import com.usc.rentbnb.models.EarningsResponse;
@@ -37,6 +38,7 @@ import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 public interface ApiService {
+    // auth
     @GET("islands")
     Call<IslandResponse> getIslands();
 
@@ -54,6 +56,7 @@ public interface ApiService {
     @PUT("auth/update")
     Call<AuthResponse> updateProfile(@Body RegisterRequest updatedData);
 
+    // listings
     @POST("listings")
     Call<CreateListingResponse> createListing(@Body CreateListingRequest createListingRequest);
 
@@ -63,12 +66,20 @@ public interface ApiService {
     @GET("listings/owner/{ownerId}")
     Call<ListingResponse> getOwnerListings(@Path("ownerId") String ownerId);
 
+    @PATCH("listings/{listingId}/status")
+    Call<ResponseBody> updateListingStatus(
+            @Path("listingId") String listingId,
+            @Body Map<String, String> status
+    );
+
+    // weatjer
     @GET("weather")
     Call<WeatherResponse> getCurrentWeather(
         @Query("lat") double lat,
         @Query("lon") double lon
     );
 
+    // cloudinary
     @Multipart
     @POST
     Call<JsonObject> uploadImageToCloudinary(
@@ -77,7 +88,7 @@ public interface ApiService {
             @Part MultipartBody.Part file
     );
 
-    //get favorite islands and listings
+    //favs
     @GET("favorites/users/{userId}/islands")
     Call<IslandResponse> getFavoriteIslands(
             @Path("userId") String userId
@@ -88,14 +99,14 @@ public interface ApiService {
             @Path("userId") String userId
     );
 
-    //add favorite listings
+    // add favl isting
     @POST("favorites/users/{userId}/listings")
     Call<Void> addFavoriteListing(
             @Path("userId") String userId,
             @Body Listing newFavorite
     );
 
-    //remove favorite listings
+    //remove fav listing
     @DELETE("favorites/users/{userId}/listings/{listingId}")
     Call<Void> removeFavoriteListing(
             @Path("userId") String userId,
@@ -117,10 +128,10 @@ public interface ApiService {
     );
 
     // history
-    @GET("users/{userId}/history")
+    @GET("bookings/users/{userId}/history")
     Call<BookingResponse> getMyBookings(@Path("userId") String userId);
 
-    @GET("users/{userId}/lent-history")
+    @GET("bookings/users/{userId}/lent-history")
     Call<BookingResponse> getMyLentItems(@Path("userId") String userId);
 
     // notifs
@@ -161,5 +172,14 @@ public interface ApiService {
     Call<BookingResponse> updateBookingStatus(
             @Path("bookingId") String bookingId,
             @Body Map<String, String> status
+    );
+
+    @POST("bookings/{bookingId}/confirm-return")
+    Call<ConfirmReturnResponse> confirmReturn(@Path("bookingId") String bookingId);
+
+    @POST("bookings/{bookingId}/apply-penalty")
+    Call<BookingResponse> applyPenalty(
+            @Path("bookingId") String bookingId,
+            @Body Map<String, Object> body
     );
 }

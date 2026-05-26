@@ -2,6 +2,7 @@ package com.usc.rentbnb.ui.dashboard;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,15 +27,18 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.adapters.OwnerListingAdapter;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.listing.AddListingActivity;
-import com.usc.rentbnb.adapters.OwnerListingAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -43,6 +48,7 @@ public class OwnerListingsFragment extends Fragment {
     private TextView tvTotalListings;
     private EditText etSearchListings;
     private ChipGroup chipGroupFilters;
+    private Chip chipAll, chipActive, chipPaused;
     private RecyclerView rvInventory;
     private FloatingActionButton fabAddListing;
     private View emptyStateListings;
@@ -51,6 +57,11 @@ public class OwnerListingsFragment extends Fragment {
     private OwnerListingAdapter listingAdapter;
     private final List<Listing> allListings = new ArrayList<>();
     private String currentQuery = "";
+
+    // Tracks which filter chips are active. "All" is non-deselectable.
+    private boolean filterAll    = true;
+    private boolean filterActive = false;
+    private boolean filterPaused = false;
 
     @Nullable
     @Override
@@ -67,6 +78,9 @@ public class OwnerListingsFragment extends Fragment {
         tvTotalListings         = view.findViewById(R.id.tvTotalListings);
         etSearchListings        = view.findViewById(R.id.search_bar);
         chipGroupFilters        = view.findViewById(R.id.chipGroupFilters);
+        chipAll                 = view.findViewById(R.id.chipAll);
+        chipActive              = view.findViewById(R.id.chipActive);
+        chipPaused              = view.findViewById(R.id.chipPaused);
         rvInventory             = view.findViewById(R.id.rvInventory);
         fabAddListing           = view.findViewById(R.id.fabAddListing);
         emptyStateListings      = view.findViewById(R.id.emptyStateListings);
@@ -74,7 +88,7 @@ public class OwnerListingsFragment extends Fragment {
 
         setupRecyclerView();
         setupSearch();
-        setupChipFilters();
+        setupChips();
 
         fabAddListing.setOnClickListener(v -> openAddListingScreen());
         if (btnEmptyStateAddListing != null) {
@@ -96,6 +110,19 @@ public class OwnerListingsFragment extends Fragment {
 
     private void setupRecyclerView() {
         listingAdapter = new OwnerListingAdapter();
+        listingAdapter.setActionListener(listing -> {
+            String newStatus = listing.isPaused() ? "active" : "paused";
+            String msg = listing.isPaused()
+                    ? "Reactivate this listing? It will be visible to renters again."
+                    : "Pause this listing? It will be hidden from all renters.";
+
+            new AlertDialog.Builder(requireContext())
+                    .setMessage(msg)
+                    .setPositiveButton("Confirm", (d, w) -> toggleListingStatus(listing, newStatus))
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
+
         rvInventory.setLayoutManager(new LinearLayoutManager(getContext()));
         rvInventory.setAdapter(listingAdapter);
     }
@@ -108,18 +135,49 @@ public class OwnerListingsFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 currentQuery = s.toString().trim();
-                applySearch();
+                applyFilterAndSearch();
             }
         });
     }
 
-    private void setupChipFilters() {
-        // Chip filters are All / Active / Paused. Since Listing has no status field,
-        // the backend getOwnerListings returns all listings for this owner.
-        // Chip selection is wired but currently only "All" produces results;
-        // "Active" and "Paused" will be functional once a status field is added to Listing.
-        if (chipGroupFilters == null) return;
-        chipGroupFilters.setOnCheckedStateChangeListener((group, checkedIds) -> applySearch());
+    /**
+     * Chip rules:
+     * - "All" is checked by default and cannot be unchecked directly.
+     * - Checking "Active" or "Paused" automatically unchecks "All".
+     * - If both "Active" and "Paused" are unchecked, "All" re-activates automatically.
+     * - User can have "Active" and "Paused" checked simultaneously (multi-select).
+     */
+    private void setupChips() {
+        if (chipAll == null || chipActive == null || chipPaused == null) return;
+
+        chipAll.setOnCheckedChangeListener((btn, isChecked) -> {
+            if (!isChecked && !filterActive && !filterPaused) {
+                chipAll.setChecked(true);
+                return;
+            }
+            filterAll = isChecked;
+            if (isChecked) {
+                filterActive = false;
+                filterPaused = false;
+                chipActive.setChecked(false);
+                chipPaused.setChecked(false);
+            }
+            applyFilterAndSearch();
+        });
+
+        chipActive.setOnCheckedChangeListener((btn, isChecked) -> {
+            filterActive = isChecked;
+            if (isChecked) { filterAll = false; chipAll.setChecked(false); }
+            else if (!filterPaused) { filterAll = true; chipAll.setChecked(true); }
+            applyFilterAndSearch();
+        });
+
+        chipPaused.setOnCheckedChangeListener((btn, isChecked) -> {
+            filterPaused = isChecked;
+            if (isChecked) { filterAll = false; chipAll.setChecked(false); }
+            else if (!filterActive) { filterAll = true; chipAll.setChecked(true); }
+            applyFilterAndSearch();
+        });
     }
 
     // ---------------------------------------------------------------------------
@@ -141,31 +199,41 @@ public class OwnerListingsFragment extends Fragment {
                                 && response.body().getData() != null) {
                             allListings.addAll(response.body().getData());
                         }
-                        applySearch();
+                        applyFilterAndSearch();
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ListingResponse> call, @NonNull Throwable t) {
                         if (!isAdded()) return;
-                        applySearch();
+                        applyFilterAndSearch();
                     }
                 });
     }
 
     // ---------------------------------------------------------------------------
-    // Filter
+    // Filter and search
     // ---------------------------------------------------------------------------
 
-    private void applySearch() {
+    private void applyFilterAndSearch() {
         List<Listing> filtered = new ArrayList<>();
         for (Listing listing : allListings) {
+            boolean matchesStatus;
+            if (filterAll) {
+                matchesStatus = true;
+            } else {
+                String s = listing.getStatus();
+                boolean isActive = "active".equalsIgnoreCase(s);
+                boolean isPaused = "paused".equalsIgnoreCase(s);
+                matchesStatus = (filterActive && isActive) || (filterPaused && isPaused);
+            }
+
             boolean matchesQuery = currentQuery.isEmpty()
                     || (listing.getProductName() != null
                     && listing.getProductName().toLowerCase().contains(currentQuery.toLowerCase()))
                     || (listing.getCategory() != null
                     && listing.getCategory().toLowerCase().contains(currentQuery.toLowerCase()));
 
-            if (matchesQuery) filtered.add(listing);
+            if (matchesStatus && matchesQuery) filtered.add(listing);
         }
 
         listingAdapter.setItems(filtered);
@@ -183,6 +251,33 @@ public class OwnerListingsFragment extends Fragment {
         }
     }
 
+    private void toggleListingStatus(Listing listing, String newStatus) {
+        Map<String, String> body = new HashMap<>();
+        body.put("status", newStatus);
+
+        ApiClient.getApiService().updateListingStatus(listing.getId(), body)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call,
+                                           @NonNull Response<ResponseBody> response) {
+                        if (!isAdded()) return;
+                        if (response.isSuccessful()) {
+                            String msg = "paused".equals(newStatus) ? "Listing paused." : "Listing reactivated.";
+                            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+                            loadListings();
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to update listing.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        if (!isAdded()) return;
+                        Toast.makeText(requireContext(), "Network error.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     // ---------------------------------------------------------------------------
     // Navigation
     // ---------------------------------------------------------------------------
@@ -196,8 +291,7 @@ public class OwnerListingsFragment extends Fragment {
     // ---------------------------------------------------------------------------
 
     private void checkAndShowEmptyState(boolean isEmpty) {
-        if (isEmpty) showEmptyState();
-        else hideEmptyState();
+        if (isEmpty) showEmptyState(); else hideEmptyState();
     }
 
     private void showEmptyState() {
@@ -212,12 +306,9 @@ public class OwnerListingsFragment extends Fragment {
 
     private void hideEmptyState() {
         if (emptyStateListings != null && emptyStateListings.getVisibility() == View.VISIBLE) {
-            emptyStateListings.animate()
-                    .alpha(0f)
-                    .setDuration(300)
+            emptyStateListings.animate().alpha(0f).setDuration(300)
                     .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
+                        @Override public void onAnimationEnd(Animator animation) {
                             emptyStateListings.setVisibility(View.GONE);
                         }
                     });

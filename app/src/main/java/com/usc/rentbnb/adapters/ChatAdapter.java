@@ -202,7 +202,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             tvTyping = v.findViewById(R.id.tvTypingIndicator);
         }
         void bind(TypingIndicator indicator) {
-            String text = indicator.name + " is typing...";
+            String text = indicator.name;
+            if (!text.toLowerCase().contains("is typing") && !text.toLowerCase().contains("is generating")) {
+                text += " is typing...";
+            } else if (!text.endsWith("...")) {
+                text += "...";
+            }
             tvTyping.setText(text);
         }
     }

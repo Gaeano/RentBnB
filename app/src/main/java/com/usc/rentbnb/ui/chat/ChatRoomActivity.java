@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -66,7 +67,12 @@ public class ChatRoomActivity extends AppCompatActivity {
     private String chatRoomId, listingId, listingTitle, ownerId, renterId, currentUserId, currentMode;
     private boolean isCurrentUserRenter;
     private String ownerDisplayName = "Owner";
-    private com.google.firebase.Timestamp lastMessageTimestamp;
+
+
+    private boolean openingMessageSent = false;
+    private boolean initialMessagesLoaded = false;
+
+    private Timestamp lastMessageTimestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,46 +134,23 @@ public class ChatRoomActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnSend = findViewById(R.id.btnSend);
 
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setStackFromEnd(true);
+        recyclerViewChat.setLayoutManager(llm);
+
         chatAdapter = new ChatAdapter(currentUserId);
-        recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewChat.setAdapter(chatAdapter);
+
         fabToggleMode.setVisibility(isCurrentUserRenter ? View.VISIBLE : View.GONE);
         updateUiForCurrentMode();
     }
 
-    public com.google.firebase.Timestamp getLastMessageTimestamp() {
+    public Timestamp getLastMessageTimestamp() {
         return lastMessageTimestamp;
     }
 
-    public void setLastMessageTimestamp(com.google.firebase.Timestamp lastMessageTimestamp) {
+    public void setLastMessageTimestamp(Timestamp lastMessageTimestamp) {
         this.lastMessageTimestamp = lastMessageTimestamp;
-    }
-
-    public String getFormattedTime() {
-        if (this.lastMessageTimestamp == null) return "";
-
-        java.util.Date date = this.lastMessageTimestamp.toDate();
-
-        java.util.Calendar msgCal = java.util.Calendar.getInstance();
-        msgCal.setTime(date);
-
-        java.util.Calendar today = java.util.Calendar.getInstance();
-        java.util.Calendar yesterday = java.util.Calendar.getInstance();
-        yesterday.add(java.util.Calendar.DAY_OF_YEAR, -1);
-
-        if (msgCal.get(java.util.Calendar.YEAR) == today.get(java.util.Calendar.YEAR) &&
-                msgCal.get(java.util.Calendar.DAY_OF_YEAR) == today.get(java.util.Calendar.DAY_OF_YEAR)) {
-            // If it's today, show the time (e.g., "9:24 AM")
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault());
-            return sdf.format(date);
-        } else if (msgCal.get(java.util.Calendar.YEAR) == yesterday.get(java.util.Calendar.YEAR) &&
-                msgCal.get(java.util.Calendar.DAY_OF_YEAR) == yesterday.get(java.util.Calendar.DAY_OF_YEAR)) {
-            return "Yesterday";
-        } else {
-            // If it's older, show the date (e.g., "Oct 12")
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault());
-            return sdf.format(date);
-        }
     }
 
     private void setupWindowInsets() {
@@ -212,11 +195,15 @@ public class ChatRoomActivity extends AppCompatActivity {
         }
     }
 
-    private void fetchInquilinoReply(@androidx.annotation.NonNull String renterQuestion) {
+    private void fetchInquilinoReply(@NonNull String renterQuestion) {
         if (listing == null) return;
 
+        // Show typing indicator before the API call
+        setTypingState(true, "Inquilino is generating");
+
         InquilinoReplyRequest request = new InquilinoReplyRequest(
-                chatRoomId, renterId, listing.getProductName(),
+                chatRoomId, renterId, ownerId, listing.getId(),
+                listing.getProductName(),
                 listing.getCategory(), listing.getIsland(),
                 String.valueOf(listing.getPrice()), listing.getDescription(),
                 listing.getOwnerFaq(),
@@ -226,18 +213,169 @@ public class ChatRoomActivity extends AppCompatActivity {
 
         ApiClient.getApiService().generateInquilinoReply(request).enqueue(new Callback<InquilinoResponse>() {
             @Override
-            public void onResponse(@NonNull Call<InquilinoResponse> call, @NonNull Response<InquilinoResponse> response) {
-                if (!response.isSuccessful() || response.body() == null || !response.body().isSuccess()) {
-                    String realError = response.body() != null ? response.body().getError() : "HTTP Error: " + response.code();
-                    Toast.makeText(ChatRoomActivity.this, "Backend Error: " + realError, Toast.LENGTH_LONG).show();
+            public void onResponse(@NonNull Call<InquilinoResponse> call,
+                                   @NonNull Response<InquilinoResponse> response) {
+                // Hide typing indicator — the real message will appear via the Firestore listener
+                setTypingState(false, "");
+
+                // The controller writes the message to Firestore directly on both success
+                // and the busy fallback path. No action needed on the Android side —
+                // the messagesListener will pick it up automatically.
+                // Only surface a Toast if there was a genuine network/server crash.
+                if (!response.isSuccessful() && response.code() >= 500) {
+                    // Backend returned an error it could not handle — already wrote busy msg
+                    // Nothing to show; the Firestore listener will surface it.
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<InquilinoResponse> call, @NonNull Throwable t) {
-                Toast.makeText(ChatRoomActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                setTypingState(false, "");
+                // Network error — the busy message was not written since the request never reached the server.
+                // Write a local fallback directly to Firestore.
+                writeLocalFallbackMessage();
             }
         });
+    }
+
+    private void maybeFireOpeningMessage() {
+        if (openingMessageSent) return;
+        if (!isCurrentUserRenter) return;
+        if (!ChatRoom.MODE_AI.equals(currentMode)) return;
+        if (listing == null) return;
+        if (!initialMessagesLoaded) return;
+
+        openingMessageSent = true;
+        setTypingState(true, "Inquilino is generating");
+
+        InquilinoOpeningRequest request = new InquilinoOpeningRequest(
+                chatRoomId, renterId, ownerId, listing.getId(),
+                listing.getProductName(),
+                listing.getCategory(), listing.getIsland(),
+                String.valueOf(listing.getPrice()), listing.getDescription(),
+                listing.getOwnerFaq()
+        );
+
+        ApiClient.getApiService().generateInquilinoOpening(request).enqueue(new Callback<InquilinoResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<InquilinoResponse> call,
+                                   @NonNull Response<InquilinoResponse> response) {
+                setTypingState(false, "");
+                // Message was written to Firestore by the controller.
+                // Firestore listener will surface it automatically.
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<InquilinoResponse> call, @NonNull Throwable t) {
+                setTypingState(false, "");
+                writeLocalFallbackMessage();
+            }
+        });
+    }
+
+    private void startListeningToMessages() {
+        messagesListener = chatRepository.listenToMessages(chatRoomId, new ChatRepository.MessagesCallback() {
+            @Override
+            public void onUpdate(List<Message> messages) {
+                chatAdapter.setMessages(messages);
+
+                // Scroll after the adapter has laid out the new items
+                recyclerViewChat.post(() -> scrollToBottom());
+
+                rebuildConversationHistory(messages);
+
+                // First snapshot received — check if this is a new room
+                if (!initialMessagesLoaded) {
+                    initialMessagesLoaded = true;
+                    if (messages.isEmpty()) {
+                        maybeFireOpeningMessage();
+                    }
+                }
+
+                // Auto-handoff: if AI is active but the human owner replied, switch modes
+                if (ChatRoom.MODE_AI.equals(currentMode)) {
+                    for (Message msg : messages) {
+                        if (Message.TYPE_OWNER.equals(msg.getSenderType())) {
+                            currentMode = ChatRoom.MODE_OWNER;
+                            chatRepository.switchChatMode(chatRoomId, ChatRoom.MODE_OWNER, s -> {});
+                            runOnUiThread(() -> {
+                                updateUiForCurrentMode();
+                                Toast.makeText(ChatRoomActivity.this,
+                                        "Owner has joined the chat", Toast.LENGTH_SHORT).show();
+                            });
+                            break;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(ChatRoomActivity.this, "Could not load messages", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void rebuildConversationHistory(@NonNull List<Message> messages) {
+        conversationHistory.clear();
+        for (Message msg : messages) {
+            String prefix = Message.TYPE_AI.equals(msg.getSenderType()) ? "Inquilino: "
+                    : (Message.TYPE_OWNER.equals(msg.getSenderType()) ? "Owner: " : "Renter: ");
+            conversationHistory.add(prefix + msg.getText());
+        }
+    }
+
+    private void fetchListingData() {
+        if (listingId == null) return;
+        FirebaseFirestore.getInstance().collection("listings").document(listingId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        listing = doc.toObject(Listing.class);
+                        if (listing != null) listing.setId(doc.getId());
+                        // Trigger opening message if messages are already confirmed empty
+                        maybeFireOpeningMessage();
+                    }
+                });
+    }
+
+    private void fetchOwnerName() {
+        if (ownerId == null) return;
+        FirebaseFirestore.getInstance().collection("users").document(ownerId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+                    String name = doc.getString("displayName");
+                    if (name != null) {
+                        ownerDisplayName = name;
+                        chatAdapter.setOwnerName(ownerDisplayName);
+                        if (ChatRoom.MODE_OWNER.equals(currentMode)) {
+                            tvUserName.setText(ownerDisplayName);
+                        }
+                    }
+                });
+    }
+
+    private void markMessagesAsRead() {
+        if (chatRoomId != null && currentUserId != null) {
+            chatRepository.markAsRead(chatRoomId, currentUserId);
+        }
+    }
+
+    private void writeLocalFallbackMessage() {
+        String fallbackText = "Inquilino is currently unavailable. Please try again in a moment, or switch to talking directly with the owner.";
+        com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore.getInstance();
+        com.google.firebase.firestore.FieldValue now = com.google.firebase.firestore.FieldValue.serverTimestamp();
+
+        java.util.Map<String, Object> msg = new java.util.HashMap<>();
+        msg.put("chatRoomId",  chatRoomId);
+        msg.put("senderId",    "INQUILINO");
+        msg.put("text",        fallbackText);
+        msg.put("timestamp",   now);
+        msg.put("senderType",  "AI");
+
+        db.collection("chatRooms").document(chatRoomId)
+                .collection("messages").add(msg);
     }
 
     private void toggleChatMode() {
@@ -258,79 +396,6 @@ public class ChatRoomActivity extends AppCompatActivity {
         });
     }
 
-    private void startListeningToMessages() {
-        messagesListener = chatRepository.listenToMessages(chatRoomId, new ChatRepository.MessagesCallback() {
-            @Override
-            public void onUpdate(List<Message> messages) {
-                chatAdapter.setMessages(messages);
-                scrollToBottom();
-                rebuildConversationHistory(messages);
-
-                // 2. AUTO-HANDOFF LOGIC: If AI is active but the human Owner just replied
-                if (ChatRoom.MODE_AI.equals(currentMode)) {
-                    for (Message msg : messages) {
-                        if (Message.TYPE_OWNER.equals(msg.getSenderType())) {
-                            // The owner intervened! Automatically switch the UI to human mode.
-                            currentMode = ChatRoom.MODE_OWNER;
-                            chatRepository.switchChatMode(chatRoomId, ChatRoom.MODE_OWNER, success -> {});
-
-                            runOnUiThread(() -> {
-                                updateUiForCurrentMode();
-                                Toast.makeText(ChatRoomActivity.this, "Owner has joined the chat", Toast.LENGTH_SHORT).show();
-                            });
-                            break;
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(ChatRoomActivity.this, "Could not load messages", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void rebuildConversationHistory(@androidx.annotation.NonNull List<Message> messages) {
-        conversationHistory.clear();
-        for (Message msg : messages) {
-            String prefix = msg.getSenderType().equals(Message.TYPE_AI) ? "Inquilino: " :
-                    (msg.getSenderType().equals(Message.TYPE_OWNER) ? "Owner: " : "Renter: ");
-            conversationHistory.add(prefix + msg.getText());
-        }
-    }
-
-    private void fetchListingData() {
-        if (listingId == null) return;
-        FirebaseFirestore.getInstance().collection("listings").document(listingId).get().addOnSuccessListener(doc -> {
-            if (doc.exists()) {
-                listing = doc.toObject(Listing.class);
-                if (listing != null) listing.setId(doc.getId());
-            }
-        });
-    }
-
-    private void fetchOwnerName() {
-        if (ownerId == null) return;
-        FirebaseFirestore.getInstance().collection("users").document(ownerId).get().addOnSuccessListener(doc -> {
-            if (!doc.exists()) return;
-            String name = doc.getString("displayName");
-            if (name != null) {
-                ownerDisplayName = name;
-                chatAdapter.setOwnerName(ownerDisplayName);
-                if (ChatRoom.MODE_OWNER.equals(currentMode)) {
-                    tvUserName.setText(ownerDisplayName);
-                }
-            }
-        });
-    }
-
-    private void markMessagesAsRead() {
-        if (chatRoomId != null && currentUserId != null) {
-            chatRepository.markAsRead(chatRoomId, currentUserId);
-        }
-    }
-
     private void updateUiForCurrentMode() {
         if (ChatRoom.MODE_AI.equals(currentMode)) {
             tvUserName.setText("Inquilino");
@@ -340,17 +405,21 @@ public class ChatRoomActivity extends AppCompatActivity {
             if (isCurrentUserRenter) {
                 fabToggleMode.setText("Talk to Owner");
                 fabToggleMode.setIconResource(R.drawable.ic_profile);
-                fabToggleMode.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.teal_primary)));
+                fabToggleMode.setBackgroundTintList(
+                        ColorStateList.valueOf(ContextCompat.getColor(this, R.color.teal_primary)));
             }
         } else {
             tvUserName.setText(ownerDisplayName);
             tvUserStatus.setText(isCurrentUserRenter ? "Connected to Owner" : "You are the Owner");
             tvUserStatus.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
-            etMessage.setHint(isCurrentUserRenter ? "Message " + ownerDisplayName + "..." : "Reply to renter...");
+            etMessage.setHint(isCurrentUserRenter
+                    ? "Message " + ownerDisplayName + "..."
+                    : "Reply to renter...");
             if (isCurrentUserRenter) {
                 fabToggleMode.setText("Switch to Inquilino");
                 fabToggleMode.setIconResource(android.R.drawable.ic_menu_compass);
-                fabToggleMode.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.black)));
+                fabToggleMode.setBackgroundTintList(
+                        ColorStateList.valueOf(ContextCompat.getColor(this, R.color.black)));
             }
         }
         if (listingTitle != null) {
@@ -364,18 +433,33 @@ public class ChatRoomActivity extends AppCompatActivity {
         if (count > 0) recyclerViewChat.smoothScrollToPosition(count - 1);
     }
 
-    /**
-     * Toggles the typing indicator at the bottom of the chat list.
-     *
-     * @param isTyping True to show "is typing...", false to hide.
-     * @param name The name of the person typing (e.g., "Owner" or "Inquilino").
-     */
     public void setTypingState(boolean isTyping, String name) {
-        if (chatAdapter != null) {
-            chatAdapter.setTypingState(isTyping, name);
-            if (isTyping) {
-                recyclerViewChat.post(this::scrollToBottom);
+        runOnUiThread(() -> {
+            if (chatAdapter != null) {
+                String displayName = (name == null || name.isEmpty()) ? "Inquilino is generating" : name;
+                chatAdapter.setTypingState(isTyping, displayName);
+                if (isTyping) recyclerViewChat.post(this::scrollToBottom);
             }
+        });
+    }
+
+    public String getFormattedTime() {
+        if (lastMessageTimestamp == null) return "";
+        java.util.Date date = lastMessageTimestamp.toDate();
+        java.util.Calendar msgCal  = java.util.Calendar.getInstance();
+        java.util.Calendar today   = java.util.Calendar.getInstance();
+        java.util.Calendar yesterday = java.util.Calendar.getInstance();
+        msgCal.setTime(date);
+        yesterday.add(java.util.Calendar.DAY_OF_YEAR, -1);
+
+        if (msgCal.get(java.util.Calendar.YEAR) == today.get(java.util.Calendar.YEAR)
+                && msgCal.get(java.util.Calendar.DAY_OF_YEAR) == today.get(java.util.Calendar.DAY_OF_YEAR)) {
+            return new java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault()).format(date);
+        } else if (msgCal.get(java.util.Calendar.YEAR) == yesterday.get(java.util.Calendar.YEAR)
+                && msgCal.get(java.util.Calendar.DAY_OF_YEAR) == yesterday.get(java.util.Calendar.DAY_OF_YEAR)) {
+            return "Yesterday";
+        } else {
+            return new java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault()).format(date);
         }
     }
 }

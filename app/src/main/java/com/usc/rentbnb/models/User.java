@@ -3,7 +3,6 @@ package com.usc.rentbnb.models;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.PropertyName;
-import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -21,7 +20,7 @@ public class User {
 
     private UserLocation location;
     private double rating;
-    private double totalRatings;
+    private double totalReviews;
     private double totalEarnings;
     private int listingsCount;
 
@@ -115,12 +114,12 @@ public class User {
         this.rating = rating;
     }
 
-    public double getTotalRatings() {
-        return totalRatings;
+    public double getTotalReviews() {
+        return totalReviews;
     }
 
-    public void setTotalRatings(double totalRatings) {
-        this.totalRatings = totalRatings;
+    public void setTotalReviews(double totalReviews) {
+        this.totalReviews = totalReviews;
     }
 
     public double getTotalEarnings() {

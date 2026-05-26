@@ -19,12 +19,14 @@ import java.util.List;
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatRoomViewHolder> {
 
     private final List<ChatRoom> chatRooms;
+    private final List<ChatRoom> allChatRooms;
     private final String currentUserId;
     private OnChatRoomClickListener clickListener;
 
     private final java.util.Map<String, String> userNames;
 
     private final java.util.Map<String, String> userPhotos;
+
 
 
     public interface OnChatRoomClickListener {
@@ -35,6 +37,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatRo
     public ChatListAdapter(@NonNull String currentUserId) {
         this.currentUserId = currentUserId;
         this.chatRooms = new ArrayList<>();
+        this.allChatRooms = new ArrayList<>();
         this.userNames = new java.util.HashMap<>();
         this.userPhotos = new java.util.HashMap<>();
     }
@@ -58,6 +61,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatRo
     public int getItemCount() { return chatRooms.size(); }
 
     public void setChatRooms(@NonNull List<ChatRoom> rooms) {
+        allChatRooms.clear();
+        allChatRooms.addAll(rooms);
         chatRooms.clear();
         chatRooms.addAll(rooms);
         notifyDataSetChanged();
@@ -77,12 +82,35 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatRo
         this.clickListener = listener;
     }
 
+    public void filter(String text) {
+        chatRooms.clear();
+        if (text.isEmpty()) {
+            // If search is empty, show everything
+            chatRooms.addAll(allChatRooms);
+        } else {
+            String query = text.toLowerCase();
+            for (ChatRoom room : allChatRooms) {
+                String otherUserId = currentUserId.equals(room.getRenterId()) ? room.getOwnerId() : room.getRenterId();
+                String name = userNames.getOrDefault(otherUserId, "").toLowerCase();
+                String title = room.getListingTitle() != null ? room.getListingTitle().toLowerCase() : "";
+                String lastMsg = room.getLastMessage() != null ? room.getLastMessage().toLowerCase() : "";
+
+                // If the search matches the name, the listing, or the last message, keep it!
+                if (name.contains(query) || title.contains(query) || lastMsg.contains(query)) {
+                    chatRooms.add(room);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
     class ChatRoomViewHolder extends RecyclerView.ViewHolder {
 
         private final ImageView ivProfilePic;
         private final TextView tvParticipantName;
         private final TextView tvListingTitle;
         private final TextView tvLastMessage;
+        private final TextView tvTimestamp; // <-- NEW
         private final View vUnreadDot;
 
         ChatRoomViewHolder(@NonNull View v) {
@@ -91,6 +119,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatRo
             tvParticipantName = v.findViewById(R.id.tvParticipantName);
             tvListingTitle = v.findViewById(R.id.tvListingTitle);
             tvLastMessage = v.findViewById(R.id.tvLastMessage);
+            tvTimestamp = v.findViewById(R.id.tvTimestamp); // <-- NEW
             vUnreadDot = v.findViewById(R.id.vUnreadDot);
         }
 
@@ -106,6 +135,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatRo
 
             String lastMsg = room.getLastMessage();
             tvLastMessage.setText(lastMsg != null ? lastMsg : "");
+
+            // --- TIMESTAMP LOGIC ---
+            String timeText = room.getFormattedTime(); // Pull from the ChatRoom model!
+            tvTimestamp.setText(timeText);
+            tvTimestamp.setVisibility(timeText.isEmpty() ? View.GONE : View.VISIBLE);
 
             int unread = room.getUnreadCountForUser(currentUserId);
             boolean hasUnread = unread > 0;

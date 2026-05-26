@@ -5,34 +5,32 @@ import com.google.gson.annotations.SerializedName;
 public class Notification {
     @SerializedName("_id")
     private String id;
-
+    
     @SerializedName("userId")
     private String userId;
-
+    
     @SerializedName("message")
     private String message;
-
+    
     @SerializedName("type")
     private String type; // e.g., "booking", "message", "system"
-
+    
     @SerializedName("is_read")
     private boolean isRead;
-
+    
     @SerializedName("timestamp")
     private String timestamp;
 
+    @SerializedName("listingId")
+    private String listingId;
+
+    // Optional fields for different notification types
     private String productName;
     private String productCategory;
     private String productImage;
     private String username;
     private String price;
     private String priceUnit;
-
-    // Chat related fields
-    private String chatRoomId;
-    private String ownerId;
-    private String renterId;
-    private String listingId;
 
     public Notification(String id, String message, String type, boolean isRead, String timestamp) {
         this.id = id;
@@ -42,8 +40,10 @@ public class Notification {
         this.timestamp = timestamp;
     }
 
+    // Extended constructor for Renter UI
     public Notification(String id, String type, String productName, String productCategory, String productImage, String price, String priceUnit) {
         this.id = id;
+        this.listingId = id; // For listing notifications, id is usually the listingId
         this.type = type;
         this.productName = productName;
         this.productCategory = productCategory;
@@ -62,21 +62,6 @@ public class Notification {
         this.timestamp = "Just now";
     }
 
-    public Notification(String id, String type, String chatRoomId, String listingId, String listingTitle, String listingImageUrl, String lastMessage, String senderName, String ownerId, String renterId, boolean isRead) {
-        this.id = id;
-        this.type = type;
-        this.chatRoomId = chatRoomId;
-        this.listingId = listingId;
-        this.productName = listingTitle;
-        this.productImage = listingImageUrl;
-        this.message = lastMessage;
-        this.username = senderName;
-        this.ownerId = ownerId;
-        this.renterId = renterId;
-        this.isRead = isRead;
-        this.timestamp = "Recent";
-    }
-
     // Getters
     public String getId() { return id; }
     public String getUserId() { return userId; }
@@ -84,6 +69,7 @@ public class Notification {
     public String getType() { return type; }
     public boolean isRead() { return isRead; }
     public String getTimestamp() { return timestamp; }
+    public String getListingId() { return listingId; }
 
     public String getProductName() { return productName; }
     public String getProductCategory() { return productCategory; }
@@ -92,10 +78,7 @@ public class Notification {
     public String getPrice() { return price; }
     public String getPriceUnit() { return priceUnit; }
 
-    public String getChatRoomId() { return chatRoomId; }
-    public String getOwnerId() { return ownerId; }
-    public String getRenterId() { return renterId; }
-    public String getListingId() { return listingId; }
-
+    // Setter for local UI updates
     public void setRead(boolean read) { isRead = read; }
+    public void setListingId(String listingId) { this.listingId = listingId; }
 }

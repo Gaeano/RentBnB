@@ -3,10 +3,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="end"
+    android:orientation="vertical"
     android:paddingHorizontal="12dp"
     android:paddingVertical="4dp">
+
+    <TextView
+        android:id="@+id/tvDateHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_date_chip"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:text="Today"
+        android:textColor="#757575"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -15,15 +30,15 @@
         android:layout_gravity="end"
         android:maxWidth="280dp"
         android:background="@drawable/bg_bubble_user"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="8dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp">
 
         <TextView
             android:id="@+id/tvMessageText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:lineSpacingMultiplier="1.2" />
 
         <TextView
@@ -32,9 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:textColor="#CCFFFFFF"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:layout_marginTop="4dp" />
-
     </LinearLayout>
-
 </LinearLayout>

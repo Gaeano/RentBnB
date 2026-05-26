@@ -8,21 +8,65 @@
 
     <TextView
         android:id="@+id/tvInboxHeader"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="26dp"
         android:text="Inbox"
-        android:textColor="@color/black"
-        android:textSize="24sp"
+        android:textColor="@color/teal_primary"
+        android:textSize="32sp"
         android:textStyle="bold"
-        android:padding="16dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayoutChats"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/search_bar_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:tabIndicatorColor="@color/teal_primary"
-        app:tabSelectedTextColor="@color/teal_primary"
-        app:tabTextColor="@color/text_grey" />
+        android:layout_height="56dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#EEEEEE"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/favorites_title">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/black" />
+
+                <EditText
+                    android:id="@+id/etSearchChats"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@null"
+                    android:hint="Search users or messages..."
+                    android:textColorHint="@color/text_grey"
+                    android:textSize="16sp"
+                    android:inputType="text"
+                    android:fontFamily="@font/inconsolata" />
+            </LinearLayout>
+
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPagerChats"

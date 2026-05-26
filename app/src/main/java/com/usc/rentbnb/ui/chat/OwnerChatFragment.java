@@ -166,4 +166,10 @@ public class OwnerChatFragment extends Fragment {
         intent.putExtra(ChatRoomActivity.EXTRA_CURRENT_MODE, room.getMode());
         startActivity(intent);
     }
+
+    public void filterChats(String query) {
+        if (adapter != null) {
+            adapter.filter(query);
+        }
+    }
 }

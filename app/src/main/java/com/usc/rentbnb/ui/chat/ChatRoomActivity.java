@@ -66,6 +66,8 @@ public class ChatRoomActivity extends AppCompatActivity {
     private String chatRoomId, listingId, listingTitle, ownerId, renterId, currentUserId, currentMode;
     private boolean isCurrentUserRenter;
     private String ownerDisplayName = "Owner";
+    private com.google.firebase.Timestamp lastMessageTimestamp;
+    private float fabTranslationY = 0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +103,13 @@ public class ChatRoomActivity extends AppCompatActivity {
         ownerId = getIntent().getStringExtra(EXTRA_OWNER_ID);
         renterId = getIntent().getStringExtra(EXTRA_RENTER_ID);
         currentMode = getIntent().getStringExtra(EXTRA_CURRENT_MODE);
+
+        if (chatRoomId == null) {
+            Toast.makeText(this, "Error: Chat Room ID is missing", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         if (currentMode == null) currentMode = ChatRoom.MODE_AI;
     }
 
@@ -127,11 +136,47 @@ public class ChatRoomActivity extends AppCompatActivity {
         updateUiForCurrentMode();
     }
 
+    public com.google.firebase.Timestamp getLastMessageTimestamp() {
+        return lastMessageTimestamp;
+    }
+
+    public void setLastMessageTimestamp(com.google.firebase.Timestamp lastMessageTimestamp) {
+        this.lastMessageTimestamp = lastMessageTimestamp;
+    }
+
+    public String getFormattedTime() {
+        if (this.lastMessageTimestamp == null) return "";
+
+        java.util.Date date = this.lastMessageTimestamp.toDate();
+
+        java.util.Calendar msgCal = java.util.Calendar.getInstance();
+        msgCal.setTime(date);
+
+        java.util.Calendar today = java.util.Calendar.getInstance();
+        java.util.Calendar yesterday = java.util.Calendar.getInstance();
+        yesterday.add(java.util.Calendar.DAY_OF_YEAR, -1);
+
+        if (msgCal.get(java.util.Calendar.YEAR) == today.get(java.util.Calendar.YEAR) &&
+                msgCal.get(java.util.Calendar.DAY_OF_YEAR) == today.get(java.util.Calendar.DAY_OF_YEAR)) {
+            // If it's today, show the time (e.g., "9:24 AM")
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault());
+            return sdf.format(date);
+        } else if (msgCal.get(java.util.Calendar.YEAR) == yesterday.get(java.util.Calendar.YEAR) &&
+                msgCal.get(java.util.Calendar.DAY_OF_YEAR) == yesterday.get(java.util.Calendar.DAY_OF_YEAR)) {
+            return "Yesterday";
+        } else {
+            // If it's older, show the date (e.g., "Oct 12")
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault());
+            return sdf.format(date);
+        }
+    }
+
     private void setupWindowInsets() {
-        ConstraintLayout headerBar = findViewById(R.id.headerBar);
-        ViewCompat.setOnApplyWindowInsetsListener(headerBar, (v, insets) -> {
-            int top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-            v.setPadding(v.getPaddingLeft(), top + 16, v.getPaddingRight(), v.getPaddingBottom());
+        // 1. Smooth Keyboard Push (Requires android:windowSoftInputMode="adjustResize" in Manifest)
+        View rootView = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
+            androidx.core.graphics.Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
     }
@@ -145,11 +190,27 @@ public class ChatRoomActivity extends AppCompatActivity {
             handleSendMessage(text);
         });
         fabToggleMode.setOnClickListener(v -> toggleChatMode());
+
         recyclerViewChat.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrolled(@androidx.annotation.NonNull RecyclerView rv, int dx, int dy) {
-                if (dy > 0 && fabToggleMode.isExtended()) fabToggleMode.shrink();
-                else if (dy < 0 && !fabToggleMode.isExtended()) fabToggleMode.extend();
+            public void onScrolled(@androidx.annotation.NonNull RecyclerView rv, int dx, int dy){
+                if (fabToggleMode.getVisibility() != View.VISIBLE) return;
+
+                float maxScroll = fabToggleMode.getHeight() + 100f;
+
+                fabTranslationY += dy;
+
+                if (fabTranslationY > maxScroll) fabTranslationY = maxScroll;
+
+                if(fabTranslationY < 0) fabTranslationY = 0;
+
+                fabToggleMode.setTranslationY(fabTranslationY);
+
+                if (dy > 0 && fabToggleMode.isExtended()){
+                    fabToggleMode.shrink();
+                }else if (dy < 0 && !fabToggleMode.isExtended() && fabTranslationY < maxScroll / 2) {
+                    fabToggleMode.extend();
+                }
             }
         });
     }
@@ -228,6 +289,23 @@ public class ChatRoomActivity extends AppCompatActivity {
                 chatAdapter.setMessages(messages);
                 scrollToBottom();
                 rebuildConversationHistory(messages);
+
+                // 2. AUTO-HANDOFF LOGIC: If AI is active but the human Owner just replied
+                if (ChatRoom.MODE_AI.equals(currentMode)) {
+                    for (Message msg : messages) {
+                        if (Message.TYPE_OWNER.equals(msg.getSenderType())) {
+                            // The owner intervened! Automatically switch the UI to human mode.
+                            currentMode = ChatRoom.MODE_OWNER;
+                            chatRepository.switchChatMode(chatRoomId, ChatRoom.MODE_OWNER, success -> {});
+
+                            runOnUiThread(() -> {
+                                updateUiForCurrentMode();
+                                Toast.makeText(ChatRoomActivity.this, "Owner has joined the chat", Toast.LENGTH_SHORT).show();
+                            });
+                            break;
+                        }
+                    }
+                }
             }
 
             @Override

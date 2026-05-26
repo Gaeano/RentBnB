@@ -100,7 +100,7 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
     }
 
     static class ListingViewHolder extends RecyclerView.ViewHolder {
-        TextView tvProductName, tvPrice, tvRentCount, tvCategory;
+        TextView tvProductName, tvPrice, tvCategory;
         ImageView ivListingImage, heartIcon;
 
         TextView chipNew, chipTrending, chipRating, chipIsland;
@@ -109,7 +109,6 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             super(itemView);
             tvProductName = itemView.findViewById(R.id.item_title);
             tvPrice = itemView.findViewById(R.id.item_price);
-            tvRentCount = itemView.findViewById(R.id.item_rent_count);
             tvCategory = itemView.findViewById(R.id.item_category);
             ivListingImage = itemView.findViewById(R.id.item_image);
             heartIcon = itemView.findViewById(R.id.favorite_heart_icon);
@@ -124,7 +123,6 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             ///  TODO: onClickListener on card and redirects to listing details
             tvProductName.setText(listing.getProductName());
             tvPrice.setText("₱" + listing.getPrice() + "/" + listing.getPriceUnit());
-            tvRentCount.setText(listing.getTimesRented() + " rents");
             tvCategory.setText(listing.getCategory());
 
             // rating chip

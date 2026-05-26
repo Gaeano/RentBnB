@@ -1,5 +1,6 @@
 package com.usc.rentbnb.ui.history;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import com.usc.rentbnb.adapters.HistoryAdapter;
 import com.usc.rentbnb.models.Booking;
 import com.usc.rentbnb.models.BookingResponse;
 import com.usc.rentbnb.network.ApiClient;
+import com.usc.rentbnb.ui.review.ReviewBookingActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +77,15 @@ public class HistoryStatusFragment extends Fragment {
 
         rvHistoryList.setLayoutManager(new LinearLayoutManager(requireContext()));
         historyAdapter = new HistoryAdapter();
+        
+        historyAdapter.setOnReviewClickListener(booking -> {
+            Intent intent = new Intent(requireContext(), ReviewBookingActivity.class);
+            intent.putExtra("EXTRA_BOOKING_ID", booking.getId());
+            intent.putExtra("EXTRA_LISTING_ID", booking.getListingId());
+            intent.putExtra("EXTRA_LISTING_TITLE", booking.getListingTitle());
+            startActivity(intent);
+        });
+
         rvHistoryList.setAdapter(historyAdapter);
 
         fetchHistoryData();

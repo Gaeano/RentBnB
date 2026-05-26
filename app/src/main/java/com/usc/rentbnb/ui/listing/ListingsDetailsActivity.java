@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -26,8 +27,6 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.callbacks.FavoriteListingsCallback;
 import com.usc.rentbnb.models.ChatRoom;
@@ -37,12 +36,14 @@ import com.usc.rentbnb.repositories.ChatRepository;
 import com.usc.rentbnb.repositories.FavoritesRepository;
 import com.usc.rentbnb.ui.booking.RentForm;
 import com.usc.rentbnb.ui.chat.ChatRoomActivity;
+import com.usc.rentbnb.ui.review.AllReviewsActivity;
+import com.usc.rentbnb.viewmodels.ReviewViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class ListingsDetailsActivity extends AppCompatActivity {
 
@@ -65,6 +66,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
 
     private FavoritesRepository favoritesRepository;
     private ChatRepository chatRepository;
+    private ReviewViewModel reviewViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +80,8 @@ public class ListingsDetailsActivity extends AppCompatActivity {
             finish();
             return;
         }
+        reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
+
 
         favoritesRepository = new FavoritesRepository();
         chatRepository = new ChatRepository();
@@ -93,6 +97,8 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         loadOwnerAvatar();
         loadReviewPreview();
         setupClickListeners();
+        setUpObservers();
+
     }
 
     private void initViews() {
@@ -272,31 +278,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
             return;
         }
 
-        FirebaseFirestore.getInstance()
-                .collection("reviews")
-                .whereEqualTo("listingId", listingId)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(1)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    if (isDestroyed()) return;
-
-                    if (querySnapshot == null || querySnapshot.isEmpty()) {
-                        showNoReviews();
-                        return;
-                    }
-
-                    for (QueryDocumentSnapshot doc : querySnapshot) {
-                        Review review = doc.toObject(Review.class);
-                        bindReviewPreview(review);
-                        break;
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    if (!isDestroyed()) {
-                        showNoReviews();
-                    }
-                });
+        reviewViewModel.getReviews(listingId);
     }
 
     private void bindReviewPreview(Review review) {
@@ -310,7 +292,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         if (tvSeeAllReviews != null) tvSeeAllReviews.setVisibility(View.VISIBLE);
 
         if (tvReviewerName != null) {
-            tvReviewerName.setText(review.getRenterName() != null ? review.getRenterName() : "Renter");
+            tvReviewerName.setText(review.getReviewerName() != null ? review.getReviewerName() : "Renter");
         }
 
         if (tvReviewRating != null) {
@@ -324,16 +306,15 @@ public class ListingsDetailsActivity extends AppCompatActivity {
 
         if (tvReviewDate != null) {
             if (review.getCreatedAt() != null) {
-                Date date = review.getCreatedAt().toDate();
-                SimpleDateFormat sdf = new SimpleDateFormat("MMM yyyy", Locale.getDefault());
-                tvReviewDate.setText(sdf.format(date));
+                String date = formatDate(review.getCreatedAt());
+                tvReviewDate.setText(date);
             } else {
                 tvReviewDate.setText("");
             }
         }
 
         if (ivReviewerAvatar != null) {
-            String photoUrl = review.getRenterPhotoUrl();
+            String photoUrl = review.getReviewerPhotoUrl();
             if (photoUrl != null && !photoUrl.isEmpty()) {
                 Glide.with(this)
                         .load(photoUrl)
@@ -405,8 +386,12 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         }
 
         if (tvSeeAllReviews != null) {
-            tvSeeAllReviews.setOnClickListener(v ->
-                    Toast.makeText(this, "All reviews coming soon.", Toast.LENGTH_SHORT).show());
+            tvSeeAllReviews.setOnClickListener(v -> {
+                Intent intent = new Intent(this, AllReviewsActivity.class);
+                intent.putExtra(AllReviewsActivity.EXTRA_LISTING_ID, currentListing.getId());
+                intent.putExtra(AllReviewsActivity.EXTRA_LISTING_TITLE, currentListing.getProductName());
+                startActivity(intent);
+            });
         }
 
         ImageButton btnOwnerChat = findViewById(R.id.btn_owner_chat);
@@ -493,6 +478,37 @@ public class ListingsDetailsActivity extends AppCompatActivity {
                 super(itemView);
                 imageView = itemView.findViewById(R.id.gallery_image);
             }
+        }
+    }
+
+    private void setUpObservers(){
+        reviewViewModel.getReviewData().observe(this, reviews -> {
+            if (reviews != null && !reviews.isEmpty()){
+                bindReviewPreview(reviews.get(0));
+                Toast.makeText(this, "Reviews successfully fetched", Toast.LENGTH_LONG).show();
+            } else {
+                showNoReviews();
+            }
+        });
+
+        reviewViewModel.getErrorData().observe(this, errorMssg -> {
+            if (errorMssg != null && !errorMssg.isEmpty()){
+                Toast.makeText(this, errorMssg, Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+    }
+
+    private String formatDate(String isoDate) {
+        if (isoDate == null) return "N/A";
+        try {
+            SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            input.setTimeZone(TimeZone.getTimeZone("UTC"));
+            SimpleDateFormat output = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+            return output.format(input.parse(isoDate));
+        } catch (Exception e) {
+            return isoDate;
         }
     }
 }

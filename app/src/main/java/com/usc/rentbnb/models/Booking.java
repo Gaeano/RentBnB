@@ -37,6 +37,7 @@ public class Booking {
     }
 
     public String getRenterId() { return renterId; }
+    public String getListingId() { return listingId; }
     public String getStatus() { return status; }
     public FinancialSummary getFinancialSummary() { return financialSummary; }
     public Schedule getSchedule() { return schedule; }

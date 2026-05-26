@@ -64,6 +64,10 @@
     <style name="CustomCalendarButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textColor">@color/black</item>
     </style>
+
+    <style name="ShapeAppearanceOverlay.App.Circle" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>
 
 

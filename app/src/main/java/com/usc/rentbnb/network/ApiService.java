@@ -15,6 +15,8 @@ import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.models.NotificationResponse;
 import com.usc.rentbnb.models.RegisterRequest;
+import com.usc.rentbnb.models.ReviewRequest;
+import com.usc.rentbnb.models.ReviewsResponse;
 import com.usc.rentbnb.models.WeatherResponse;
 
 import java.util.Map;
@@ -118,6 +120,13 @@ public interface ApiService {
 
     @GET("bookings/users/{userId}/lent-history")
     Call<BookingResponse> getMyLentItems(@Path("userId") String userId);
+
+    // reviews
+    @POST("reviews/add")
+    Call<Void> addReview(@Body ReviewRequest request);
+
+    @GET("reviews/listing/{listingId}")
+    Call<ReviewsResponse> getListingReview(@Path("listingId") String listingId);
 
     // notifs
     @GET("notifications")

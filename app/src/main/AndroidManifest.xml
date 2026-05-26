@@ -17,6 +17,9 @@
         android:theme="@style/Theme.RentBnb"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.review.ReviewBookingActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.profile.ChangePassActivity"
             android:exported="false" />
         <activity
@@ -47,15 +50,15 @@
         <activity
             android:name=".ui.booking.RentForm"
             android:exported="false" />
-
         <activity
             android:name=".ui.booking.MyBookingsActivity"
             android:exported="false"
             android:label="My Bookings" />
-
         <activity
             android:name=".ui.listing.ListingsDetailsActivity"
             android:exported="false" />
+        <activity android:name=".ui.review.AllReviewsActivity"
+            android:exported="false"/>
         <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"

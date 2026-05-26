@@ -9,6 +9,7 @@ activity = "1.8.0"
 constraintlayout = "2.1.4"
 swiperefreshlayout = "1.1.0"
 recyclerview = "1.4.0"
+activityKtx = "1.13.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -20,6 +21,7 @@ activity = { group = "androidx.activity", name = "activity", version.ref = "acti
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

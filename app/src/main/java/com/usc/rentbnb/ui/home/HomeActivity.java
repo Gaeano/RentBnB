@@ -467,12 +467,7 @@ public class HomeActivity extends AppCompatActivity {
                         }
                     }
 
-                    // --- MOCK DATA CHECK (For testing UI red dot) ---
-                    if (!foundUnread) {
-                        if (!readIds.contains("mock_rent_1") || !readIds.contains("mock_chat_1")) {
-                            foundUnread = true;
-                        }
-                    }
+                    // REMOVED MOCK DATA CHECK
                 }
 else {
                     Log.d("HomeActivity", "Notification API response failed or empty. Code: " + response.code());

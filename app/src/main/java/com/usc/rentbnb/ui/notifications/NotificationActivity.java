@@ -128,27 +128,6 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                 android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
                 java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
 
-                // ADD MOCK NOTIFICATIONS FOR RENTER UI
-                Notification mockRent = new Notification(
-                        "mock_rent_1",
-                        "rent",
-                        "Yamaha NMAX",
-                        "Motorcycle",
-                        "yamaha_nmax",
-                        "150",
-                        "day"
-                );
-                mockRent.setRead(readIds.contains(mockRent.getId()));
-                notificationList.add(mockRent);
-                
-                Notification mockChat = new Notification(
-                        "mock_chat_1",
-                        "chat",
-                        "Username"
-                );
-                mockChat.setRead(readIds.contains(mockChat.getId()));
-                notificationList.add(mockChat);
-
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> serverList = response.body().getData();
                     if (serverList != null) {

@@ -25,10 +25,10 @@ public class ReviewsRepository {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()){
                     Log.d("REVIEWS", "Successfully added review " + response.message());
-                    callback.onSuccess(response.message());
+                    callback.onSuccess("Successfully created review");
                 } else {
                     Log.e("REVIEWS", "ERROR: " + response.message() + response.code());
-                    callback.onError(response.message());
+                    callback.onError("Error: " + response.message());
                 }
             }
 

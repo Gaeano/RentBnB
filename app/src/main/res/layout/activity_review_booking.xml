@@ -109,6 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="Submit Review"
+            android:textColor="@color/white"
             android:textAllCaps="false"
             android:textSize="16sp"
             android:textStyle="bold"

@@ -24,7 +24,6 @@ import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.home.HomeActivity;
 import com.usc.rentbnb.ui.profile.ProfileDetailsActivity;
-import com.usc.rentbnb.ui.profile.ProfileDetailsEditActivity;
 import com.usc.rentbnb.viewmodels.UserProfileViewModel;
 
 // TODO: add count reviews in backend
@@ -128,7 +127,7 @@ public class OwnerProfileFragment extends Fragment {
         if (user == null) return;
 
         if (ownerAvatar != null){
-            if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()){
+            if (user.getPhotoUrl() != null &&   user.getPhotoUrl().isEmpty()){
                 Glide.with(this)
                         .load(user.getPhotoUrl())
                         .placeholder(R.drawable.userprofile)
@@ -142,7 +141,7 @@ public class OwnerProfileFragment extends Fragment {
         if (ownerName != null) ownerName.setText(nameStr);
         if (memberSince != null) memberSince.setText(dateStr);
         if (profileRating != null) profileRating.setText(String.format("%.1f", user.getRating()));
-        if (profileReviews != null) profileReviews.setText(String.valueOf((int) user.getTotalRatings()));
+        if (profileReviews != null) profileReviews.setText(String.valueOf((int) user.getTotalReviews()));
         if (profileRentals != null) profileRentals.setText(String.valueOf(user.getListingsCount()));
     }
 

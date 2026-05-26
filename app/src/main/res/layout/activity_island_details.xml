@@ -225,8 +225,7 @@
                     android:id="@+id/empty_state_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal|top"
-                    android:layout_marginTop="48dp"
+                    android:layout_marginTop="80dp"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:visibility="gone">
@@ -243,7 +242,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="0dp"
                         android:text="Oops! Couldn't find what you're looking for."
                         android:textSize="18sp"
                         android:textStyle="bold"

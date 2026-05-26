@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +39,7 @@ import retrofit2.Response;
 public class IslandDetailsActivity extends AppCompatActivity {
     private String island_name;
     private String description;
+    private String imageUrl;
 
     private FrameLayout btnBackWrapper;
     private FavoriteViewModel favoriteViewModel;
@@ -59,6 +61,7 @@ public class IslandDetailsActivity extends AppCompatActivity {
 
         island_name = getIntent().getStringExtra("island_name");
         description = getIntent().getStringExtra("description");
+        imageUrl = getIntent().getStringExtra("imageUrl");
 
         islandName = findViewById(R.id.island_title);
         islandDescription = findViewById(R.id.island_description);
@@ -66,6 +69,15 @@ public class IslandDetailsActivity extends AppCompatActivity {
 
         islandName.setText(island_name);
         islandDescription.setText(description);
+
+        ImageView headerImage = findViewById(R.id.header_image);
+        if (headerImage != null && imageUrl != null) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(imageUrl)
+                    .centerCrop()
+                    .placeholder(R.drawable.details_header)
+                    .into(headerImage);
+        }
 
         btnBackWrapper = findViewById(R.id.btn_back_wrapper);
         ViewCompat.setOnApplyWindowInsetsListener(btnBackWrapper, (v, insets) -> {

@@ -69,16 +69,16 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|end"
                 android:layout_margin="6dp"
-                android:background="@drawable/circular_light_bg"
-                android:text="4.9"
-                android:textColor="@android:color/black"
-                android:textSize="11sp"
+                android:background="@drawable/rating_bg"
+                android:drawablePadding="4dp"
                 android:fontFamily="@font/jost_bold"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
+                android:text="4.9"
+                android:textColor="@android:color/black"
+                android:textSize="11sp"
                 app:drawableStartCompat="@drawable/ic_top_rated"
-                android:drawablePadding="4dp"
                 app:drawableTint="#FFC107" />
 
 

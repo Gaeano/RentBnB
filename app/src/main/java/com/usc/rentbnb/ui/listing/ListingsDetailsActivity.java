@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,15 +29,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.usc.rentbnb.R;
-import com.usc.rentbnb.callbacks.FavoriteListingsCallback;
 import com.usc.rentbnb.models.ChatRoom;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.models.Review;
 import com.usc.rentbnb.repositories.ChatRepository;
-import com.usc.rentbnb.repositories.FavoritesRepository;
 import com.usc.rentbnb.ui.booking.RentForm;
 import com.usc.rentbnb.ui.chat.ChatRoomActivity;
 import com.usc.rentbnb.ui.review.AllReviewsActivity;
+import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 import com.usc.rentbnb.viewmodels.ReviewViewModel;
 
 import java.text.SimpleDateFormat;
@@ -64,9 +64,9 @@ public class ListingsDetailsActivity extends AppCompatActivity {
     private String currentUserId;
     private boolean isFavorited = false;
 
-    private FavoritesRepository favoritesRepository;
     private ChatRepository chatRepository;
     private ReviewViewModel reviewViewModel;
+    private FavoriteViewModel favoriteViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,10 +80,10 @@ public class ListingsDetailsActivity extends AppCompatActivity {
             finish();
             return;
         }
+
         reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
+        favoriteViewModel = new ViewModelProvider(this).get(FavoriteViewModel.class);
 
-
-        favoritesRepository = new FavoritesRepository();
         chatRepository = new ChatRepository();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -99,6 +99,10 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         setupClickListeners();
         setUpObservers();
 
+        // Check the database for initial favorite state
+        if (currentUserId != null) {
+            favoriteViewModel.loadListings(currentUserId);
+        }
     }
 
     private void initViews() {
@@ -214,7 +218,7 @@ public class ListingsDetailsActivity extends AppCompatActivity {
                             if (name == null || name.isEmpty()) {
                                 name = documentSnapshot.getString("name");
                             }
-                            
+
                             if (ownerNameView != null) {
                                 if (name != null && !name.isEmpty()) {
                                     ownerNameView.setText(name);
@@ -258,7 +262,6 @@ public class ListingsDetailsActivity extends AppCompatActivity {
 
         galleryIndicatorLayout.removeAllViews();
 
-        // Only show indicators when there is more than one image
         if (count <= 1) {
             galleryIndicatorLayout.setVisibility(View.GONE);
             return;
@@ -382,31 +385,43 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         ImageButton btnFavorite = findViewById(R.id.btn_favorite);
         if (btnFavorite != null) {
             btnFavorite.setOnClickListener(v -> {
-                if (currentUserId == null) return;
-
-                if (isFavorited) {
-                    favoritesRepository.removeFavoriteListing(currentUserId, currentListing.getId(), new FavoriteListingsCallback() {
-                        @Override
-                        public void onSuccess(List<Listing> favorites) {
-                            isFavorited = false;
-                            updateFavoriteIcon();
-                        }
-
-                        @Override
-                        public void onError(String error) {}
-                    });
-                } else {
-                    favoritesRepository.addFavoriteListing(currentUserId, currentListing, new FavoriteListingsCallback() {
-                        @Override
-                        public void onSuccess(List<Listing> favorites) {
-                            isFavorited = true;
-                            updateFavoriteIcon();
-                        }
-
-                        @Override
-                        public void onError(String error) {}
-                    });
+                if (currentUserId == null) {
+                    Toast.makeText(this, "Please log in to add favorites", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                // 1. Determine target state immediately (Optimistic UI)
+                boolean targetState = !isFavorited;
+
+                // 2. Start bounce-down animation
+                btnFavorite.animate()
+                        .scaleX(0.7f)
+                        .scaleY(0.7f)
+                        .setDuration(150)
+                        .withEndAction(() -> {
+                            // 3. Swap icon at the bottom of the bounce
+                            if (targetState) {
+                                btnFavorite.setImageResource(R.drawable.ic_favorites_filled);
+                            } else {
+                                btnFavorite.setImageResource(R.drawable.ic_favorites);
+                            }
+
+                            // 4. Bounce back up
+                            btnFavorite.animate()
+                                    .scaleX(1.0f)
+                                    .scaleY(1.0f)
+                                    .setDuration(200)
+                                    .setInterpolator(new OvershootInterpolator())
+                                    .start();
+
+                            // 5. Fire database request to ViewModel
+                            if (isFavorited) {
+                                favoriteViewModel.deleteFavoriteListing(currentUserId, currentListing.getId());
+                            } else {
+                                favoriteViewModel.addFavoriteListing(currentUserId, currentListing);
+                            }
+                        })
+                        .start();
             });
         }
 
@@ -515,7 +530,6 @@ public class ListingsDetailsActivity extends AppCompatActivity {
         reviewViewModel.getReviewData().observe(this, reviews -> {
             if (reviews != null && !reviews.isEmpty()){
                 bindReviewPreview(reviews.get(0));
-                Toast.makeText(this, "Reviews successfully fetched", Toast.LENGTH_LONG).show();
             } else {
                 showNoReviews();
             }
@@ -527,7 +541,24 @@ public class ListingsDetailsActivity extends AppCompatActivity {
             }
         });
 
+        favoriteViewModel.getFavoriteListings().observe(this, listings -> {
+            if (listings != null) {
+                isFavorited = false;
+                for (Listing l : listings) {
+                    if (l.getId() != null && l.getId().equals(currentListing.getId())) {
+                        isFavorited = true;
+                        break;
+                    }
+                }
+                updateFavoriteIcon();
+            }
+        });
 
+        favoriteViewModel.getErrorMessage().observe(this, error -> {
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private String formatDate(String isoDate) {

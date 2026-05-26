@@ -63,11 +63,32 @@ public class BookingRequestAdapter extends RecyclerView.Adapter<BookingRequestAd
         }
         holder.tvRenterName.setText(renterName);
 
-        // Listing title
+        // Listing title — with Firestore fallback for bookings created before
+        // the new controller stored listingTitle on the document
         String title = booking.getListingTitle();
         if (title == null || title.isEmpty()) title = booking.getProductName();
-        if (title == null) title = "Item";
-        holder.tvRentedItemName.setText(title);
+
+        if (title != null && !title.isEmpty()) {
+            holder.tvRentedItemName.setText(title);
+        } else if (booking.getListingId() != null && !booking.getListingId().isEmpty()) {
+            holder.tvRentedItemName.setText("Loading...");
+            String listingId = booking.getListingId();
+            com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                    .collection("listings")
+                    .document(listingId)
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc == null || !doc.exists()) return;
+                        String fetched = doc.getString("productName");
+                        if (fetched != null) booking.setCachedListingTitle(fetched);
+                        if (holder.getAdapterPosition() != androidx.recyclerview.widget.RecyclerView.NO_ID) {
+                            holder.tvRentedItemName.setText(fetched != null ? fetched : "Item");
+                        }
+                    })
+                    .addOnFailureListener(e -> holder.tvRentedItemName.setText("Item"));
+        } else {
+            holder.tvRentedItemName.setText("Item");
+        }
 
         // Dates
         String startDate = formatDate(booking.getStartDate());

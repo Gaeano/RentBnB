@@ -94,26 +94,41 @@
             android:clipToPadding="false"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp">
+
+            <!-- singleSelection="false" enables multi-select.
+                 selectionRequired="true" prevents deselecting the last chip (All). -->
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupFilters"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:singleLine="true">
+                app:singleLine="true"
+                app:singleSelection="false"
+                app:selectionRequired="false">
+
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="All"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    android:checkable="true"
+                    android:checked="true"
+                    style="@style/FilterChip"/>
+
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipActive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Active"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    android:checkable="true"
+                    style="@style/FilterChip"/>
+
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPaused"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Paused"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    android:checkable="true"
+                    style="@style/FilterChip"/>
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
@@ -132,7 +147,6 @@
                 android:paddingBottom="80dp"
                 tools:listitem="@layout/item_inventory_listing" />
 
-            <!-- Empty State Layout -->
             <include
                 layout="@layout/layout_empty_state_listings"
                 android:layout_width="match_parent"

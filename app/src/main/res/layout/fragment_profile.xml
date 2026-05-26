@@ -122,8 +122,8 @@
 
             </LinearLayout>
 
-            <HorizontalScrollView
-                android:id="@+id/active_listings_scroll"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_profile_listings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
@@ -131,33 +131,9 @@
                 android:paddingEnd="12dp"
                 android:scrollbars="none"
                 android:layout_marginTop="12dp"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="24dp" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingBottom="8dp">
-
-                    <include
-                        layout="@layout/profile_listing_card"
-                        android:layout_width="160dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp" />
-                    <include
-                        layout="@layout/profile_listing_card"
-                        android:layout_width="160dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp" />
-                    <include
-                        layout="@layout/profile_listing_card"
-                        android:layout_width="160dp"
-                        android:layout_height="wrap_content" />
-
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ACCOUNT &amp; ACTIVITY" android:fontFamily="@font/jost_bold" android:textColor="#757575" android:textSize="14sp" android:layout_marginBottom="12dp" android:layout_marginHorizontal="16dp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ACCOUNT &amp; ACTIVITY" android:fontFamily="@font/jost_bold" android:textColor="#757575" android:textSize="14sp" android:layout_marginTop="24dp" android:layout_marginBottom="12dp" android:layout_marginHorizontal="16dp"/>
 
             <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" app:cardCornerRadius="16dp" app:cardElevation="0dp" app:cardBackgroundColor="#FFFFFF" android:layout_marginBottom="32dp" android:layout_marginHorizontal="16dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">

@@ -21,17 +21,23 @@ import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.faltenreich.skeletonlayout.Skeleton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.adapters.OwnerListingAdapter;
+import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.dashboard.DashboardActivity;
 import com.usc.rentbnb.ui.favorites.FavoritesFragment;
 import com.usc.rentbnb.ui.history.HistoryActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
+import com.usc.rentbnb.viewmodels.ListingViewModel;
 import com.usc.rentbnb.viewmodels.UserProfileViewModel;
 
 import java.util.Locale;
@@ -40,11 +46,14 @@ public class ProfileFragment extends Fragment {
 
     private TextView tvName, tvEmail;
     private ImageView ivAvatar;
-    private LinearLayout profileHeader;
+    private LinearLayout profileHeader, activeListingsHeader;
     private Skeleton skeleton;
+    private RecyclerView rvListings;
+    private OwnerListingAdapter ownerListingAdapter;
 
     private UserProfileViewModel profileViewModel;
     private boolean isCompany = false;
+    private ListingViewModel listingViewModel;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -61,6 +70,7 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+        listingViewModel = new ViewModelProvider(this).get(ListingViewModel.class);
 
         initViews(view);
         setupObservers();
@@ -74,7 +84,9 @@ public class ProfileFragment extends Fragment {
         });
         setupClickListeners(view);
 
+
         profileViewModel.loadUserData();
+        listingViewModel.getOwnerListings();
     }
 
     private void setupObservers() {
@@ -96,11 +108,24 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+
         profileViewModel.getErrorData().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
             }
         });
+
+        listingViewModel.getListingLiveData().observe(getViewLifecycleOwner(), listings -> {
+            if (listings == null || listings.isEmpty()) {
+                activeListingsHeader.setVisibility(View.GONE);
+                rvListings.setVisibility(View.GONE);
+            } else {
+                activeListingsHeader.setVisibility(View.VISIBLE);
+                rvListings.setVisibility(View.VISIBLE);
+                ownerListingAdapter.submitData(listings);
+            }
+        });
+
     }
 
     private void initViews(View view) {
@@ -108,8 +133,14 @@ public class ProfileFragment extends Fragment {
         tvEmail = view.findViewById(R.id.profile_email);
         ivAvatar = view.findViewById(R.id.profile_image);
         profileHeader = view.findViewById(R.id.profile_header);
+        activeListingsHeader = view.findViewById(R.id.active_listings_header);
 
         skeleton = view.findViewById(R.id.skeleton_profile);
+
+        rvListings = view.findViewById(R.id.rv_profile_listings);
+        rvListings.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        ownerListingAdapter = new OwnerListingAdapter(true);
+        rvListings.setAdapter(ownerListingAdapter);
     }
 
     private void populateUI(User user) {

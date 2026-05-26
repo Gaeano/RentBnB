@@ -7,7 +7,9 @@ public class BookingResponse {
 
     private int count;
 
+    private String message;
     private List<Booking> data;
+    private Booking booking;
 
     public boolean isSuccess() {
         return success;
@@ -24,6 +26,8 @@ public class BookingResponse {
     public void setSuccess(boolean success) {
         this.success = success;
     }
+    public String getMessage() { return message; }
+    public Booking getBooking() { return booking; }
 
     public void setCount(int count) {
         this.count = count;

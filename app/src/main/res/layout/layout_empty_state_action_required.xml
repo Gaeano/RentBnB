@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/emptyStateActionRequired"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:visibility="gone">
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_check_circle"
+        android:alpha="0.5"
+        app:tint="@color/teal_primary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="All caught up!"
+        android:textColor="#1D1D1D"
+        android:textSize="24sp"
+        android:fontFamily="@font/jost_bold"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No pending actions at the moment"
+        android:fontFamily="@font/inconsolata"
+        android:textColor="#666666"
+        android:textSize="16sp"
+        android:textAlignment="center"
+        android:layout_marginTop="4dp" />
+
+</LinearLayout>

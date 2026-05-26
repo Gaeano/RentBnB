@@ -3,6 +3,7 @@ package com.usc.rentbnb.models;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.PropertyName;
+import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -13,7 +14,11 @@ public class User {
     private String displayName; // For individuals, this is their name. For companies, it can be the rep's name or company name.
     private String email;
     private String photoUrl;
+    private String age;
+    private String gender;
     private String phone;
+    private String completeAddress;
+
     private UserLocation location;
     private double rating;
     private double totalRatings;
@@ -85,6 +90,14 @@ public class User {
         this.phone = phone;
     }
 
+    public String getCompleteAddress() {
+        return completeAddress;
+    }
+
+    public void setCompleteAddress(String completeAddress) {
+        this.completeAddress = completeAddress;
+    }
+
     public UserLocation getLocation() {
         return location;
     }
@@ -138,33 +151,79 @@ public class User {
         return companyDetails;
     }
 
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     public void setCompanyDetails(CompanyDetails companyDetails) {
         this.companyDetails = companyDetails;
     }
 
     // --- EXISTING NESTED CLASS ---
     public static class UserLocation {
-        private String island;
+        private String city;
         private String province;
 
         public UserLocation() {}
-        public String getIsland() { return island; }
+        public String getCity() { return city; }
         public String getProvince() { return province; }
-        public void setIsland(String island) { this.island = island; }
+        public void setCity(String city) { this.city = city; }
         public void setProvince(String province) { this.province = province; }
     }
 
     public static class CompanyDetails {
         private String companyName;
         private String permitNumber;
+        private String businessType;
+        private String yearsOfOperation;
         private boolean isVerified;
+
+        private ServiceArea serviceArea;
+
 
         public CompanyDetails() {}
 
-        public CompanyDetails(String companyName, String permitNumber) {
+        public CompanyDetails(String companyName, String permitNumber, String businessType, String yearsOfOperation) {
             this.companyName = companyName;
             this.permitNumber = permitNumber;
-            this.isVerified = false;
+            this.businessType = businessType;
+            this.yearsOfOperation = yearsOfOperation;
+        }
+
+        public ServiceArea getServiceArea() {
+            return serviceArea;
+        }
+
+        public void setServiceArea(ServiceArea serviceArea) {
+            this.serviceArea = serviceArea;
+        }
+
+        public String getBusinessType() {
+            return businessType;
+        }
+
+        public void setBusinessType(String businessType) {
+            this.businessType = businessType;
+        }
+
+        public String getYearsOfOperation() {
+            return yearsOfOperation;
+        }
+
+        public void setYearsOfOperation(String yearsOfOperation) {
+            this.yearsOfOperation = yearsOfOperation;
         }
 
         public String getCompanyName() { return companyName; }
@@ -175,5 +234,41 @@ public class User {
 
         public boolean isVerified() { return isVerified; }
         public void setVerified(boolean verified) { isVerified = verified; }
+    }
+
+    public static class ServiceArea{
+        private String radius;
+        private String coverage;
+        private String specificAreas;
+
+        public ServiceArea(String radius, String coverage, String specificAreas) {
+            this.radius = radius;
+            this.coverage = coverage;
+            this.specificAreas = specificAreas;
+        }
+
+        public String getSpecificAreas() {
+            return specificAreas;
+        }
+
+        public void setSpecificAreas(String specificAreas) {
+            this.specificAreas = specificAreas;
+        }
+
+        public String getCoverage() {
+            return coverage;
+        }
+
+        public void setCoverage(String coverage) {
+            this.coverage = coverage;
+        }
+
+        public String getRadius() {
+            return radius;
+        }
+
+        public void setRadius(String radius) {
+            this.radius = radius;
+        }
     }
 }

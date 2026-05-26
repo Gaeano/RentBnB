@@ -7,16 +7,27 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.ui.auth.LoginActivity;
+import com.usc.rentbnb.ui.auth.SignUpActivity;
+import com.usc.rentbnb.ui.auth.verifyAndForgetActivity;
+import com.usc.rentbnb.ui.home.HomeActivity;
+import com.usc.rentbnb.ui.signup.CompanySignUpActivity;
+import com.usc.rentbnb.ui.signup.IndividualSignUpActivity;
 import com.usc.rentbnb.ui.signup.SignupAs;
 
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 public class OnboardingActivity extends AppCompatActivity {
 
@@ -25,6 +36,12 @@ public class OnboardingActivity extends AppCompatActivity {
     private LinearLayout indicatorLayout;
     private OnboardingAdapter adapter;
     private List<OnboardingItem> items;
+
+
+    private FirebaseAuth auth;
+    private FirebaseUser user;
+    private boolean isEmailVerified;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +52,7 @@ public class OnboardingActivity extends AppCompatActivity {
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         );
         setContentView(R.layout.activity_onboarding);
+
 
         viewPager = findViewById(R.id.viewPager);
         btnNext = findViewById(R.id.btnNext);

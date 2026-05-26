@@ -41,7 +41,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         holder.category.setText(booking.getCategory());
         holder.ownerName.setText(booking.getOwnerName());
         holder.price.setText(booking.getPrice());
-        holder.dates.setText(booking.getDateRange());
+        // dates use start and end date
         holder.status.setText(booking.getStatus().toUpperCase());
 
         // Handle visual distinction between Upcoming and Past

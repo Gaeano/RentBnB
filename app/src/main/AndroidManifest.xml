@@ -17,6 +17,15 @@
         android:theme="@style/Theme.RentBnb"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.profile.ChangePassActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.ProfileDetailsEditActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.ProfileDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.chat.ChatRoomActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -28,9 +37,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.signup.SignupAs"
-            android:exported="false">
-
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".ui.booking.ThankYouPage"
             android:exported="false" />
@@ -40,6 +47,12 @@
         <activity
             android:name=".ui.booking.RentForm"
             android:exported="false" />
+
+        <activity
+            android:name=".ui.booking.MyBookingsActivity"
+            android:exported="false"
+            android:label="My Bookings" />
+
         <activity
             android:name=".ui.listing.ListingsDetailsActivity"
             android:exported="false" />
@@ -56,10 +69,24 @@
         <activity
             android:name=".ui.listing.AddListingActivity"
             android:exported="false">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="true">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
         <activity
             android:name=".ui.auth.verifyAndForgetActivity"
@@ -92,6 +119,9 @@
             android:exported="false"/>
         <activity
             android:name=".ui.notifications.NotificationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
     </application>
 

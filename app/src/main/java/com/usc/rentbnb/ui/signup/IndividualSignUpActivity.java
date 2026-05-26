@@ -259,7 +259,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
         }
 
         strengthIndicator.setVisibility(View.VISIBLE);
-        com.usc.rentbnb.utils.PasswordStrengthHelper.Strength strength = 
+        com.usc.rentbnb.utils.PasswordStrengthHelper.Strength strength =
                 com.usc.rentbnb.utils.PasswordStrengthHelper.calculateStrength(password);
 
         tvStrengthLabel.setText("Strength: " + strength.label);
@@ -308,6 +308,7 @@ public class IndividualSignUpActivity extends AppCompatActivity {
 
         authViewModel.getAuthStepCompletedLiveData().observe(this, isCompleted -> {
             if (isCompleted != null && isCompleted) {
+                loadingOverlay.setVisibility(View.GONE);
                 Toast.makeText(this, "Verification email sent to " + regData.getEmail(), Toast.LENGTH_LONG).show();
                 viewFlipper.setDisplayedChild(2);
                 updateStepper(2);

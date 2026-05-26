@@ -27,7 +27,7 @@ public class ChatPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 2;
+        return 1;
     }
 
     // NEW: Pass the search query to both tabs instantly

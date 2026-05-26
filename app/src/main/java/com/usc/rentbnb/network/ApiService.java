@@ -192,15 +192,15 @@ public interface ApiService {
     );
 
     // FAQs
-    @GET("faqs")
+    @GET("faqs/default")
     Call<List<FAQ>> getDefaultFaqs();
 
-    @POST("faqs")
+    @POST("faqs/default")
     Call<FAQ> addDefaultFaq(@Body FAQ faq);
 
-    @PUT("faqs/{id}")
+    @PUT("faqs/default/{id}")
     Call<FAQ> updateDefaultFaq(@Path("id") String id, @Body FAQ faq);
 
-    @DELETE("faqs/{id}")
+    @DELETE("faqs/default/{id}")
     Call<ResponseBody> deleteDefaultFaq(@Path("id") String id);
 }

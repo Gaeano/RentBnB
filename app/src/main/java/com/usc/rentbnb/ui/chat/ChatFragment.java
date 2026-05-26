@@ -38,7 +38,6 @@ public class ChatFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TabLayout tabLayout = view.findViewById(R.id.tabLayoutChats);
         ViewPager2 viewPager = view.findViewById(R.id.viewPagerChats);
         tvInboxHeader = view.findViewById(R.id.tvInboxHeader);
         etSearchChats = view.findViewById(R.id.etSearchChats); // NEW
@@ -48,13 +47,6 @@ public class ChatFragment extends Fragment {
 
         applyWindowInsets();
 
-        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-            if (position == 0) {
-                tab.setText("As Renter");
-            } else {
-                tab.setText("As Owner");
-            }
-        }).attach();
 
         // NEW: Listen for text changes in the search bar
         etSearchChats.addTextChangedListener(new TextWatcher() {

@@ -72,7 +72,6 @@ public class OwnerInboxFragment extends Fragment {
         rvInbox         = view.findViewById(R.id.rvInbox);
         emptyStateInbox = view.findViewById(R.id.emptyStateInbox);
         tvNewMessages   = view.findViewById(R.id.tvNewMessages);
-        chipGroupInbox  = view.findViewById(R.id.chipGroupInbox);
 
         setupRecyclerView();
         setupSearch();
@@ -140,6 +139,7 @@ public class OwnerInboxFragment extends Fragment {
 
                         allRooms.clear();
                         for (ChatRoom room : rooms) {
+                            // Strictly filter for chats where the current user is the OWNER
                             if (currentUserId.equals(room.getOwnerId())) {
                                 allRooms.add(room);
                             }

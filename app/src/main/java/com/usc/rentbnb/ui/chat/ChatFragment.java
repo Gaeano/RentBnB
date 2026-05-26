@@ -103,9 +103,17 @@ public class ChatFragment extends Fragment {
                         getActivity().runOnUiThread(() -> {
                             if (!isAdded()) return;
 
-                            updateEmptyStateVisibility(allRooms.size());
-                            adapter.setChatRooms(allRooms);
-                            resolveParticipantProfiles(allRooms);
+                            // 1. Strictly filter for ONLY Renter chats (since this is the Renter/Standard Chat tab)
+                            java.util.List<ChatRoom> filteredRooms = new java.util.ArrayList<>();
+                            for (ChatRoom room : allRooms) {
+                                if (currentUserId.equals(room.getRenterId())) {
+                                    filteredRooms.add(room);
+                                }
+                            }
+
+                            updateEmptyStateVisibility(filteredRooms.size());
+                            adapter.setChatRooms(filteredRooms);
+                            resolveParticipantProfiles(filteredRooms);
                         });
                     }
 

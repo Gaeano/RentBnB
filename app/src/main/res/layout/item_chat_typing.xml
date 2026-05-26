@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvTypingIndicator"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="8dp"
+    android:text="Owner is typing..."
+    android:textColor="@color/text_grey"
+    android:textSize="12sp"
+    android:textStyle="italic" />

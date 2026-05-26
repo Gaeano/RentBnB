@@ -1,84 +1,108 @@
 package com.usc.rentbnb.models;
 
-import com.google.gson.annotations.SerializedName;
-
 public class Notification {
-    @SerializedName("_id")
+    // Populated from Firestore document ID by NotificationActivity
     private String id;
-    
-    @SerializedName("userId")
     private String userId;
-    
-    @SerializedName("message")
-    private String message;
-    
-    @SerializedName("type")
-    private String type; // e.g., "booking", "message", "system"
-    
-    @SerializedName("is_read")
-    private boolean isRead;
-    
-    @SerializedName("timestamp")
-    private String timestamp;
-
-    @SerializedName("listingId")
+    private String type;
+    private String title;
+    private String body;
+    private String bookingId;
     private String listingId;
+    // "read" matches the Firestore field name exactly (no @SerializedName needed)
+    private boolean read;
+    private String createdAt;
 
-    // Optional fields for different notification types
+    // Display fields — populated from Firestore or constructed locally
     private String productName;
     private String productCategory;
     private String productImage;
     private String username;
     private String price;
     private String priceUnit;
+    private String chatRoomId;
+    private String ownerId;
+    private String renterId;
+    private String message;
 
-    public Notification(String id, String message, String type, boolean isRead, String timestamp) {
-        this.id = id;
-        this.message = message;
-        this.type = type;
-        this.isRead = isRead;
-        this.timestamp = timestamp;
+    // No-arg constructor required for Gson / Firestore toObject()
+    public Notification() {}
+
+    // Backend booking/system notification (from Firestore listener)
+    public Notification(String id, String type, String title, String body,
+                        String bookingId, String listingId, boolean read, String createdAt) {
+        this.id        = id;
+        this.type      = type;
+        this.title     = title;
+        this.body      = body;
+        this.bookingId = bookingId;
+        this.listingId = listingId;
+        this.read      = read;
+        this.createdAt = createdAt;
     }
 
-    // Extended constructor for Renter UI
-    public Notification(String id, String type, String productName, String productCategory, String productImage, String price, String priceUnit) {
-        this.id = id;
-        this.listingId = id; // For listing notifications, id is usually the listingId
-        this.type = type;
-        this.productName = productName;
+    // New listing notification (constructed locally)
+    public Notification(String id, String type, String productName, String productCategory,
+                        String productImage, String price, String priceUnit) {
+        this.id              = id;
+        this.listingId       = id;
+        this.type            = type;
+        this.productName     = productName;
         this.productCategory = productCategory;
-        this.productImage = productImage;
-        this.price = price;
-        this.priceUnit = priceUnit;
-        this.isRead = false;
-        this.timestamp = "Just now";
+        this.productImage    = productImage;
+        this.price           = price;
+        this.priceUnit       = priceUnit;
+        this.read            = false;
+        this.createdAt       = "Just now";
     }
 
-    public Notification(String id, String type, String username) {
-        this.id = id;
-        this.type = type;
-        this.username = username;
-        this.isRead = false;
-        this.timestamp = "Just now";
+    // Chat notification (constructed locally from ChatRoom)
+    public Notification(String id, String type, String chatRoomId, String listingId,
+                        String listingTitle, String listingImageUrl, String lastMessage,
+                        String senderName, String ownerId, String renterId, boolean read) {
+        this.id           = id;
+        this.type         = type;
+        this.chatRoomId   = chatRoomId;
+        this.listingId    = listingId;
+        this.productName  = listingTitle;
+        this.productImage = listingImageUrl;
+        this.message      = lastMessage;
+        this.username     = senderName;
+        this.ownerId      = ownerId;
+        this.renterId     = renterId;
+        this.read         = read;
+        this.createdAt    = "Recent";
     }
 
     // Getters
-    public String getId() { return id; }
-    public String getUserId() { return userId; }
-    public String getMessage() { return message; }
-    public String getType() { return type; }
-    public boolean isRead() { return isRead; }
-    public String getTimestamp() { return timestamp; }
-    public String getListingId() { return listingId; }
-
-    public String getProductName() { return productName; }
+    public String getId()              { return id; }
+    public String getUserId()          { return userId; }
+    public String getType()            { return type; }
+    public String getTitle()           { return title; }
+    public String getBody()            { return body; }
+    public String getBookingId()       { return bookingId; }
+    public String getListingId()       { return listingId; }
+    public boolean isRead()            { return read; }
+    public String getCreatedAt()       { return createdAt; }
+    public String getTimestamp()       { return createdAt; }
+    public String getProductName()     { return productName; }
     public String getProductCategory() { return productCategory; }
-    public String getProductImage() { return productImage; }
-    public String getUsername() { return username; }
-    public String getPrice() { return price; }
-    public String getPriceUnit() { return priceUnit; }
+    public String getProductImage()    { return productImage; }
+    public String getUsername()        { return username; }
+    public String getPrice()           { return price; }
+    public String getPriceUnit()       { return priceUnit; }
+    public String getChatRoomId()      { return chatRoomId; }
+    public String getOwnerId()         { return ownerId; }
+    public String getRenterId()        { return renterId; }
+    public String getMessage()         { return message; }
 
-    // Setter for local UI updates
-    public void setRead(boolean read) { isRead = read; }
-    public void setListingId(String listingId) { this.listingId = listingId; }
+    // Setters
+    public void setId(String id)                     { this.id = id; }
+    public void setRead(boolean read)                { this.read = read; }
+    public void setListingId(String listingId)       { this.listingId = listingId; }
+    public void setProductName(String productName)   { this.productName = productName; }
+    public void setProductImage(String productImage) { this.productImage = productImage; }
+    public void setUsername(String username)         { this.username = username; }
+    public void setTitle(String title)               { this.title = title; }
+    public void setBody(String body)                 { this.body = body; }
 }

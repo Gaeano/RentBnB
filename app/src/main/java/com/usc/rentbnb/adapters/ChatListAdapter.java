@@ -145,7 +145,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatRo
             boolean hasUnread = unread > 0;
             vUnreadDot.setVisibility(hasUnread ? View.VISIBLE : View.GONE);
 
-            itemView.setAlpha(hasUnread ? 1.0f : 0.55f);
+            itemView.setAlpha(hasUnread ? 1.0f : 0.85f);
 
             String photoUrl = userPhotos.get(otherUserId);
             if (photoUrl != null && !photoUrl.isEmpty()) {

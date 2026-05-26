@@ -67,7 +67,6 @@ public class ChatRoomActivity extends AppCompatActivity {
     private boolean isCurrentUserRenter;
     private String ownerDisplayName = "Owner";
     private com.google.firebase.Timestamp lastMessageTimestamp;
-    private float fabTranslationY = 0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -190,29 +189,6 @@ public class ChatRoomActivity extends AppCompatActivity {
             handleSendMessage(text);
         });
         fabToggleMode.setOnClickListener(v -> toggleChatMode());
-
-        recyclerViewChat.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@androidx.annotation.NonNull RecyclerView rv, int dx, int dy){
-                if (fabToggleMode.getVisibility() != View.VISIBLE) return;
-
-                float maxScroll = fabToggleMode.getHeight() + 100f;
-
-                fabTranslationY += dy;
-
-                if (fabTranslationY > maxScroll) fabTranslationY = maxScroll;
-
-                if(fabTranslationY < 0) fabTranslationY = 0;
-
-                fabToggleMode.setTranslationY(fabTranslationY);
-
-                if (dy > 0 && fabToggleMode.isExtended()){
-                    fabToggleMode.shrink();
-                }else if (dy < 0 && !fabToggleMode.isExtended() && fabTranslationY < maxScroll / 2) {
-                    fabToggleMode.extend();
-                }
-            }
-        });
     }
 
     private void handleSendMessage(@androidx.annotation.NonNull String text) {
@@ -386,5 +362,20 @@ public class ChatRoomActivity extends AppCompatActivity {
     private void scrollToBottom() {
         int count = chatAdapter.getItemCount();
         if (count > 0) recyclerViewChat.smoothScrollToPosition(count - 1);
+    }
+
+    /**
+     * Toggles the typing indicator at the bottom of the chat list.
+     *
+     * @param isTyping True to show "is typing...", false to hide.
+     * @param name The name of the person typing (e.g., "Owner" or "Inquilino").
+     */
+    public void setTypingState(boolean isTyping, String name) {
+        if (chatAdapter != null) {
+            chatAdapter.setTypingState(isTyping, name);
+            if (isTyping) {
+                recyclerViewChat.post(this::scrollToBottom);
+            }
+        }
     }
 }

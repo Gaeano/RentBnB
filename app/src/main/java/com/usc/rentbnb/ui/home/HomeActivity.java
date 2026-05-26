@@ -498,29 +498,28 @@ public class HomeActivity extends AppCompatActivity {
         ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
             @Override
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
-                hasUnreadNotifs = false;
+                boolean hasUnread = false;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> notifications = response.body().getData();
                     if (notifications != null) {
                         for (Notification n : notifications) {
                             if (!n.isRead()) {
-                                hasUnreadNotifs = true;
+                                hasUnread = true;
                                 break;
                             }
                         }
                     }
                 }
 
-                if (!hasUnreadNotifs) {
-                    checkNewListingsForBadge();
+                if (hasUnread) {
+                    updateNotificationBadge(true);
                 } else {
-                    updateNotificationBadge();
+                    checkNewListingsForBadge();
                 }
             }
 
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
-                hasUnreadNotifs = false;
                 checkNewListingsForBadge();
             }
         });
@@ -530,25 +529,24 @@ public class HomeActivity extends AppCompatActivity {
         ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
             @Override
             public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
-                hasNewListings = false;
+                boolean hasNew = false;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Listing> listings = response.body().getData();
                     if (listings != null) {
                         for (Listing l : listings) {
                             if (l.isNew()) {
-                                hasNewListings = true;
+                                hasNew = true;
                                 break;
                             }
                         }
                     }
                 }
-                updateNotificationBadge();
+                updateNotificationBadge(hasNew);
             }
 
             @Override
             public void onFailure(Call<ListingResponse> call, Throwable t) {
-                hasNewListings = false;
-                updateNotificationBadge();
+                updateNotificationBadge(false);
             }
         });
     }
@@ -578,14 +576,16 @@ public class HomeActivity extends AppCompatActivity {
         chatListener = chatRepo.listenToChatRoomsForUser(currentUserId, new ChatRepository.ChatRoomsListCallback() {
             @Override
             public void onUpdate(List<ChatRoom> chatRooms) {
-                hasUnreadChats = false;
+                boolean hasUnreadChat = false;
                 for (ChatRoom room : chatRooms) {
                     if (room.getUnreadCountForUser(currentUserId) > 0) {
-                        hasUnreadChats = true;
+                        hasUnreadChat = true;
                         break;
                     }
                 }
-                updateNotificationBadge();
+                if (hasUnreadChat) {
+                    updateNotificationBadge(true);
+                }
             }
 
             @Override
@@ -593,13 +593,21 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private void updateNotificationBadge() {
+    private void updateNotificationBadge(boolean visible) {
         View badge = findViewById(R.id.notification_badge);
         if (badge != null) {
-            boolean visible = hasUnreadNotifs || hasUnreadChats || hasNewListings;
             badge.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
+
+    private final ActivityResultLauncher<Intent> notifLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                // NotificationActivity calls setResult(RESULT_OK) after markAllAsRead.
+                // Regardless of result code, always re-check so badge clears immediately.
+                checkUnreadNotifications();
+            }
+    );
 
     private final ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),

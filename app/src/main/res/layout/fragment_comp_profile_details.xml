@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     android:fillViewport="true">
 
     <com.faltenreich.skeletonlayout.SkeletonLayout
@@ -16,123 +18,89 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
+            android:padding="24dp"
             android:animateLayoutChanges="true">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="24dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Company Details" android:textColor="#1D1D1D" android:textSize="24sp" android:fontFamily="@font/jost_bold" android:layout_marginBottom="24dp"/>
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    app:cardCornerRadius="50dp" app:cardElevation="2dp">
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Account Name" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_comp_name" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Boat Rentals Inc." android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
 
-                    <ImageView
-                        android:id="@+id/iv_avatar"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:background="#E0E0E0" />
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Business Type" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_comp_type" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Boat Rentals" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
 
-                    <LinearLayout
-                        android:id="@+id/overlay_edit_comp_photo"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="#66000000"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:visibility="gone">
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Years of Operation" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_comp_years" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="2 Years" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
 
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Email Address" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_comp_email" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="contact@boatrentals.com" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="16dp"
-                    android:animateLayoutChanges="true">
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Phone Number" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_comp_phone" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="(+63) 912 345 6789" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
 
-                    <TextView
-                        android:id="@+id/tv_comp_header_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Not Set"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black" />
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Full Address" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_comp_address" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="N.s Cabanhud, Lapu-Lapu" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true" android:maxWidth="200dp" android:gravity="end"/>
+            </RelativeLayout>
 
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="City" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_comp_city" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Lap-Lap City" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true" android:maxWidth="200dp" android:gravity="end"/>
+            </RelativeLayout>
 
-                    <TextView
-                        android:id="@+id/btn_edit_profile_toggle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="EDIT PROFILE ✎"
-                        android:textSize="12sp"
-                        android:textColor="#9E9E9E"
-                        android:textStyle="bold"
-                        android:clickable="true"
-                        android:focusable="true"/>
-                </LinearLayout>
-            </LinearLayout>
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="32dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Province" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_comp_province" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Ang Probinsyano" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true" android:maxWidth="200dp" android:gravity="end"/>
+            </RelativeLayout>
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="#F5F5F5"
-                android:layout_marginBottom="16dp">
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginBottom="32dp"/>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Service Area" android:textColor="#1D1D1D" android:textSize="24sp" android:fontFamily="@font/jost_bold" android:layout_marginBottom="24dp"/>
 
-                    <include layout="@layout/item_profile_field" android:id="@+id/field_acct_name" />
-                    <include layout="@layout/item_profile_field" android:id="@+id/field_business_type" />
-                    <include layout="@layout/item_profile_field" android:id="@+id/field_years" />
-                    <include layout="@layout/item_profile_field" android:id="@+id/field_comp_email" />
-                    <include layout="@layout/item_profile_field" android:id="@+id/field_comp_phone" />
-                    <include layout="@layout/item_profile_field" android:id="@+id/field_comp_address" />
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Radius" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_radius" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="45 km" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
 
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Coverage" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_coverage" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Within City" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SERVICE AREA"
-                android:textColor="#555555"
-                android:textStyle="bold"
-                android:textSize="12sp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginStart="8dp"/>
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="32dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Specific Areas" android:fontFamily="@font/jost_semibold" android:textColor="#9E9E9E" android:textSize="14sp" android:layout_alignParentStart="true"/>
+                <TextView android:id="@+id/tv_detail_specific_areas" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Lakawon Islands, Sipalay" android:fontFamily="@font/jost_bold" android:textColor="#1D1D1D" android:textSize="14sp" android:layout_alignParentEnd="true" android:maxWidth="200dp" android:gravity="end"/>
+            </RelativeLayout>
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/btn_edit_profile_toggle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
+                android:layout_height="52dp"
+                app:cardBackgroundColor="@color/teal_primary"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="#F5F5F5"
-                android:layout_marginBottom="16dp">
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <include layout="@layout/item_profile_field" android:id="@+id/field_radius" />
-                    <include layout="@layout/item_profile_field" android:id="@+id/field_within" />
-                    <include layout="@layout/item_profile_field" android:id="@+id/field_specific_areas" />
-
+                    android:layout_gravity="center"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@android:drawable/ic_menu_edit" app:tint="@color/white" android:layout_marginEnd="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Edit" android:textColor="@color/white" android:textSize="16sp" android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

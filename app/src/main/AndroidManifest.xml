@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -16,6 +17,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RentBnb"
         android:usesCleartextTraffic="true">
+
+        <service
+            android:name=".services.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".ui.review.ReviewBookingActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.profile.ChangePassActivity"
             android:exported="false" />
@@ -48,8 +61,14 @@
             android:name=".ui.booking.RentForm"
             android:exported="false" />
         <activity
+            android:name=".ui.booking.MyBookingsActivity"
+            android:exported="false"
+            android:label="My Bookings" />
+        <activity
             android:name=".ui.listing.ListingsDetailsActivity"
             android:exported="false" />
+        <activity android:name=".ui.review.AllReviewsActivity"
+            android:exported="false"/>
         <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"
@@ -62,10 +81,26 @@
         </activity>
         <activity
             android:name=".ui.listing.AddListingActivity"
-            android:exported="false" />
+            android:exported="false">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
+        </activity>
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="true" />
+            android:exported="true">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
+        </activity>
         <activity
             android:name=".ui.auth.verifyAndForgetActivity"
             android:exported="false" />
@@ -99,13 +134,7 @@
             android:name=".ui.notifications.NotificationActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.ManageFaqsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.profile.SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.profile.LegalContentActivity"
+            android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
     </application>
 

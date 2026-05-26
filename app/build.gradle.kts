@@ -34,6 +34,7 @@ android {
 
 dependencies {
 
+    implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -50,6 +51,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage:20.3.0")
+    implementation ("com.google.firebase:firebase-messaging")
 
     // Google
     implementation("androidx.credentials:credentials:1.2.2")

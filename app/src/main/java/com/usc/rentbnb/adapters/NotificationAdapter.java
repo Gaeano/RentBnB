@@ -69,8 +69,15 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.ivIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
         } else {
             // Default/Existing style
-            holder.tvTitle.setText(notification.getMessage());
-            holder.tvSubtitle.setText(notification.getTimestamp());
+            String msg = notification.getMessage();
+            if (msg == null || msg.isEmpty()) {
+                // If it slips through, at least don't show an empty title
+                holder.tvTitle.setText("System Notification");
+            } else {
+                holder.tvTitle.setText(msg);
+            }
+            
+            holder.tvSubtitle.setText(notification.getTimestamp() != null ? notification.getTimestamp() : "");
             holder.tvExtra.setVisibility(View.GONE);
             holder.tvDetailsLink.setVisibility(View.GONE);
             holder.ivIcon.setImageResource(R.drawable.ic_notifications);

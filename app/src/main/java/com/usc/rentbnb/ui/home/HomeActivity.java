@@ -8,14 +8,14 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.text.Editable;
-import android.text.TextWatcher;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -30,7 +30,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.usc.rentbnb.repositories.ChatRepository;
@@ -60,7 +59,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private TextView[] filterChips;
     private HomeViewModel homeViewModel;
-
     private EditText searchBar;
 
     private boolean showingRentals = true;
@@ -79,9 +77,13 @@ public class HomeActivity extends AppCompatActivity {
     private FilterCriteria lastCriteria = null;
     private ListenerRegistration chatListener;
 
+    private boolean hasUnreadNotifs = false;
+    private boolean hasUnreadChats = false;
+    private boolean hasNewListings = false;
+
+    // saerch debouncing lkogic
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,21 +93,28 @@ public class HomeActivity extends AppCompatActivity {
         LinearLayout homeHeader = findViewById(R.id.homeHeader);
         ViewCompat.setOnApplyWindowInsetsListener(homeHeader, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-            v.setPadding(v.getPaddingLeft(), statusBarHeight + 8, v.getPaddingRight(), v.getPaddingBottom());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    statusBarHeight + 8,
+                    v.getPaddingRight(),
+                    v.getPaddingBottom()
+            );
             return insets;
         });
 
         tabIslands = findViewById(R.id.tab_islands);
         tabRentals = findViewById(R.id.tab_rentals);
-
+        searchBar = findViewById(R.id.search_bar);
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
+        com.usc.rentbnb.services.MyFirebaseMessagingService.refreshAndSaveToken();
 
         setupFilterChips();
         setupTitleToggle();
         setupBottomNavigation(homeHeader);
         setupFilterButton();
+        setupSearchLogic();
 
         if (getIntent().getBooleanExtra("navigate_to_chat", false)) {
             navigationHelper.navigateToChat();
@@ -113,8 +122,6 @@ public class HomeActivity extends AppCompatActivity {
             navigationHelper.setInitialState();
         }
 
-        updateTabUI(true);
-        loadInitialFragment();
 
         homeViewModel.fetchIslands();
         homeViewModel.fetchListings();
@@ -122,6 +129,7 @@ public class HomeActivity extends AppCompatActivity {
         switchFeed(true);
 
         fetchUserLocation();
+        requestNotificationPermission();
 
         findViewById(R.id.weather_button).setOnClickListener(v -> showWeatherDialog());
 
@@ -136,29 +144,20 @@ public class HomeActivity extends AppCompatActivity {
         checkUnreadNotifications();
         listenToUnreadChat();
 
-        // --- SEARCH BAR INITIALIZATION ---
-        searchBar = findViewById(R.id.search_bar);
-        setupSearchLogic();
-
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
             @Override
             public void onFragmentResumed(@NonNull androidx.fragment.app.FragmentManager fm, @NonNull Fragment f) {
                 super.onFragmentResumed(fm, f);
-                if (f instanceof RentalsFragment) updateTabUI(true);
-                else if (f instanceof IslandsFragment) updateTabUI(false);
+                if (f instanceof RentalsFragment) {
+                    updateTabUI(true);
+                } else if (f instanceof IslandsFragment) {
+                    updateTabUI(false);
+                }
             }
         }, false);
     }
 
-    public void navigateToFavorites() {
-        if (navigationHelper != null) {
-            navigationHelper.navigateToFavorites();
-        }
-    }
-
     private void setupSearchLogic() {
-        if (searchBar == null) return;
-
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -174,14 +173,13 @@ public class HomeActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 String query = s.toString().trim();
                 searchRunnable = () -> {
-                    // CORRECTED LOGIC:
-                    // If showingRentals is true, filter Rentals. Otherwise, filter Islands.
                     if (showingRentals) {
                         homeViewModel.filterRentals(query);
                     } else {
                         homeViewModel.filterIslands(query);
                     }
                 };
+
                 searchHandler.postDelayed(searchRunnable, 300);
             }
         });
@@ -204,6 +202,13 @@ public class HomeActivity extends AppCompatActivity {
     private void switchFeed(boolean toRentals) {
         updateTabUI(toRentals);
 
+        String currentQuery = searchBar.getText().toString();
+        if (toRentals) {
+            homeViewModel.filterRentals(currentQuery);
+        } else {
+            homeViewModel.filterIslands(currentQuery);
+        }
+
         Fragment fragment = toRentals ? new RentalsFragment() : new IslandsFragment();
         getSupportFragmentManager()
                 .beginTransaction()
@@ -212,58 +217,58 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void loadInitialFragment() {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.homeFeedContainer, new RentalsFragment())
-                .commit();
-    }
     private void updateTabUI(boolean isRentals) {
         showingRentals = isRentals;
 
-        int activeColor = ContextCompat.getColor(this, R.color.teal_primary);
-        int inactiveColor = ContextCompat.getColor(this, R.color.text_grey);
-
         if (isRentals) {
             tabRentals.setBackgroundResource(R.drawable.bg_tab_active);
-            tabRentals.setTextColor(activeColor);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+
             tabIslands.setBackgroundResource(android.R.color.transparent);
-            tabIslands.setTextColor(inactiveColor);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
         } else {
             tabIslands.setBackgroundResource(R.drawable.bg_tab_active);
-            tabIslands.setTextColor(activeColor);
+            tabIslands.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
+
             tabRentals.setBackgroundResource(android.R.color.transparent);
-            tabRentals.setTextColor(inactiveColor);
+            tabRentals.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
         }
     }
 
     private void setupFilterChips() {
-        int[] chipIds = {R.id.chip_near_you, R.id.chip_trending, R.id.chip_new, R.id.chip_top_rated};
-        filterChips = new TextView[chipIds.length];
+        TextView chipWheels = findViewById(R.id.chip_wheels);
+        TextView chipWater = findViewById(R.id.chip_water);
+        TextView chipOutdoors = findViewById(R.id.chip_outdoors);
+        TextView chipElectronics = findViewById(R.id.chip_electronics);
+        TextView chipBeachLeisure = findViewById(R.id.chip_beach_leisure);
 
-        for (int i = 0; i < chipIds.length; i++) {
-            filterChips[i] = findViewById(chipIds[i]);
-            if (filterChips[i] != null) {
-                filterChips[i].setSelected(false);
-                filterChips[i].setOnClickListener(v -> handleChipToggle((TextView) v));
+        filterChips = new TextView[]{chipWheels, chipWater, chipOutdoors, chipElectronics, chipBeachLeisure};
+
+        for (TextView chip : filterChips) {
+            if (chip != null) {
+                chip.setSelected(false);
+                chip.setOnClickListener(v -> handleChipToggle((TextView) v));
             }
         }
     }
 
     private void handleChipToggle(TextView selectedChip) {
         boolean isNowSelected = !selectedChip.isSelected();
-
-        for (TextView chip : filterChips) {
-            chip.setSelected(false);
-            chip.setBackgroundResource(R.drawable.chip_background);
-            chip.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start();
-        }
+        selectedChip.setSelected(isNowSelected);
 
         if (isNowSelected) {
-            selectedChip.setSelected(true);
             selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
-            selectedChip.animate().scaleX(1.05f).scaleY(1.05f).setDuration(100).start();
+        } else {
+            selectedChip.setBackgroundResource(R.drawable.chip_background);
         }
+
+        java.util.List<String> selectedCategories = new java.util.ArrayList<>();
+        for (TextView chip : filterChips) {
+            if (chip != null && chip.isSelected()) {
+                selectedCategories.add(chip.getText().toString());
+            }
+        }
+        homeViewModel.filterByCategories(selectedCategories);
     }
 
     private void setupBottomNavigation(View homeHeader) {
@@ -369,7 +374,9 @@ public class HomeActivity extends AppCompatActivity {
     private void fetchUserLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        // check if user granted permission
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // no permission = ask permission; show pop-up
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
             return;
         }
@@ -408,6 +415,14 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    private void requestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -422,7 +437,12 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void fetchNearbyIslands(double lat, double lng) {
+        // TODO: pass 'lat' and 'lng' to backend to calculate distance puhon
+        // ApiClient.getApiService().getNearbyIslands(lat, lng)...
+
         Log.d("DATA", "Preparing to fetch islands near " + lat + ", " + lng);
+
+        // fornow because db only has 6 islands, just fetch ALL islands
         homeViewModel.fetchIslands();
     }
 
@@ -430,28 +450,29 @@ public class HomeActivity extends AppCompatActivity {
         ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
             @Override
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
-                boolean hasUnread = false;
+                hasUnreadNotifs = false;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> notifications = response.body().getData();
                     if (notifications != null) {
                         for (Notification n : notifications) {
                             if (!n.isRead()) {
-                                hasUnread = true;
+                                hasUnreadNotifs = true;
                                 break;
                             }
                         }
                     }
                 }
 
-                if (hasUnread) {
-                    updateNotificationBadge(true);
-                } else {
+                if (!hasUnreadNotifs) {
                     checkNewListingsForBadge();
+                } else {
+                    updateNotificationBadge();
                 }
             }
 
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                hasUnreadNotifs = false;
                 checkNewListingsForBadge();
             }
         });
@@ -461,26 +482,33 @@ public class HomeActivity extends AppCompatActivity {
         ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
             @Override
             public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
-                boolean hasNew = false;
+                hasNewListings = false;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Listing> listings = response.body().getData();
                     if (listings != null) {
                         for (Listing l : listings) {
                             if (l.isNew()) {
-                                hasNew = true;
+                                hasNewListings = true;
                                 break;
                             }
                         }
                     }
                 }
-                updateNotificationBadge(hasNew);
+                updateNotificationBadge();
             }
 
             @Override
             public void onFailure(Call<ListingResponse> call, Throwable t) {
-                updateNotificationBadge(false);
+                hasNewListings = false;
+                updateNotificationBadge();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkUnreadNotifications();
     }
 
     @Override
@@ -499,16 +527,14 @@ public class HomeActivity extends AppCompatActivity {
         chatListener = chatRepo.listenToChatRoomsForUser(currentUserId, new ChatRepository.ChatRoomsListCallback() {
             @Override
             public void onUpdate(List<ChatRoom> chatRooms) {
-                boolean hasUnreadChat = false;
+                hasUnreadChats = false;
                 for (ChatRoom room : chatRooms) {
                     if (room.getUnreadCountForUser(currentUserId) > 0) {
-                        hasUnreadChat = true;
+                        hasUnreadChats = true;
                         break;
                     }
                 }
-                if (hasUnreadChat) {
-                    updateNotificationBadge(true);
-                }
+                updateNotificationBadge();
             }
 
             @Override
@@ -516,9 +542,10 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private void updateNotificationBadge(boolean visible) {
+    private void updateNotificationBadge() {
         View badge = findViewById(R.id.notification_badge);
         if (badge != null) {
+            boolean visible = hasUnreadNotifs || hasUnreadChats || hasNewListings;
             badge.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }

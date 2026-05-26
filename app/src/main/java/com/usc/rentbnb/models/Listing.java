@@ -29,6 +29,11 @@ public class Listing implements Parcelable {
     private double rating;
     private int totalReviews;
     private int timesRented;
+    private Penalties penalties;
+    // "active" | "paused" — stored in Firestore by createListing controller
+    private String status;
+    // "booked" | null — set by backend when a booking is ACTIVE
+    private String bookingStatus;
 
     @Exclude
     private String createdAt;
@@ -36,10 +41,49 @@ public class Listing implements Parcelable {
     private String ownerName;
     private String ownerFaq;
 
-    @PropertyName("createdAt")
-    public Object getFirestoreCreatedAt() {
-        return null;
+    // -------------------------------------------------------------------------
+    // Nested Penalties
+    // -------------------------------------------------------------------------
+    public static class Penalties implements Parcelable {
+        private String penaltyUnit;
+        private double penaltyAmount;
+
+        public Penalties() {}
+
+        public Penalties(String penaltyUnit, double penaltyAmount) {
+            this.penaltyUnit = penaltyUnit;
+            this.penaltyAmount = penaltyAmount;
+        }
+
+        protected Penalties(Parcel in) {
+            penaltyUnit = in.readString();
+            penaltyAmount = in.readDouble();
+        }
+
+        public static final Creator<Penalties> CREATOR = new Creator<Penalties>() {
+            @Override public Penalties createFromParcel(Parcel in) { return new Penalties(in); }
+            @Override public Penalties[] newArray(int size) { return new Penalties[size]; }
+        };
+
+        public String getPenaltyUnit() { return penaltyUnit; }
+        public double getPenaltyAmount() { return penaltyAmount; }
+        public void setPenaltyUnit(String penaltyUnit) { this.penaltyUnit = penaltyUnit; }
+        public void setPenaltyAmount(double penaltyAmount) { this.penaltyAmount = penaltyAmount; }
+
+        @Override public int describeContents() { return 0; }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeString(penaltyUnit);
+            dest.writeDouble(penaltyAmount);
+        }
     }
+
+    // -------------------------------------------------------------------------
+    // Firestore createdAt handling
+    // -------------------------------------------------------------------------
+    @PropertyName("createdAt")
+    public Object getFirestoreCreatedAt() { return null; }
 
     @PropertyName("createdAt")
     public void setFirestoreCreatedAt(Object value) {
@@ -53,7 +97,14 @@ public class Listing implements Parcelable {
         }
     }
 
-    public Listing(String id, String productName, String description, String category, String island, double price, String priceUnit, double rating, int totalReviews, List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls, String createdAt, int timesRented, String ownerId, String ownerName, String ownerFaq) {
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+    public Listing(String id, String productName, String description, String category, String island,
+                   double price, String priceUnit, double rating, int totalReviews,
+                   List<String> paymentMethods, List<String> suggestedActivities, List<String> imageUrls,
+                   String createdAt, int timesRented, String ownerId, String ownerName,
+                   String ownerFaq, Penalties penalties, String status, String bookingStatus) {
         this.id = id;
         this.productName = productName;
         this.description = description;
@@ -71,6 +122,9 @@ public class Listing implements Parcelable {
         this.ownerId = ownerId;
         this.ownerName = ownerName;
         this.ownerFaq = ownerFaq;
+        this.penalties = penalties;
+        this.status = status;
+        this.bookingStatus = bookingStatus;
     }
 
     public Listing() {}
@@ -93,48 +147,75 @@ public class Listing implements Parcelable {
         ownerId = in.readString();
         ownerName = in.readString();
         ownerFaq = in.readString();
+        penalties = in.readParcelable(Penalties.class.getClassLoader());
+        status = in.readString();
+        bookingStatus = in.readString();
     }
 
     public static final Creator<Listing> CREATOR = new Creator<Listing>() {
-        @Override
-        public Listing createFromParcel(Parcel in) {
-            return new Listing(in);
-        }
-
-        @Override
-        public Listing[] newArray(int size) {
-            return new Listing[size];
-        }
+        @Override public Listing createFromParcel(Parcel in) { return new Listing(in); }
+        @Override public Listing[] newArray(int size) { return new Listing[size]; }
     };
 
-    public String getId() {return id;}
-    public String getProductName() {return productName;}
-    public String getDescription() {return description;}
-    public String getCategory() {return category;}
-    public String getIsland() {return island;}
-    public double getPrice() {return price;}
-    public String getPriceUnit() {return priceUnit;}
-    public double getRating() {return rating;}
-    public int getTotalReviews() {return totalReviews;}
-    public List<String> getImageUrls() {return imageUrls;}
-    @Exclude
-    public String getCreatedAt() {return createdAt;}
-    public int getTimesRented() {return timesRented;}
-    public List<String> getPaymentMethods() {return paymentMethods;}
-    public List<String> getSuggestedActivities() {return suggestedActivities;}
+    // -------------------------------------------------------------------------
+    // Getters
+    // -------------------------------------------------------------------------
+    public String getId() { return id; }
+    public String getProductName() { return productName; }
+    public String getDescription() { return description; }
+    public String getCategory() { return category; }
+    public String getIsland() { return island; }
+    public double getPrice() { return price; }
+    public String getPriceUnit() { return priceUnit; }
+    public double getRating() { return rating; }
+    public int getTotalReviews() { return totalReviews; }
+    public List<String> getImageUrls() { return imageUrls; }
+    @Exclude public String getCreatedAt() { return createdAt; }
+    public int getTimesRented() { return timesRented; }
+    public List<String> getPaymentMethods() { return paymentMethods; }
+    public List<String> getSuggestedActivities() { return suggestedActivities; }
     public String getOwnerId() { return ownerId; }
     public String getOwnerName() { return ownerName; }
     public String getOwnerFaq() { return ownerFaq; }
+    public Penalties getPenalties() { return penalties; }
+    public String getStatus() { return status; }
+    public String getBookingStatus() { return bookingStatus; }
+    public boolean isBeingBooked() { return "booked".equals(bookingStatus); }
+    public boolean isPaused() { return "paused".equals(status); }
 
+    // -------------------------------------------------------------------------
+    // Setters
+    // -------------------------------------------------------------------------
+    public void setId(String id) { this.id = id; }
+    public void setProductName(String productName) { this.productName = productName; }
+    public void setDescription(String description) { this.description = description; }
+    public void setCategory(String category) { this.category = category; }
+    public void setIsland(String island) { this.island = island; }
+    public void setPrice(double price) { this.price = price; }
+    public void setPriceUnit(String priceUnit) { this.priceUnit = priceUnit; }
+    public void setPaymentMethods(List<String> paymentMethods) { this.paymentMethods = paymentMethods; }
+    public void setSuggestedActivities(List<String> suggestedActivities) { this.suggestedActivities = suggestedActivities; }
+    public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
+    public void setRating(double rating) { this.rating = rating; }
+    public void setTotalReviews(int totalReviews) { this.totalReviews = totalReviews; }
+    public void setTimesRented(int timesRented) { this.timesRented = timesRented; }
+    @Exclude public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public void setOwnerId(String ownerId) { this.ownerId = ownerId; }
+    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+    public void setOwnerFaq(String ownerFaq) { this.ownerFaq = ownerFaq; }
+    public void setPenalties(Penalties penalties) { this.penalties = penalties; }
+    public void setStatus(String status) { this.status = status; }
+    public void setBookingStatus(String bookingStatus) { this.bookingStatus = bookingStatus; }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
     public boolean isNew() {
-        if (createdAt == null || createdAt.isEmpty()) {
-            return false;
-        }
+        if (createdAt == null || createdAt.isEmpty()) return false;
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date dateCreated = sdf.parse(createdAt);
-
             if (dateCreated != null) {
                 long diffInMillis = System.currentTimeMillis() - dateCreated.getTime();
                 long hoursDiff = diffInMillis / (1000 * 60 * 60);
@@ -146,71 +227,7 @@ public class Listing implements Parcelable {
         return false;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public void setIsland(String island) {
-        this.island = island;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public void setPriceUnit(String priceUnit) {
-        this.priceUnit = priceUnit;
-    }
-
-    public void setPaymentMethods(List<String> paymentMethods) {
-        this.paymentMethods = paymentMethods;
-    }
-
-    public void setSuggestedActivities(List<String> suggestedActivities) {
-        this.suggestedActivities = suggestedActivities;
-    }
-
-    public void setImageUrls(List<String> imageUrls) {
-        this.imageUrls = imageUrls;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
-
-    public void setTotalReviews(int totalReviews) {
-        this.totalReviews = totalReviews;
-    }
-
-    public void setTimesRented(int timesRented) {
-        this.timesRented = timesRented;
-    }
-
-    @Exclude
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public void setOwnerId(String ownerId) { this.ownerId = ownerId; }
-    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
-    public void setOwnerFaq(String ownerFaq) { this.ownerFaq = ownerFaq; }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+    @Override public int describeContents() { return 0; }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -231,5 +248,8 @@ public class Listing implements Parcelable {
         dest.writeString(ownerId);
         dest.writeString(ownerName);
         dest.writeString(ownerFaq);
+        dest.writeParcelable(penalties, flags);
+        dest.writeString(status);
+        dest.writeString(bookingStatus);
     }
 }

@@ -9,7 +9,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    private static final String BASE_URL = "https://rentbnb-0wbk.onrender.com/api/v1/"; // http://10.0.2.2:3000/api/v1/ is localhost for Android emulator | https://rentbnb-0wbk.onrender.com/api/v1/ for Render  http://10.0.2.2:3000/api/v1/
+    private static final String BASE_URL = "http://10.0.2.2:3000/api/v1/"; // http://10.0.2.2:3000/api/v1/ is localhost for Android emulator | https://rentbnb-0wbk.onrender.com/api/v1/ for Render
     private static Retrofit retrofit = null;
     public static Retrofit getClient() {
         if (retrofit == null) {

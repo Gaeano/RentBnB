@@ -132,4 +132,30 @@ public class ChatRoom {
         Integer count = unreadCount.get(userId);
         return count != null ? count : 0;
     }
+    public String getFormattedTime() {
+        if (this.lastMessageTimestamp == null) return "";
+
+        java.util.Date date = this.lastMessageTimestamp.toDate();
+
+        java.util.Calendar msgCal = java.util.Calendar.getInstance();
+        msgCal.setTime(date);
+
+        java.util.Calendar today = java.util.Calendar.getInstance();
+        java.util.Calendar yesterday = java.util.Calendar.getInstance();
+        yesterday.add(java.util.Calendar.DAY_OF_YEAR, -1);
+
+        if (msgCal.get(java.util.Calendar.YEAR) == today.get(java.util.Calendar.YEAR) &&
+                msgCal.get(java.util.Calendar.DAY_OF_YEAR) == today.get(java.util.Calendar.DAY_OF_YEAR)) {
+            // If it's today, show the time (e.g., "9:24 AM")
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault());
+            return sdf.format(date);
+        } else if (msgCal.get(java.util.Calendar.YEAR) == yesterday.get(java.util.Calendar.YEAR) &&
+                msgCal.get(java.util.Calendar.DAY_OF_YEAR) == yesterday.get(java.util.Calendar.DAY_OF_YEAR)) {
+            return "Yesterday";
+        } else {
+            // If it's older, show the date (e.g., "Oct 12")
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault());
+            return sdf.format(date);
+        }
+    }
 }

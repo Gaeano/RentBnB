@@ -1,9 +1,12 @@
 package com.usc.rentbnb.ui.chat;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +15,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
+
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.usc.rentbnb.R;
@@ -19,9 +23,11 @@ import com.usc.rentbnb.adapters.ChatPagerAdapter;
 
 public class ChatFragment extends Fragment {
 
-    public ChatFragment() {}
-
     private TextView tvInboxHeader;
+    private EditText etSearchChats;
+    private ChatPagerAdapter pagerAdapter;
+
+    public ChatFragment() {}
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,23 +38,29 @@ public class ChatFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TabLayout tabLayout = view.findViewById(R.id.tabLayoutChats);
         ViewPager2 viewPager = view.findViewById(R.id.viewPagerChats);
         tvInboxHeader = view.findViewById(R.id.tvInboxHeader);
+        etSearchChats = view.findViewById(R.id.etSearchChats); // NEW
 
-        // Link the ViewPager to your new fragments
-        ChatPagerAdapter pagerAdapter = new ChatPagerAdapter(this);
+        pagerAdapter = new ChatPagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
 
         applyWindowInsets();
-        // TabLayoutMediator automatically syncs tab clicks with ViewPager swipes
-        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-            if (position == 0) {
-                tab.setText("As Renter");
-            } else {
-                tab.setText("As Owner");
+
+
+        // NEW: Listen for text changes in the search bar
+        etSearchChats.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Fire the search query into the pager adapter!
+                if (pagerAdapter != null) {
+                    pagerAdapter.filterAll(s.toString().trim());
+                }
             }
-        }).attach();
+        });
     }
 
     private void applyWindowInsets() {

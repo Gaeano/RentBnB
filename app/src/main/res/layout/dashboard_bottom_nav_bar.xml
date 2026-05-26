@@ -24,7 +24,7 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <FrameLayout
-            android:id="@+id/btnNavHome"
+            android:id="@+id/btnNavDashboard"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -33,16 +33,16 @@
             android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:id="@+id/navHome"
+                android:id="@+id/navDashboard"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_dashboard"
                 android:scaleType="center"
-                android:contentDescription="@string/nav_home"
+                android:contentDescription="Dashboard"
                 app:tint="@color/white" />
 
             <View
-                android:id="@+id/dotHome"
+                android:id="@+id/dotDashboard"
                 android:layout_width="5dp"
                 android:layout_height="5dp"
                 android:layout_gravity="bottom|center_horizontal"
@@ -52,7 +52,7 @@
         </FrameLayout>
 
         <FrameLayout
-            android:id="@+id/btnNavFavorites"
+            android:id="@+id/btnNavCalendar"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -61,17 +61,17 @@
             android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:id="@+id/navFavorites"
+                android:id="@+id/navCalendar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_listing"
+                android:src="@drawable/ic_calendar"
                 android:scaleType="center"
-                android:contentDescription="@string/nav_favorites"
+                android:contentDescription="Calendar"
                 android:alpha="0.7"
                 app:tint="@color/white" />
 
             <View
-                android:id="@+id/dotFavorites"
+                android:id="@+id/dotCalendar"
                 android:layout_width="5dp"
                 android:layout_height="5dp"
                 android:layout_gravity="bottom|center_horizontal"
@@ -80,14 +80,8 @@
                 android:visibility="gone" />
         </FrameLayout>
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.8"
-            android:visibility="invisible" />
-
         <FrameLayout
-            android:id="@+id/btnNavBookings"
+            android:id="@+id/btnNavListings"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -96,17 +90,51 @@
             android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:id="@+id/navChat"
+                android:id="@+id/navListings"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_chat"
+                android:src="@drawable/ic_listing"
                 android:scaleType="center"
-                android:contentDescription="@string/nav_bookings"
+                android:contentDescription="Calendar"
                 android:alpha="0.7"
                 app:tint="@color/white" />
 
             <View
-                android:id="@+id/dotChat"
+                android:id="@+id/dotListings"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/nav_dot_indicator"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnNavInbox"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+
+                <ImageView
+                    android:id="@+id/navInbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_chat"
+                    android:alpha="0.7"
+                    app:tint="@color/white" />
+
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/dotInbox"
                 android:layout_width="5dp"
                 android:layout_height="5dp"
                 android:layout_gravity="bottom|center_horizontal"
@@ -130,7 +158,7 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_profile"
                 android:scaleType="center"
-                android:contentDescription="@string/nav_profile"
+                android:contentDescription="Profile"
                 android:alpha="0.7"
                 app:tint="@color/white" />
 
@@ -144,28 +172,5 @@
                 android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/navFab"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:elevation="8dp"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/fab_inner_bg"
-            android:src="@drawable/ic_lease"
-            android:scaleType="centerInside"
-            android:padding="10dp"
-            app:tint="@color/teal_primary" />
-
-    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

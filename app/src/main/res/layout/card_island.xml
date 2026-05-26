@@ -29,16 +29,31 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:gravity="center"
+        android:gravity="start"
         android:padding="24dp">
+
+        <TextView
+            android:id="@+id/tvRentalsIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RENTALS IN"
+            android:textColor="#CCFFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="@font/jost_bold"
+            android:letterSpacing="0.1"
+            android:shadowColor="#66000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="3" />
 
         <TextView
             android:id="@+id/islandName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="-4dp"
             android:text="ISLAND NAME"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
+            android:textSize="28sp"
             android:textStyle="bold"
             android:fontFamily="@font/jost_bold"
             android:textAllCaps="true"
@@ -52,7 +67,7 @@
             android:id="@+id/islandDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:text="Description goes here..."
             android:textColor="#E0FFFFFF"
             android:textSize="13sp"
@@ -62,21 +77,6 @@
             android:shadowDy="1"
             android:shadowRadius="3" />
     </LinearLayout>
-
-
-        <TextView
-            android:id="@+id/islandTrendingChip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|start"
-            android:layout_margin="16dp"
-            android:background="@drawable/bg_trending_chip"
-            android:text="Trending"
-            android:textColor="@android:color/white"
-            android:textSize="15sp"
-            android:fontFamily="@font/jost_bold"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="4dp" />
 
         <FrameLayout
             android:id="@+id/btnFavorite"

@@ -23,7 +23,6 @@ import com.google.gson.JsonObject;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
-import com.usc.rentbnb.models.FAQ;
 import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.viewmodels.AddListingViewModel;
 import com.usc.rentbnb.viewmodels.ListingDraft;
@@ -210,6 +209,18 @@ public class ListingSummaryFragment extends Fragment {
                                      AtomicInteger completedDrafts,
                                      AtomicInteger failedDrafts,
                                      int totalDrafts) {
+
+        CreateListingRequest.Penalties penalties = null;
+        boolean hasPenalty = draft.penaltyAmount > 0
+                && draft.penaltyUnit != null
+                && !draft.penaltyUnit.isEmpty();
+        if (hasPenalty) {
+            penalties = new CreateListingRequest.Penalties(
+                    draft.penaltyUnit,
+                    draft.penaltyAmount
+            );
+        }
+
         CreateListingRequest request = new CreateListingRequest(
                 draft.productName,
                 draft.description,
@@ -220,7 +231,7 @@ public class ListingSummaryFragment extends Fragment {
                 draft.paymentMethods,
                 draft.suggestedActivities,
                 imageUrls,
-                viewModel.faqs
+                penalties
         );
 
         ApiClient.getApiService().createListing(request)

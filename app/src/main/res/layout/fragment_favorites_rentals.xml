@@ -25,8 +25,8 @@
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/empty_animation"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
             app:lottie_rawRes="@raw/no_data_found"
             app:lottie_autoPlay="true"
             app:lottie_loop="true" />
@@ -41,11 +41,12 @@
             android:textColor="@color/text_grey" />
 
         <TextView
+            android:id="@+id/find_fave_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/add_favorites"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:textColor="@color/text_grey" />
     </LinearLayout>
 

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvNewBookingPill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/chip_background_teal"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:text="● NEW BOOKING REQUEST"
+            android:textColor="#006970"
+            android:textSize="10sp"
+            android:fontFamily="@font/jost_bold"
+            android:letterSpacing="0.04" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="14dp"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivRenterAvatar"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/CircleImageView"
+                android:background="#E0E0E0" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/tvRenterName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Maya Chen"
+                    android:textColor="#1D1D1D"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/jost_bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="wants to rent your"
+                    android:textColor="#757575"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvRentedItemName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="DeWalt Power Drill"
+                    android:textColor="#1D1D1D"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/jost_bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="#F4F5F7"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_calendar"
+                    app:tint="#757575" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dates" android:textColor="#757575" android:textSize="11sp" />
+                    <TextView android:id="@+id/tvBookingDates" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="May 12 – 14" android:textColor="#1D1D1D" android:textSize="13sp" android:fontFamily="@font/jost_bold" android:layout_marginTop="2dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View android:layout_width="1dp" android:layout_height="match_parent" android:background="#E0E0E0" android:layout_marginHorizontal="8dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView android:layout_width="16dp" android:layout_height="16dp" android:text="$" android:textColor="#757575" android:textAlignment="center"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Your payout" android:textColor="#757575" android:textSize="11sp" />
+                    <TextView android:id="@+id/tvBookingPayout" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="$84.00" android:textColor="#1D1D1D" android:textSize="13sp" android:fontFamily="@font/jost_bold" android:layout_marginTop="2dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnDecline"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Decline"
+                android:textColor="@color/teal_primary"
+                android:textSize="14sp"
+                android:fontFamily="@font/jost_bold"
+                android:gravity="center"
+                android:background="@drawable/bg_btn_outline" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btnAccept"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardBackgroundColor="@color/teal_primary"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="Accept" android:textColor="#FFFFFF" android:textSize="14sp" android:fontFamily="@font/jost_bold" />
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

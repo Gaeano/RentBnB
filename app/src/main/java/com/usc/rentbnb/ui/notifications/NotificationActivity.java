@@ -152,7 +152,29 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> serverList = response.body().getData();
                     if (serverList != null) {
-                        notificationList.addAll(serverList);
+                        for (Notification n : serverList) {
+                            // Only add if it has valid content for its type
+                            if (n.getType() == null) {
+                                if (n.getMessage() != null && !n.getMessage().isEmpty()) {
+                                    notificationList.add(n);
+                                }
+                            } else {
+                                switch (n.getType()) {
+                                    case "rent":
+                                    case "listing":
+                                        if (n.getProductName() != null) notificationList.add(n);
+                                        break;
+                                    case "chat":
+                                        if (n.getUsername() != null) notificationList.add(n);
+                                        break;
+                                    default:
+                                        if (n.getMessage() != null && !n.getMessage().isEmpty()) {
+                                            notificationList.add(n);
+                                        }
+                                        break;
+                                }
+                            }
+                        }
                     }
                     
                     fetchNewListingsAsNotifications();
@@ -258,6 +280,7 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
         // Navigation Logic
         if ("rent".equals(type) || "listing".equals(type)) {
             Intent intent = new Intent(this, ListingsDetailsActivity.class);
+            intent.putExtra("listing_id", notification.getListingId());
             intent.putExtra("product_name", notification.getProductName() != null ? notification.getProductName() : "Product");
             intent.putExtra("category", notification.getProductCategory() != null ? notification.getProductCategory() : "Category");
             intent.putExtra("price", notification.getPrice() != null ? notification.getPrice() : "0");

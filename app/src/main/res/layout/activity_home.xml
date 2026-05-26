@@ -216,12 +216,12 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/chip_near_you"
+                        android:id="@+id/chip_wheels"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/chip_background"
-                        android:text="Near You"
+                        android:text="Wheels"
                         android:textColor="@color/teal_primary"
                         android:textSize="16sp"
                         android:fontFamily="@font/jost_bold"
@@ -229,16 +229,16 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:drawablePadding="4dp"
-                        app:drawableStartCompat="@drawable/ic_near"
+                        app:drawableStartCompat="@drawable/ic_wheels"
                         android:drawableTint="@color/teal_primary"/>
 
                     <TextView
-                        android:id="@+id/chip_trending"
+                        android:id="@+id/chip_water"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/chip_background"
-                        android:text="Trending"
+                        android:text="Water"
                         android:textColor="@color/teal_primary"
                         android:textSize="16sp"
                         android:fontFamily="@font/jost_bold"
@@ -246,16 +246,16 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:drawablePadding="4dp"
-                        app:drawableStartCompat="@drawable/ic_trending"
+                        app:drawableStartCompat="@drawable/ic_water"
                         android:drawableTint="@color/teal_primary"/>
 
                     <TextView
-                        android:id="@+id/chip_new"
+                        android:id="@+id/chip_outdoors"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/chip_background"
-                        android:text="New"
+                        android:text="Outdoors"
                         android:textColor="@color/teal_primary"
                         android:textSize="16sp"
                         android:fontFamily="@font/jost_bold"
@@ -263,16 +263,16 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:drawablePadding="4dp"
-                        app:drawableStartCompat="@drawable/ic_new"
+                        app:drawableStartCompat="@drawable/ic_outdoors"
                         android:drawableTint="@color/teal_primary"/>
 
                     <TextView
-                        android:id="@+id/chip_top_rated"
+                        android:id="@+id/chip_electronics"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/chip_background"
-                        android:text="Top Rated"
+                        android:text="Electronics"
                         android:textColor="@color/teal_primary"
                         android:textSize="16sp"
                         android:fontFamily="@font/jost_bold"
@@ -280,7 +280,24 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:drawablePadding="4dp"
-                        app:drawableStartCompat="@drawable/ic_top_rated"
+                        app:drawableStartCompat="@drawable/ic_electronics"
+                        android:drawableTint="@color/teal_primary"/>
+
+                    <TextView
+                        android:id="@+id/chip_beach_leisure"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_background"
+                        android:text="Beach Leisure"
+                        android:textColor="@color/teal_primary"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/jost_bold"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:drawablePadding="4dp"
+                        app:drawableStartCompat="@drawable/ic_beach_leisure"
                         android:drawableTint="@color/teal_primary"/>
 
                 </LinearLayout>

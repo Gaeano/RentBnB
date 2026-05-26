@@ -230,12 +230,13 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupFilterChips() {
-        TextView chipNearYou = findViewById(R.id.chip_near_you);
-        TextView chipTrending = findViewById(R.id.chip_trending);
-        TextView chipNew = findViewById(R.id.chip_new);
-        TextView chipTopRated = findViewById(R.id.chip_top_rated);
+        TextView chipWheels = findViewById(R.id.chip_wheels);
+        TextView chipWater = findViewById(R.id.chip_water);
+        TextView chipOutdoors = findViewById(R.id.chip_outdoors);
+        TextView chipElectronics = findViewById(R.id.chip_electronics);
+        TextView chipBeachLeisure = findViewById(R.id.chip_beach_leisure);
 
-        filterChips = new TextView[]{chipNearYou, chipTrending, chipNew, chipTopRated};
+        filterChips = new TextView[]{chipWheels, chipWater, chipOutdoors, chipElectronics, chipBeachLeisure};
 
         for (TextView chip : filterChips) {
             if (chip != null) {

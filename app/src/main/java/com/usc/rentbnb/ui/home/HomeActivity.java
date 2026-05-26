@@ -447,59 +447,80 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void checkUnreadNotifications() {
+        Log.d("HomeActivity", "Checking unread notifications...");
         ApiClient.getApiService().getNotifications().enqueue(new Callback<NotificationResponse>() {
             @Override
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
-                hasUnreadNotifs = false;
+                boolean foundUnread = false;
+                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<Notification> notifications = response.body().getData();
                     if (notifications != null) {
+                        Log.d("HomeActivity", "Found " + notifications.size() + " total notifications from server.");
                         for (Notification n : notifications) {
-                            if (!n.isRead()) {
-                                hasUnreadNotifs = true;
+                            if (!readIds.contains(n.getId())) {
+                                foundUnread = true;
                                 break;
                             }
                         }
                     }
-                }
 
-                if (!hasUnreadNotifs) {
-                    checkNewListingsForBadge();
-                } else {
-                    updateNotificationBadge();
+                    // --- MOCK DATA CHECK (For testing UI red dot) ---
+                    if (!foundUnread) {
+                        if (!readIds.contains("mock_rent_1") || !readIds.contains("mock_chat_1")) {
+                            foundUnread = true;
+                        }
+                    }
                 }
+else {
+                    Log.d("HomeActivity", "Notification API response failed or empty. Code: " + response.code());
+                }
+                hasUnreadNotifs = foundUnread;
+                updateNotificationBadge();
+                checkNewListingsForBadge();
             }
 
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
-                hasUnreadNotifs = false;
+                Log.e("HomeActivity", "Failed to fetch notifications: " + t.getMessage());
                 checkNewListingsForBadge();
             }
         });
     }
 
     private void checkNewListingsForBadge() {
+        Log.d("HomeActivity", "Checking for new listings badge...");
         ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
             @Override
             public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
-                hasNewListings = false;
+                boolean foundNew = false;
+                android.content.SharedPreferences prefs = getSharedPreferences("RentBnB_Prefs", MODE_PRIVATE);
+                java.util.Set<String> readIds = prefs.getStringSet("read_notification_ids", new java.util.HashSet<>());
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<Listing> listings = response.body().getData();
                     if (listings != null) {
+                        Log.d("HomeActivity", "Found " + listings.size() + " total listings from server.");
                         for (Listing l : listings) {
-                            if (l.isNew()) {
-                                hasNewListings = true;
+                            if (l.isNew() && !readIds.contains(l.getId())) {
+                                Log.d("HomeActivity", "New unread listing found: " + l.getId());
+                                foundNew = true;
                                 break;
                             }
                         }
                     }
+                } else {
+                    Log.d("HomeActivity", "Listings API response failed or empty. Code: " + response.code());
                 }
+                hasNewListings = foundNew;
                 updateNotificationBadge();
             }
 
             @Override
             public void onFailure(Call<ListingResponse> call, Throwable t) {
-                hasNewListings = false;
+                Log.e("HomeActivity", "Failed to fetch listings for badge: " + t.getMessage());
                 updateNotificationBadge();
             }
         });
@@ -546,7 +567,18 @@ public class HomeActivity extends AppCompatActivity {
         View badge = findViewById(R.id.notification_badge);
         if (badge != null) {
             boolean visible = hasUnreadNotifs || hasUnreadChats || hasNewListings;
+            Log.d("HomeActivity", "Updating badge visibility. UnreadNotifs: " + hasUnreadNotifs + 
+                    ", UnreadChats: " + hasUnreadChats + ", NewListings: " + hasNewListings + 
+                    " -> Visible: " + visible);
             badge.setVisibility(visible ? View.VISIBLE : View.GONE);
+            
+            // Force a layout pass if visible to ensure it's not hidden
+            if (visible) {
+                badge.bringToFront();
+                if (badge.getParent() != null) {
+                    ((View) badge.getParent()).invalidate();
+                }
+            }
         }
     }
 

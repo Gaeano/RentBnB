@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.faltenreich.skeletonlayout.Skeleton;
 import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
@@ -52,6 +53,8 @@ public class RentalsFragment extends Fragment {
 
     private List<Listing> currentAllListings = new ArrayList<>();
     private List<String> currentFavoriteIds = new ArrayList<>();
+    private int allRentalsLimit = 10;
+    private MaterialButton btnSeeMoreAllRentals;
 
     private FirebaseUser currentUser;
     private SmartRefreshLayout swipeRefreshLayout;
@@ -108,6 +111,12 @@ public class RentalsFragment extends Fragment {
         adapterAll = new ListingAdapter(favListener);
         rvAll.setAdapter(adapterAll);
 
+        btnSeeMoreAllRentals = view.findViewById(R.id.btn_see_more_all_rentals);
+        btnSeeMoreAllRentals.setOnClickListener(v -> {
+            allRentalsLimit += 10;
+            updateAllRentalsView();
+        });
+
         skeletonNear = SkeletonLayoutUtils.applySkeleton(rvNear, R.layout.rentable_item_card, 2);
         skeletonNear.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
         skeletonNear.setMaskCornerRadius(16);
@@ -131,10 +140,29 @@ public class RentalsFragment extends Fragment {
 
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(layout -> {
+                allRentalsLimit = 10;
                 skeletonNear.showSkeleton();
                 skeletonAll.showSkeleton();
                 homeViewModel.fetchListings();
             });
+        }
+    }
+
+    private void updateAllRentalsView() {
+        if (currentAllListings == null || currentAllListings.isEmpty()) {
+            adapterAll.submitData(new ArrayList<>(), currentFavoriteIds);
+            btnSeeMoreAllRentals.setVisibility(View.GONE);
+            return;
+        }
+
+        int limit = Math.min(allRentalsLimit, currentAllListings.size());
+        List<Listing> subList = new ArrayList<>(currentAllListings.subList(0, limit));
+        adapterAll.submitData(subList, currentFavoriteIds);
+
+        if (limit >= currentAllListings.size()) {
+            btnSeeMoreAllRentals.setVisibility(View.GONE);
+        } else {
+            btnSeeMoreAllRentals.setVisibility(View.VISIBLE);
         }
     }
 
@@ -158,7 +186,7 @@ public class RentalsFragment extends Fragment {
                 }
 
                 adapterNear.submitData(currentAllListings, currentFavoriteIds);
-                adapterAll.submitData(currentAllListings, currentFavoriteIds);
+                updateAllRentalsView();
 
                 distributeData(currentAllListings);
             }
@@ -173,7 +201,7 @@ public class RentalsFragment extends Fragment {
                 }
 
                 adapterNear.submitData(currentAllListings, currentFavoriteIds);
-                adapterAll.submitData(currentAllListings, currentFavoriteIds);
+                updateAllRentalsView();
 
                 if (adapterPopular != null) distributeData(currentAllListings);
             }

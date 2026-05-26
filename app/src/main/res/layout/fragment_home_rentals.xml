@@ -161,6 +161,18 @@
                     android:paddingHorizontal="16dp"
                     android:clipToPadding="false"
                     android:nestedScrollingEnabled="false" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_see_more_all_rentals"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    android:text="See More"
+                    android:textColor="@color/teal_primary"
+                    app:strokeColor="@color/teal_primary"
+                    android:visibility="gone" />
             </LinearLayout>
 
         </LinearLayout>

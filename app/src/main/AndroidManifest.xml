@@ -133,6 +133,12 @@
         <activity
             android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.review.AllReviewsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.review.ReviewBookingActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

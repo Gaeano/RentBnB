@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/tvInboxHeader"
@@ -15,9 +15,7 @@
         android:text="Inbox"
         android:textColor="@color/teal_primary"
         android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textStyle="bold" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/search_bar_container"
@@ -25,52 +23,88 @@
         android:layout_height="56dp"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
-        app:cardCornerRadius="28dp"
-        app:cardElevation="0dp"
         app:cardBackgroundColor="#EEEEEE"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/favorites_title">
+        app:cardCornerRadius="28dp"
+        app:cardElevation="0dp">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="6dp">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
-            <LinearLayout
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_search"
+                app:tint="@color/black" />
+
+            <EditText
+                android:id="@+id/etSearchChats"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="16dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_search"
-                    app:tint="@color/black" />
-
-                <EditText
-                    android:id="@+id/etSearchChats"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@null"
-                    android:hint="Search users or messages..."
-                    android:textColorHint="@color/text_grey"
-                    android:textSize="16sp"
-                    android:inputType="text"
-                    android:fontFamily="@font/inconsolata" />
-            </LinearLayout>
-
-        </RelativeLayout>
+                android:layout_marginStart="12dp"
+                android:background="@null"
+                android:hint="Search"
+                android:inputType="text"
+                android:textColorHint="#888888"
+                android:textSize="16sp" />
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPagerChats"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="16dp">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewInbox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible" />
+
+        <LinearLayout
+            android:id="@+id/layoutEmptyState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottieEmptyAnimation"
+                android:layout_width="260dp"
+                android:layout_height="260dp"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/no_message" />
+
+            <TextView
+                android:id="@+id/empty_state_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="It's quiet here..."
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:textColor="#9E9E9E" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Start a new conversation by "
+                android:textColor="#888888"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="tapping the 'Chat' on a listing."
+                android:textColor="#888888"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

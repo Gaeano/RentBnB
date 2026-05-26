@@ -119,7 +119,7 @@
             android:name=".ui.onboarding.OnboardingActivity"
             android:exported="false" />
         <activity
-            android:name=".islands.IslandDetailsActivity"
+            android:name=".ui.islands.IslandDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".ui.history.HistoryActivity"

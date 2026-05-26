@@ -73,6 +73,7 @@ dependencies {
 
     // image
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.github.bumptech.glide:recyclerview-integration:4.16.0")
 
     // SmartRefreshLayout
     implementation("io.github.scwang90:refresh-layout-kernel:2.1.1")

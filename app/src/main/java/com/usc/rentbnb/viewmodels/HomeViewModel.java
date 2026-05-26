@@ -28,6 +28,8 @@ public class HomeViewModel extends ViewModel {
     private List<Island> allIslands = new ArrayList<>();
     private List<Listing> allListings = new ArrayList<>();
 
+    private static final double DEFAULT_RADIUS_KM = 250.0;
+
     public LiveData<List<Island>> getIslands() {
         return islands;
     }
@@ -39,22 +41,49 @@ public class HomeViewModel extends ViewModel {
     }
 
     public void fetchIslands() {
-        ApiClient.getApiService().getIslands().enqueue(new Callback<IslandResponse>() {
-            @Override
-            public void onResponse(Call<IslandResponse> call, Response<IslandResponse> response) {
-                if (response.isSuccessful() && response.body() != null ) {
-                    allIslands = response.body().getData();
-                    islands.setValue(allIslands);
-                } else {
-                    errorMessage.setValue("Server Error fetching Islands: " + response.code());
-                }
-            }
+        ApiClient.getApiService().getIslands(null, null, null)
+                .enqueue(new Callback<IslandResponse>() {
+                    @Override
+                    public void onResponse(Call<IslandResponse> call, Response<IslandResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            allIslands = response.body().getData();
+                            islands.setValue(allIslands);
+                        } else {
+                            errorMessage.setValue("Server error fetching islands: " + response.code());
+                        }
+                    }
 
-            @Override
-            public void onFailure(Call<IslandResponse> call, Throwable t) {
-                errorMessage.setValue("Network Error: " + t.getMessage());
-            }
-        });
+                    @Override
+                    public void onFailure(Call<IslandResponse> call, Throwable t) {
+                        errorMessage.setValue("Network error: " + t.getMessage());
+                    }
+                });
+    }
+
+    public void fetchNearbyIslands(double lat, double lon) {
+        fetchNearbyIslands(lat, lon, DEFAULT_RADIUS_KM);
+    }
+
+    public void fetchNearbyIslands(double lat, double lon, double radiusKm) {
+        ApiClient.getApiService().getIslands(lat, lon, radiusKm)
+                .enqueue(new Callback<IslandResponse>() {
+                    @Override
+                    public void onResponse(Call<IslandResponse> call, Response<IslandResponse> response) {
+                        if (response.isSuccessful() && response.body() != null
+                                && response.body().getData() != null) {
+                            allIslands = response.body().getData();
+                            // Directly pass the backend's data to the UI!
+                            islands.setValue(allIslands);
+                        } else {
+                            fetchIslands();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<IslandResponse> call, Throwable t) {
+                        fetchIslands();
+                    }
+                });
     }
 
     public void fetchListings() {

@@ -61,6 +61,14 @@ public interface ApiService {
     @PUT("auth/update")
     Call<AuthResponse> updateProfile(@Body RegisterRequest updatedData);
 
+    // islands
+    @GET("islands")
+    Call<IslandResponse> getIslands(
+            @Query("lat")    Double lat,
+            @Query("lon")    Double lon,
+            @Query("radius") Double radiusKm
+    );
+
     // listings
     @POST("listings")
     Call<CreateListingResponse> createListing(@Body CreateListingRequest createListingRequest);

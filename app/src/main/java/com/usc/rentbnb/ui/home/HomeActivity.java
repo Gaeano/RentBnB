@@ -29,7 +29,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.usc.rentbnb.repositories.ChatRepository;
@@ -74,6 +78,7 @@ public class HomeActivity extends AppCompatActivity {
     private NavigationHelper navigationHelper;
 
     private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
     private FilterCriteria lastCriteria = null;
     private ListenerRegistration chatListener;
 
@@ -381,38 +386,85 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
 
+        // Try getting last known location first
         fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
             if (location != null) {
-                userLat = location.getLatitude();
-                userLon = location.getLongitude();
-                fetchWeather(userLat, userLon);
-
-                try {
-                    Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-                    List<Address> addresses = geocoder.getFromLocation(userLat, userLon, 1);
-
-                    if (addresses != null && !addresses.isEmpty()) {
-                        userCity = addresses.get(0).getLocality();
-                        Log.d("LOCATION", "User is in: " + userCity);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.homeFeedContainer);
-                if (currentFragment instanceof RentalsFragment) {
-                    ((RentalsFragment) currentFragment).onLocationUpdated(userCity, userLat, userLon);
-                } else if (currentFragment instanceof IslandsFragment) {
-                    ((IslandsFragment) currentFragment).updateLocationTitle(userCity);
-                }
-
-                fetchNearbyIslands(userLat, userLon);
-            } else {
-                fetchWeather(userLat, userLon);
+                updateLocationData(location);
             }
-        }).addOnFailureListener(e -> {
-            fetchWeather(userLat, userLon);
         });
+
+        // Request periodic updates to catch location changes immediately
+        startLocationUpdates();
+    }
+
+    private void startLocationUpdates() {
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+                .setMinUpdateIntervalMillis(5000)
+                .build();
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                for (android.location.Location location : locationResult.getLocations()) {
+                    if (location != null) {
+                        updateLocationData(location);
+                    }
+                }
+            }
+        };
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+        }
+    }
+
+    private void updateLocationData(android.location.Location location) {
+        double newLat = location.getLatitude();
+        double newLon = location.getLongitude();
+
+        // 1. Check for significant movement (e.g., > 500 meters) before refreshing
+        float[] results = new float[1];
+        android.location.Location.distanceBetween(userLat, userLon, newLat, newLon, results);
+        float distanceMoved = results[0];
+
+        // Only block if we aren't at the default location (Cebu) or if movement is tiny
+        // This allows the initial update from Mountain View -> Cebu to happen immediately.
+        if (userLat != 10.3157 && distanceMoved < 500) {
+            return;
+        }
+
+        userLat = newLat;
+        userLon = newLon;
+
+        Log.d("LOCATION", "Significant movement detected (" + distanceMoved + "m). Updating data...");
+        fetchWeather(userLat, userLon);
+
+        try {
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            List<Address> addresses = geocoder.getFromLocation(userLat, userLon, 1);
+
+            if (addresses != null && !addresses.isEmpty()) {
+                String newCity = addresses.get(0).getLocality();
+                if (newCity == null) newCity = addresses.get(0).getSubAdminArea();
+                
+                // Update city UI
+                if (newCity != null) {
+                    userCity = newCity;
+                    Log.d("LOCATION", "User is in: " + userCity);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.homeFeedContainer);
+        if (currentFragment instanceof RentalsFragment) {
+            ((RentalsFragment) currentFragment).onLocationUpdated(userCity, userLat, userLon);
+        } else if (currentFragment instanceof IslandsFragment) {
+            ((IslandsFragment) currentFragment).updateLocationTitle(userCity);
+        }
+
+        fetchNearbyIslands(userLat, userLon);
     }
 
     private void requestNotificationPermission() {
@@ -432,18 +484,14 @@ public class HomeActivity extends AppCompatActivity {
             } else {
                 Log.d("LOCATION", "Permission denied, defaulting to Cebu");
                 fetchWeather(10.3157, 123.8854);
+                fetchNearbyIslands(10.3157, 123.8854);
             }
         }
     }
 
-    private void fetchNearbyIslands(double lat, double lng) {
-        // TODO: pass 'lat' and 'lng' to backend to calculate distance puhon
-        // ApiClient.getApiService().getNearbyIslands(lat, lng)...
-
-        Log.d("DATA", "Preparing to fetch islands near " + lat + ", " + lng);
-
-        // fornow because db only has 6 islands, just fetch ALL islands
-        homeViewModel.fetchIslands();
+    private void fetchNearbyIslands(double lat, double lon) {
+        Log.d("LOCATION", "Fetching islands near " + lat + ", " + lon);
+        homeViewModel.fetchNearbyIslands(lat, lon);
     }
 
     private void checkUnreadNotifications() {
@@ -516,6 +564,9 @@ public class HomeActivity extends AppCompatActivity {
         super.onDestroy();
         if (chatListener != null) {
             chatListener.remove();
+        }
+        if (fusedLocationClient != null && locationCallback != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
         }
     }
 

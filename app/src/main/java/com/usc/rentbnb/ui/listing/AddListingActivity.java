@@ -81,7 +81,7 @@ public class AddListingActivity extends AppCompatActivity {
     }
 
     private void fetchDefaultFaqs() {
-        ApiClient.getApiService().getDefaultFaqs().enqueue(new Callback<List<FAQ>>() {
+        ApiClient.getApiService().getMyFaqs().enqueue(new Callback<List<FAQ>>() {
             @Override
             public void onResponse(@NonNull Call<List<FAQ>> call, @NonNull Response<List<FAQ>> response) {
                 if (response.isSuccessful() && response.body() != null) {

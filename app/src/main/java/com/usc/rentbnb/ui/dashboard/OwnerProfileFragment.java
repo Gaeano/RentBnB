@@ -25,6 +25,8 @@ import com.usc.rentbnb.R;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.ui.auth.LoginActivity;
 import com.usc.rentbnb.ui.home.HomeActivity;
+import com.usc.rentbnb.ui.profile.ManageFaqsActivity;
+import com.usc.rentbnb.ui.profile.PayoutSettingsActivity;
 import com.usc.rentbnb.ui.profile.ProfileDetailsActivity;
 import com.usc.rentbnb.viewmodels.AuthViewModel;
 import com.usc.rentbnb.viewmodels.UserProfileViewModel;
@@ -95,7 +97,14 @@ public class OwnerProfileFragment extends Fragment {
         });
 
         rowPayoutMethod.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Open Payout Settings", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(requireActivity(), PayoutSettingsActivity.class);
+            startActivity(intent);
+        });
+
+        View rowManageFaqs = view.findViewById(R.id.rowManageFaqs);
+        rowManageFaqs.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), ManageFaqsActivity.class);
+            startActivity(intent);
         });
 
         if (switchPushNotifs != null) {
@@ -106,7 +115,8 @@ public class OwnerProfileFragment extends Fragment {
         }
 
         rowHelpCenter.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Open Inquilino Help Center", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(requireActivity(), com.usc.rentbnb.ui.help.HelpCenterActivity.class);
+            startActivity(intent);
         });
 
         rowSignOut.setOnClickListener(v -> {

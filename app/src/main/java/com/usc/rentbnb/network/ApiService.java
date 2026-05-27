@@ -8,11 +8,14 @@ import com.usc.rentbnb.models.ConfirmReturnResponse;
 import com.usc.rentbnb.models.CreateListingRequest;
 import com.usc.rentbnb.models.CreateListingResponse;
 import com.usc.rentbnb.models.EarningsResponse;
+import com.usc.rentbnb.models.HelpRequest;
+import com.usc.rentbnb.models.HelpResponse;
 import com.usc.rentbnb.models.InquilinoOpeningRequest;
 import com.usc.rentbnb.models.InquilinoReplyRequest;
 import com.usc.rentbnb.models.InquilinoResponse;
 import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.models.IslandResponse;
+import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.models.FAQ;
 import com.usc.rentbnb.models.Listing;
 import com.usc.rentbnb.models.ListingResponse;
@@ -62,6 +65,9 @@ public interface ApiService {
 
     @PUT("auth/update")
     Call<AuthResponse> updateProfile(@Body RegisterRequest updatedData);
+
+    @PUT("auth/payout-methods")
+    Call<ResponseBody> updatePayoutMethods(@Body User.PayoutMethods payoutMethods);
 
     // islands
     @GET("islands")
@@ -209,15 +215,19 @@ public interface ApiService {
     );
 
     // FAQs
-    @GET("faqs/default")
-    Call<List<FAQ>> getDefaultFaqs();
+    @GET("auth/faqs")
+    Call<List<FAQ>> getMyFaqs();
 
-    @POST("faqs/default")
-    Call<FAQ> addDefaultFaq(@Body FAQ faq);
+    @POST("auth/faqs")
+    Call<FAQ> addMyFaq(@Body FAQ faq);
 
-    @PUT("faqs/default/{id}")
-    Call<FAQ> updateDefaultFaq(@Path("id") String id, @Body FAQ faq);
+    @PUT("auth/faqs/{id}")
+    Call<FAQ> updateMyFaq(@Path("id") String id, @Body FAQ faq);
 
-    @DELETE("faqs/default/{id}")
-    Call<ResponseBody> deleteDefaultFaq(@Path("id") String id);
+    @DELETE("auth/faqs/{id}")
+    Call<ResponseBody> deleteMyFaq(@Path("id") String id);
+
+    // help
+    @POST("chat/help")
+    Call<HelpResponse> getHelpAnswer(@Body HelpRequest request);
 }

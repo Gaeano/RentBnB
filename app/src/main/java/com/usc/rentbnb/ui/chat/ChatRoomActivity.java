@@ -66,11 +66,12 @@ public class ChatRoomActivity extends AppCompatActivity {
 
     private String chatRoomId, listingId, listingTitle, ownerId, renterId, currentUserId, currentMode;
     private boolean isCurrentUserRenter;
-    private String ownerDisplayName = "Owner";
+    private String otherParticipantName = "User";
 
 
     private boolean openingMessageSent = false;
     private boolean initialMessagesLoaded = false;
+    private boolean isRoomEmpty = false;
 
     private Timestamp lastMessageTimestamp;
 
@@ -87,7 +88,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         setupWindowInsets();
         setupListeners();
         fetchListingData();
-        fetchOwnerName();
+        fetchOtherParticipantName();
         startListeningToMessages();
         markMessagesAsRead();
     }
@@ -244,6 +245,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         if (!ChatRoom.MODE_AI.equals(currentMode)) return;
         if (listing == null) return;
         if (!initialMessagesLoaded) return;
+        if (!isRoomEmpty) return;
 
         openingMessageSent = true;
         setTypingState(true, "Inquilino is generating");
@@ -287,7 +289,8 @@ public class ChatRoomActivity extends AppCompatActivity {
                 // First snapshot received — check if this is a new room
                 if (!initialMessagesLoaded) {
                     initialMessagesLoaded = true;
-                    if (messages.isEmpty()) {
+                    isRoomEmpty = messages.isEmpty();
+                    if (isRoomEmpty) {
                         maybeFireOpeningMessage();
                     }
                 }
@@ -339,18 +342,20 @@ public class ChatRoomActivity extends AppCompatActivity {
                 });
     }
 
-    private void fetchOwnerName() {
-        if (ownerId == null) return;
-        FirebaseFirestore.getInstance().collection("users").document(ownerId)
+    private void fetchOtherParticipantName() {
+        String otherUserId = isCurrentUserRenter ? ownerId : renterId;
+        if (otherUserId == null) return;
+        
+        FirebaseFirestore.getInstance().collection("users").document(otherUserId)
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (!doc.exists()) return;
                     String name = doc.getString("displayName");
                     if (name != null) {
-                        ownerDisplayName = name;
-                        chatAdapter.setOwnerName(ownerDisplayName);
+                        otherParticipantName = name;
+                        chatAdapter.setOtherParticipantName(otherParticipantName);
                         if (ChatRoom.MODE_OWNER.equals(currentMode)) {
-                            tvUserName.setText(ownerDisplayName);
+                            tvUserName.setText(otherParticipantName);
                         }
                     }
                 });
@@ -409,11 +414,11 @@ public class ChatRoomActivity extends AppCompatActivity {
                         ColorStateList.valueOf(ContextCompat.getColor(this, R.color.teal_primary)));
             }
         } else {
-            tvUserName.setText(ownerDisplayName);
-            tvUserStatus.setText(isCurrentUserRenter ? "Connected to Owner" : "You are the Owner");
+            tvUserName.setText(otherParticipantName);
+            tvUserStatus.setText(isCurrentUserRenter ? "Connected to Owner" : "Connected to Renter");
             tvUserStatus.setTextColor(ContextCompat.getColor(this, R.color.text_grey));
             etMessage.setHint(isCurrentUserRenter
-                    ? "Message " + ownerDisplayName + "..."
+                    ? "Message " + otherParticipantName + "..."
                     : "Reply to renter...");
             if (isCurrentUserRenter) {
                 fabToggleMode.setText("Switch to Inquilino");

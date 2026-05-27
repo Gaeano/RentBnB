@@ -3,7 +3,8 @@ package com.usc.rentbnb.models;
 import com.google.gson.annotations.SerializedName;
 
 public class FAQ {
-    @SerializedName("_id")
+    // FIX: Change "_id" to "id" to match the backend response
+    @SerializedName("id")
     private String id;
     private String question;
     private String answer;

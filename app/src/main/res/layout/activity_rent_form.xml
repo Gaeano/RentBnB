@@ -279,43 +279,36 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="32dp"
+            android:padding="24dp"
             android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Scan to Pay via QRPH"
+                android:text="Scan to Pay via QR"
                 android:textColor="@color/text_dark"
-                android:textSize="20sp"
+                android:textSize="22sp"
                 android:fontFamily="@font/jost_bold"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="4dp" />
 
             <TextView
                 android:id="@+id/tvQrTotal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/teal_primary"
-                android:textSize="24sp"
+                android:textSize="26sp"
                 android:fontFamily="@font/jost_bold"
-                android:layout_marginBottom="32dp"
+                android:textStyle="bold"
+                android:layout_marginBottom="24dp"
                 tools:text="₱450.00" />
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="240dp"
-                android:layout_height="240dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:layout_marginBottom="48dp">
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="16dp"
-                    android:scaleType="centerCrop"
-                    android:src="@android:drawable/ic_menu_gallery" />
-            </androidx.cardview.widget.CardView>
+            <ImageView
+                android:layout_width="600dp"
+                android:layout_height="600dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/gcash_qr"
+                android:layout_marginBottom="24dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnConfirmQr"

@@ -302,7 +302,7 @@ public class RentForm extends AppCompatActivity {
                 if (paymentMode.contains("qr") || paymentMode.contains("gcash") || paymentMode.contains("paymaya") || paymentMode.contains("maya")) {
                     tvRentFormHeader.setText("QR Payment");
                     vfCheckout.setDisplayedChild(1);
-                } else if (paymentMode.contains("card") || paymentMode.contains("credit") || paymentMode.contains("visa") || paymentMode.contains("mastercard")) {
+                } else if (paymentMode.contains("paypal")) {
                     tvRentFormHeader.setText("Card Payment");
                     vfCheckout.setDisplayedChild(2);
                 } else {

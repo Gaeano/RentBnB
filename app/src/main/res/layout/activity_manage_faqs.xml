@@ -56,8 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:text="These FAQs will be automatically added to
-        your new listings and will help the Inquilino AI answer questions for you."
+        android:text="These FAQs will be automatically added to your new listings and will help the Inquilino AI answer questions for you."
         android:textColor="@color/text_grey"
         android:textSize="14sp"
         android:fontFamily="@font/inconsolata"

@@ -139,6 +139,15 @@
         <activity
             android:name=".ui.review.ReviewBookingActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.profile.ManageFaqsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.PayoutSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.help.HelpCenterActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -46,8 +46,17 @@ public class User {
 
     private String userType; // Use constants like "INDIVIDUAL" or "COMPANY"
     private CompanyDetails companyDetails; // Will be null for Individual users
+    private PayoutMethods payoutMethods;
 
     public User() {}
+
+    public PayoutMethods getPayoutMethods() {
+        return payoutMethods;
+    }
+
+    public void setPayoutMethods(PayoutMethods payoutMethods) {
+        this.payoutMethods = payoutMethods;
+    }
 
     // Existing getters and setters
     public String getUid() {
@@ -278,5 +287,41 @@ public class User {
         public void setRadius(String radius) {
             this.radius = radius;
         }
+    }
+
+    public static class PayoutMethods {
+        private GcashDetails gcash;
+        private PaypalDetails paypal;
+
+        public PayoutMethods() {}
+
+        public GcashDetails getGcash() { return gcash; }
+        public void setGcash(GcashDetails gcash) { this.gcash = gcash; }
+        public PaypalDetails getPaypal() { return paypal; }
+        public void setPaypal(PaypalDetails paypal) { this.paypal = paypal; }
+    }
+
+    public static class GcashDetails {
+        private String mobileNumber;
+
+        public GcashDetails() {}
+        public GcashDetails(String mobileNumber) { this.mobileNumber = mobileNumber; }
+        public String getMobileNumber() { return mobileNumber; }
+        public void setMobileNumber(String mobileNumber) { this.mobileNumber = mobileNumber; }
+    }
+
+    public static class PaypalDetails {
+        private String email;
+        private String accountHolderName;
+
+        public PaypalDetails() {}
+        public PaypalDetails(String email, String accountHolderName) {
+            this.email = email;
+            this.accountHolderName = accountHolderName;
+        }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getAccountHolderName() { return accountHolderName; }
+        public void setAccountHolderName(String accountHolderName) { this.accountHolderName = accountHolderName; }
     }
 }

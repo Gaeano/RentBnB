@@ -70,4 +70,24 @@ public class UserProfileViewModel extends ViewModel {
             }
         });
     }
+
+    public void updatePayoutMethods(User.PayoutMethods payoutMethods) {
+        isloading.setValue(true);
+        userProfileRepository.updatePayoutMethods(payoutMethods, new UserProfileCallback() {
+            @Override
+            public void onSuccess(User user) {
+                isloading.setValue(false);
+                if (user != null) {
+                    userLiveData.setValue(user);
+                    updateProfileSuccess.setValue(true);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                errorLiveData.setValue(errorMessage);
+                isloading.setValue(false);
+            }
+        });
+    }
 }

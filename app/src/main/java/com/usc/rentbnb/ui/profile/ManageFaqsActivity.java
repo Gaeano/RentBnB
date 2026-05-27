@@ -62,20 +62,21 @@ public class ManageFaqsActivity extends AppCompatActivity implements FaqAdapter.
     }
 
     private void fetchFaqs() {
-        ApiClient.getApiService().getDefaultFaqs().enqueue(new Callback<List<FAQ>>() {
+        ApiClient.getApiService().getMyFaqs().enqueue(new Callback<List<FAQ>>() {
             @Override
             public void onResponse(Call<List<FAQ>> call, Response<List<FAQ>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     faqList = response.body();
-                    updateUI();
                 } else {
-                    mockFaqs(); // Fallback for demo
+                    Toast.makeText(ManageFaqsActivity.this, "Failed to load FAQs", Toast.LENGTH_SHORT).show();
                 }
+                updateUI();
             }
 
             @Override
             public void onFailure(Call<List<FAQ>> call, Throwable t) {
-                mockFaqs(); // Fallback for demo
+                Toast.makeText(ManageFaqsActivity.this, "Network error. Please check connection.", Toast.LENGTH_SHORT).show();
+                updateUI();
             }
         });
     }
@@ -84,12 +85,6 @@ public class ManageFaqsActivity extends AppCompatActivity implements FaqAdapter.
         adapter = new FaqAdapter(faqList, this);
         rvFaqs.setLayoutManager(new LinearLayoutManager(this));
         rvFaqs.setAdapter(adapter);
-    }
-
-    private void mockFaqs() {
-        faqList.add(new FAQ("mock_1", "How do I contact you?", "You can message me through the app's chat feature."));
-        faqList.add(new FAQ("mock_2", "Is delivery available?", "Yes, I offer delivery for a small fee depending on the distance."));
-        updateUI();
     }
 
     private void updateUI() {
@@ -133,59 +128,67 @@ public class ManageFaqsActivity extends AppCompatActivity implements FaqAdapter.
                 return;
             }
 
+            // Disable button to prevent double-clicks while network is loading
+            btnSave.setEnabled(false);
+
             if (faq == null) {
-                // Add new
+                // Add new FAQ
                 FAQ newFaq = new FAQ(q, a);
-                ApiClient.getApiService().addDefaultFaq(newFaq).enqueue(new Callback<FAQ>() {
+                ApiClient.getApiService().addMyFaq(newFaq).enqueue(new Callback<FAQ>() {
                     @Override
                     public void onResponse(Call<FAQ> call, Response<FAQ> response) {
-                        if (response.isSuccessful()) {
-                            faqList.add(response.body());
+                        if (response.isSuccessful() && response.body() != null) {
+                            faqList.add(response.body()); // Body contains the new Firestore document ID
                             updateUI();
                             Toast.makeText(ManageFaqsActivity.this, "FAQ added", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
                         } else {
-                            // Local fallback for demo
-                            faqList.add(new FAQ("local_" + System.currentTimeMillis(), q, a));
-                            updateUI();
+                            // Extract the exact server error message
+                            String errorDetails = "Failed: " + response.code();
+                            try {
+                                if (response.errorBody() != null) {
+                                    errorDetails += " - " + response.errorBody().string();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            Toast.makeText(ManageFaqsActivity.this, errorDetails, Toast.LENGTH_LONG).show();
+                            btnSave.setEnabled(true);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<FAQ> call, Throwable t) {
-                        // Local fallback for demo
-                        faqList.add(new FAQ("local_" + System.currentTimeMillis(), q, a));
-                        updateUI();
-                        Toast.makeText(ManageFaqsActivity.this, "Network error - Saved locally", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ManageFaqsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                        btnSave.setEnabled(true);
                     }
                 });
             } else {
-                // Update existing
-                String oldQ = faq.getQuestion();
-                String oldA = faq.getAnswer();
-                faq.setQuestion(q);
-                faq.setAnswer(a);
-                
-                updateUI(); // Immediate local update
-
-                ApiClient.getApiService().updateDefaultFaq(faq.getId(), faq).enqueue(new Callback<FAQ>() {
+                // Update existing FAQ
+                FAQ updatedFaq = new FAQ(faq.getId(), q, a);
+                ApiClient.getApiService().updateMyFaq(faq.getId(), updatedFaq).enqueue(new Callback<FAQ>() {
                     @Override
                     public void onResponse(Call<FAQ> call, Response<FAQ> response) {
                         if (response.isSuccessful()) {
+                            // Only update local UI if server successfully updated it
+                            faq.setQuestion(q);
+                            faq.setAnswer(a);
+                            updateUI();
                             Toast.makeText(ManageFaqsActivity.this, "FAQ updated", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
                         } else {
-                            // Keep local changes but inform user
-                            Toast.makeText(ManageFaqsActivity.this, "Failed to sync update with server", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ManageFaqsActivity.this, "Failed to update FAQ", Toast.LENGTH_SHORT).show();
+                            btnSave.setEnabled(true);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<FAQ> call, Throwable t) {
-                        // Keep local changes but inform user
-                        Toast.makeText(ManageFaqsActivity.this, "Update saved locally (offline)", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ManageFaqsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                        btnSave.setEnabled(true);
                     }
                 });
             }
-            dialog.dismiss();
         });
 
         dialog.show();
@@ -200,21 +203,23 @@ public class ManageFaqsActivity extends AppCompatActivity implements FaqAdapter.
     public void onDeleteClick(FAQ faq) {
         new AlertDialog.Builder(this)
                 .setTitle("Delete FAQ")
-                .setMessage("Are you sure you want to delete this default FAQ?")
+                .setMessage("Are you sure you want to delete this FAQ?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    ApiClient.getApiService().deleteDefaultFaq(faq.getId()).enqueue(new Callback<ResponseBody>() {
+                    ApiClient.getApiService().deleteMyFaq(faq.getId()).enqueue(new Callback<ResponseBody>() {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                             if (response.isSuccessful()) {
                                 faqList.remove(faq);
                                 updateUI();
                                 Toast.makeText(ManageFaqsActivity.this, "FAQ deleted", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(ManageFaqsActivity.this, "Failed to delete FAQ", Toast.LENGTH_SHORT).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            Toast.makeText(ManageFaqsActivity.this, "Failed to delete FAQ", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ManageFaqsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
                         }
                     });
                 })

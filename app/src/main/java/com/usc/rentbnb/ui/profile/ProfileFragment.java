@@ -189,7 +189,8 @@ public class ProfileFragment extends Fragment {
         });
 
         menuHelpCenter.setOnClickListener(v -> {
-            Log.d("ProfileFragment", "Help Center button clicked");
+            Intent intent = new Intent(requireActivity(), com.usc.rentbnb.ui.help.HelpCenterActivity.class);
+            startActivity(intent);
         });
 
         menuFavorite.setOnClickListener(v -> {

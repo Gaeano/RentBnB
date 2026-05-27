@@ -13,6 +13,7 @@ import com.usc.rentbnb.models.Message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -24,7 +25,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final List<Message> messageList = new ArrayList<>();
     private final List<Object> displayList = new ArrayList<>();
     private final String currentUserId;
-    private String ownerName = "Owner";
+    private String otherParticipantName = "User";
     
     private boolean isTyping = false;
     private String typingName = "";
@@ -90,7 +91,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (holder instanceof SentViewHolder) {
             ((SentViewHolder) holder).bind((Message) item);
         } else if (holder instanceof ReceivedViewHolder) {
-            ((ReceivedViewHolder) holder).bind((Message) item, ownerName);
+            ((ReceivedViewHolder) holder).bind((Message) item, otherParticipantName);
         } else if (holder instanceof DateHeaderViewHolder) {
             ((DateHeaderViewHolder) holder).bind((DateHeader) item);
         } else if (holder instanceof TypingViewHolder) {
@@ -106,7 +107,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void setMessages(@NonNull List<Message> messages) {
         // Calculate diff for smoother updates and to prevent "jumping"
         final List<Object> oldDisplayList = new ArrayList<>(displayList);
-        
+
         messageList.clear();
         messageList.addAll(messages);
         rebuildDisplayList();
@@ -141,8 +142,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    public void setOwnerName(String name) {
-        this.ownerName = name;
+    public void setOtherParticipantName(String name) {
+        this.otherParticipantName = name;
         notifyDataSetChanged();
     }
 
@@ -171,12 +172,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             tvTime = v.findViewById(R.id.tvTimestamp);
             bubble = v.findViewById(R.id.llBubble);
         }
-        void bind(Message msg, String ownerDisplayName) {
+        void bind(Message msg, String otherParticipantName) {
             if (msg.isFromAi()) {
                 tvName.setText("Inquilino");
                 bubble.setBackgroundResource(R.drawable.bg_bubble_ai);
             } else {
-                tvName.setText(ownerDisplayName);
+                tvName.setText(otherParticipantName);
                 bubble.setBackgroundResource(R.drawable.bg_bubble_owner);
             }
             tvText.setText(msg.getText());
@@ -214,12 +215,32 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     // ─── Helper Objects ───────────────────────────────────────────────────────
     static class DateHeader {
-        String date;
+        final String date;
         DateHeader(String date) { this.date = date; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof DateHeader)) return false;
+            return Objects.equals(date, ((DateHeader) o).date);
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(date); }
     }
 
     static class TypingIndicator {
-        String name;
+        final String name;
         TypingIndicator(String name) { this.name = name; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof TypingIndicator)) return false;
+            return Objects.equals(name, ((TypingIndicator) o).name);
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(name); }
     }
 }

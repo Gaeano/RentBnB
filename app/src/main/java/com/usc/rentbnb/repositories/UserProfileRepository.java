@@ -56,4 +56,22 @@ public class UserProfileRepository {
             }
         });
     }
+
+    public void updatePayoutMethods(User.PayoutMethods payoutMethods, UserProfileCallback callback) {
+        apiService.updatePayoutMethods(payoutMethods).enqueue(new Callback<okhttp3.ResponseBody>() {
+            @Override
+            public void onResponse(Call<okhttp3.ResponseBody> call, Response<okhttp3.ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    fetchUserData(callback);
+                } else {
+                    callback.onError("Failed to update payout methods: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
 }

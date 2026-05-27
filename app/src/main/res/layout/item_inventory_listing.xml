@@ -43,7 +43,7 @@
 
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
                 <TextView android:id="@+id/tvStats" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="14 bookings • ★ 4.9" android:textColor="#757575" android:textSize="12sp" android:layout_centerVertical="true"/>
-                <TextView android:id="@+id/tvStatus" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="👁 Active" android:textColor="#008080" android:textSize="12sp" android:background="@drawable/chip_background_teal" android:paddingHorizontal="10dp" android:paddingVertical="4dp" android:layout_alignParentEnd="true" android:textStyle="bold"/>
+                <TextView android:id="@+id/tvStatus" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Active" android:textColor="#008080" android:textSize="12sp" android:background="@drawable/chip_background_teal" android:paddingHorizontal="10dp" android:paddingVertical="4dp" android:layout_alignParentEnd="true" android:textStyle="bold"/>
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

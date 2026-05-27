@@ -16,7 +16,7 @@
             android:layout_width="0dp"
             android:layout_height="280dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/bg_final"
+            android:src="@drawable/landing_bg"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

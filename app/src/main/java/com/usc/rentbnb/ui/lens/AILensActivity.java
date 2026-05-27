@@ -19,15 +19,14 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.models.LensRequest;
 import com.usc.rentbnb.models.LensResponse;
 import com.usc.rentbnb.models.Listing;
-import com.usc.rentbnb.models.ListingResponse;
 import com.usc.rentbnb.network.ApiClient;
 
 import java.io.ByteArrayOutputStream;
@@ -41,27 +40,25 @@ import retrofit2.Response;
 public class AILensActivity extends AppCompatActivity {
 
     private ImageView ivCapturedImage;
-    private LinearLayout layoutIdleState, layoutStatus, layoutNoResults;
+    private LinearLayout layoutIdleState, layoutLoadingOverlay, layoutNoResults;
     private ChipGroup chipGroupKeywords;
     private RecyclerView rvLensResults;
-    private MaterialButton btnCapture;
-    private TextView tvStatus;
+    private FloatingActionButton btnRetake;
+    private TextView tvTagsTitle, tvResultsTitle, tvNoResults;
 
     private Bitmap capturedBitmap;
-    private List<Listing> allListings = new ArrayList<>();
 
-    // ---------------------------------------------------------------------------
-    // Camera launcher — TakePicturePreview returns a thumbnail Bitmap directly,
-    // no URI or FileProvider setup required.
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Camera launcher — TakePicturePreview returns a Bitmap directly.
+    // -------------------------------------------------------------------------
     private final ActivityResultLauncher<Void> cameraLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.TakePicturePreview(),
                     bitmap -> {
                         if (bitmap != null) {
                             capturedBitmap = bitmap;
-                            showCapturedImage(bitmap);
-                            fetchAllListingsThenAnalyse();
+                            showCapturedState(bitmap);
+                            analyseAndSearch();
                         }
                     }
             );
@@ -71,212 +68,169 @@ public class AILensActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ai_lens);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.aiLensRoot), (v, insets) -> {
-            androidx.core.graphics.Insets bars =
-                    insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-            return insets;
-        });
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(R.id.aiLensRoot), (v, insets) -> {
+                    androidx.core.graphics.Insets bars =
+                            insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+                    return insets;
+                });
 
         initViews();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        btnCapture.setOnClickListener(v -> cameraLauncher.launch(null));
+        // Both the idle state placeholder and the retake button launch the camera
+        layoutIdleState.setOnClickListener(v -> cameraLauncher.launch(null));
+        btnRetake.setOnClickListener(v -> cameraLauncher.launch(null));
     }
 
-    // ---------------------------------------------------------------------------
-    // View setup
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Views
+    // -------------------------------------------------------------------------
 
     private void initViews() {
-        ivCapturedImage   = findViewById(R.id.ivCapturedImage);
-        layoutIdleState   = findViewById(R.id.layoutIdleState);
-        layoutStatus      = findViewById(R.id.layoutStatus);
-        layoutNoResults   = findViewById(R.id.layoutNoResults);
-        chipGroupKeywords = findViewById(R.id.chipGroupKeywords);
-        rvLensResults     = findViewById(R.id.rvLensResults);
-        btnCapture        = findViewById(R.id.btnCapture);
-        tvStatus          = findViewById(R.id.tvStatus);
+        ivCapturedImage      = findViewById(R.id.ivCapturedImage);
+        layoutIdleState      = findViewById(R.id.layoutIdleState);
+        layoutLoadingOverlay = findViewById(R.id.layoutLoadingOverlay);
+        layoutNoResults      = findViewById(R.id.layoutNoResults);
+
+        chipGroupKeywords    = findViewById(R.id.chipGroupKeywords);
+        rvLensResults        = findViewById(R.id.rvLensResults);
+        btnRetake            = findViewById(R.id.btnRetake);
+
+        tvTagsTitle          = findViewById(R.id.tvTagsTitle);
+        tvResultsTitle       = findViewById(R.id.tvResultsTitle);
 
         rvLensResults.setLayoutManager(new GridLayoutManager(this, 2));
     }
 
-    // ---------------------------------------------------------------------------
-    // Step 1 — show captured image and update button label
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Step 1 — show captured image
+    // -------------------------------------------------------------------------
 
-    private void showCapturedImage(Bitmap bitmap) {
+    private void showCapturedState(Bitmap bitmap) {
+        // Show Image & Retake Button
         layoutIdleState.setVisibility(View.GONE);
         ivCapturedImage.setVisibility(View.VISIBLE);
         ivCapturedImage.setImageBitmap(bitmap);
-        btnCapture.setText("Retake Photo");
-        btnCapture.setIconResource(R.drawable.ic_lens);
+        btnRetake.setVisibility(View.VISIBLE);
 
-        // Reset result views for fresh analysis
+        // Hide old results perfectly
+        tvTagsTitle.setVisibility(View.GONE);
         chipGroupKeywords.removeAllViews();
-        chipGroupKeywords.setVisibility(View.GONE);
+        tvResultsTitle.setVisibility(View.GONE);
         rvLensResults.setVisibility(View.GONE);
         layoutNoResults.setVisibility(View.GONE);
     }
 
-    // ---------------------------------------------------------------------------
-    // Step 2 — fetch all listings first so we can filter client-side after
-    // the AI returns keywords. This avoids a second network round trip.
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Step 2 — single API call: analyse image + search listings on the backend.
+    // -------------------------------------------------------------------------
 
-    private void fetchAllListingsThenAnalyse() {
-        setLoadingState(true, "Preparing listings...");
-
-        ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<ListingResponse> call,
-                                   @NonNull Response<ListingResponse> response) {
-                if (response.isSuccessful() && response.body() != null
-                        && response.body().getData() != null) {
-                    allListings = response.body().getData();
-                }
-                // Proceed to AI analysis regardless of whether listings loaded
-                analyseImage();
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ListingResponse> call, @NonNull Throwable t) {
-                analyseImage();
-            }
-        });
-    }
-
-    // ---------------------------------------------------------------------------
-    // Step 3 — send image to backend AI endpoint
-    // ---------------------------------------------------------------------------
-
-    private void analyseImage() {
+    private void analyseAndSearch() {
         if (capturedBitmap == null) return;
-        setLoadingState(true, "AI is analysing your image...");
 
-        // Compress bitmap to JPEG and base64-encode for transport
+        setLoadingState(true);
+
+        // Compress bitmap to JPEG at 70% quality and base64-encode for transport
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         capturedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
         String base64Image = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
 
-        LensRequest request = new LensRequest(base64Image);
-
-        ApiClient.getApiService().analyseImageWithLens(request)
+        ApiClient.getApiService()
+                .analyseImageWithLens(new LensRequest(base64Image))
                 .enqueue(new Callback<LensResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<LensResponse> call,
                                            @NonNull Response<LensResponse> response) {
-                        setLoadingState(false, "");
+                        setLoadingState(false);
 
-                        if (response.isSuccessful() && response.body() != null
-                                && response.body().getKeywords() != null
-                                && !response.body().getKeywords().isEmpty()) {
-                            displayResults(response.body().getKeywords());
-                        } else {
+                        if (!response.isSuccessful() || response.body() == null || !response.body().isSuccess()) {
                             showNoResults("Could not identify the object. Try a clearer photo.");
+                            return;
+                        }
+
+                        LensResponse body = response.body();
+
+                        displayKeywordChips(body.getKeywords(), body.getDetectedCategory());
+
+                        List<Listing> listings = body.getData();
+                        if (listings == null || listings.isEmpty()) {
+                            showNoResults("No similar rentals found for this object.");
+                        } else {
+                            displayListings(listings);
                         }
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<LensResponse> call, @NonNull Throwable t) {
-                        setLoadingState(false, "");
+                    public void onFailure(@NonNull Call<LensResponse> call,
+                                          @NonNull Throwable t) {
+                        setLoadingState(false);
                         showNoResults("Network error. Please try again.");
                     }
                 });
     }
 
-    // ---------------------------------------------------------------------------
-    // Step 4 — display keyword chips and filter listings
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Display helpers
+    // -------------------------------------------------------------------------
 
-    private void displayResults(List<String> keywords) {
-        // Show keyword chips
+    private void displayKeywordChips(List<String> keywords, String category) {
         chipGroupKeywords.removeAllViews();
-        for (String keyword : keywords) {
-            Chip chip = new Chip(this);
-            chip.setText(keyword);
-            chip.setClickable(false);
-            chip.setChipBackgroundColorResource(R.color.teal_primary);
-            chip.setTextColor(getColor(android.R.color.white));
-            chipGroupKeywords.addView(chip);
-        }
-        chipGroupKeywords.setVisibility(View.VISIBLE);
+        boolean hasChips = false;
 
-        // Filter listings by keywords — match against productName, category,
-        // suggestedActivities, description (case-insensitive)
-        List<Listing> matched = filterListingsByKeywords(allListings, keywords);
-
-        if (matched.isEmpty()) {
-            showNoResults("No similar rentals found for this object.");
-            return;
+        // Category chip — teal, shown first
+        if (category != null && !category.isEmpty()) {
+            Chip catChip = new Chip(this);
+            catChip.setText(category);
+            catChip.setClickable(false);
+            catChip.setChipBackgroundColorResource(R.color.teal_dark);
+            catChip.setTextColor(getColor(android.R.color.white));
+            chipGroupKeywords.addView(catChip);
+            hasChips = true;
         }
 
-        // Display matched listings
-        ListingAdapter adapter = new ListingAdapter((listing, isFav) ->
-                Toast.makeText(this, listing.getProductName(), Toast.LENGTH_SHORT).show());
-        adapter.submitData(matched, new ArrayList<>());
+        // Keyword chips — lighter teal
+        if (keywords != null) {
+            for (String keyword : keywords) {
+                Chip chip = new Chip(this);
+                chip.setText(keyword);
+                chip.setClickable(false);
+                chip.setChipBackgroundColorResource(R.color.teal_primary);
+                chip.setTextColor(getColor(android.R.color.white));
+                chipGroupKeywords.addView(chip);
+                hasChips = true;
+            }
+        }
+
+        tvTagsTitle.setVisibility(hasChips ? View.VISIBLE : View.GONE);
+    }
+
+    private void displayListings(List<Listing> listings) {
+        ListingAdapter adapter = new ListingAdapter(
+                (listing, isFav) -> Toast.makeText(
+                        this, listing.getProductName(), Toast.LENGTH_SHORT).show());
+        adapter.submitData(listings, new ArrayList<>());
 
         rvLensResults.setAdapter(adapter);
+        tvResultsTitle.setVisibility(View.VISIBLE);
         rvLensResults.setVisibility(View.VISIBLE);
         layoutNoResults.setVisibility(View.GONE);
     }
 
-    /**
-     * Filters listings where any keyword matches productName, category,
-     * suggestedActivities list, or description. Case-insensitive.
-     */
-    private List<Listing> filterListingsByKeywords(List<Listing> listings,
-                                                   List<String> keywords) {
-        List<Listing> result = new ArrayList<>();
-        for (Listing listing : listings) {
-            for (String keyword : keywords) {
-                String kw = keyword.toLowerCase();
-                boolean matches = false;
-
-                if (listing.getProductName() != null
-                        && listing.getProductName().toLowerCase().contains(kw)) {
-                    matches = true;
-                } else if (listing.getCategory() != null
-                        && listing.getCategory().toLowerCase().contains(kw)) {
-                    matches = true;
-                } else if (listing.getDescription() != null
-                        && listing.getDescription().toLowerCase().contains(kw)) {
-                    matches = true;
-                } else if (listing.getSuggestedActivities() != null) {
-                    for (String activity : listing.getSuggestedActivities()) {
-                        if (activity.toLowerCase().contains(kw)) {
-                            matches = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (matches) {
-                    result.add(listing);
-                    break; // don't add the same listing twice for multiple keywords
-                }
-            }
-        }
-        return result;
-    }
-
-    // ---------------------------------------------------------------------------
-    // UI state helpers
-    // ---------------------------------------------------------------------------
-
-    private void setLoadingState(boolean loading, String message) {
-        layoutStatus.setVisibility(loading ? View.VISIBLE : View.GONE);
-        if (tvStatus != null) tvStatus.setText(message);
-        btnCapture.setEnabled(!loading);
-        btnCapture.setAlpha(loading ? 0.6f : 1.0f);
+    private void setLoadingState(boolean loading) {
+        // Toggles the translucent overlay over the image card
+        layoutLoadingOverlay.setVisibility(loading ? View.VISIBLE : View.GONE);
+        btnRetake.setEnabled(!loading);
     }
 
     private void showNoResults(String message) {
-        TextView tvNoResults = findViewById(R.id.tvNoResults);
         if (tvNoResults != null) tvNoResults.setText(message);
-        rvLensResults.setVisibility(View.GONE);
+
         layoutNoResults.setVisibility(View.VISIBLE);
+        tvResultsTitle.setVisibility(View.GONE);
+        rvLensResults.setVisibility(View.GONE);
     }
 }

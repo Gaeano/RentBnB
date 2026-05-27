@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/top_background">
+    android:background="@drawable/signup_bg">
 
     <!-- Top Header Section -->
     <ImageView
@@ -13,12 +13,12 @@
         android:layout_height="32dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="4dp"
-        android:src="@android:drawable/ic_menu_revert"
+        android:background="@drawable/circular_light_bg"
+        android:padding="8dp"
+        android:src="@drawable/ic_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white" />
+        app:tint="@color/black" />
 
     <TextView
         android:id="@+id/tvLogo"
@@ -27,6 +27,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="rentbnb"
+        android:fontFamily="@font/cherry_bomb_one"
         android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -39,6 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:text="Log In"
+        android:fontFamily="@font/jost_bold"
         android:textColor="@color/white"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@id/tvLogo"
@@ -68,7 +70,7 @@
                 android:layout_height="40dp"
                 android:background="@drawable/stepper_circle_active"
                 android:padding="8dp"
-                android:src="@android:drawable/ic_menu_myplaces"
+                android:src="@drawable/ic_profile"
                 app:tint="@color/teal_primary" />
 
             <TextView
@@ -107,7 +109,7 @@
                 android:id="@+id/step2Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Verification"
+                android:text="Mobile Number"
                 android:textColor="@color/white"
                 android:textSize="10sp" />
         </LinearLayout>
@@ -139,7 +141,7 @@
                 android:id="@+id/step3Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="You're in!"
+                android:text="Email Verification"
                 android:textColor="@color/white"
                 android:textSize="10sp" />
         </LinearLayout>

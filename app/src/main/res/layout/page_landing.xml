@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/bg_landing" />
+        android:src="@drawable/landing_bg" />
 
     <View
         android:layout_width="match_parent"
@@ -26,11 +26,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="4dp"
             android:text="@string/app_name"
             android:textColor="@color/white"
-            android:textSize="22sp"
-            android:fontFamily="@font/jost_bold"
+            android:textSize="38sp"
+            android:fontFamily="@font/cherry_bomb_one"
             android:textStyle="bold"
             android:paddingTop="35dp"
             android:letterSpacing="0.04" />
@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/landing_subtitle"
-            android:textColor="#CCffffff"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:fontFamily="@font/inconsolata"
             android:lineSpacingMultiplier="1.4"

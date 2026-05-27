@@ -1,11 +1,10 @@
-package com.usc.rentbnb.islands;
-
-import static androidx.core.content.ContentProviderCompat.requireContext;
+package com.usc.rentbnb.ui.islands;
 
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,10 +38,8 @@ import retrofit2.Response;
 
 public class IslandDetailsActivity extends AppCompatActivity {
     private String island_name;
-    private String location;
-    private double rating;
-    private String category;
     private String description;
+    private String imageUrl;
 
     private FrameLayout btnBackWrapper;
     private FavoriteViewModel favoriteViewModel;
@@ -51,8 +48,10 @@ public class IslandDetailsActivity extends AppCompatActivity {
     private RecyclerView rv;
     private Skeleton skeleton;
     private LinearLayout emptyStateLayout;
-    private TextView islandName, islandLocation, islandRating, islandDescription;
+    private TextView islandName, islandDescription;
     private SmartRefreshLayout refreshLayout;
+    private TextView[] filterChips;
+    private List<Listing> allListings = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,20 +60,24 @@ public class IslandDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_island_details);
 
         island_name = getIntent().getStringExtra("island_name");
-        location = getIntent().getStringExtra("location");
-        rating = getIntent().getDoubleExtra("rating", 0.0);
-        category = getIntent().getStringExtra("category");
         description = getIntent().getStringExtra("description");
+        imageUrl = getIntent().getStringExtra("imageUrl");
 
         islandName = findViewById(R.id.island_title);
-        islandLocation = findViewById(R.id.island_location);
-        islandRating = findViewById(R.id.island_rating);
         islandDescription = findViewById(R.id.island_description);
         emptyStateLayout = findViewById(R.id.empty_state_layout);
 
         islandName.setText(island_name);
-        islandRating.setText(String.valueOf(rating));
         islandDescription.setText(description);
+
+        ImageView headerImage = findViewById(R.id.header_image);
+        if (headerImage != null && imageUrl != null) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(imageUrl)
+                    .centerCrop()
+                    .placeholder(R.drawable.details_header)
+                    .into(headerImage);
+        }
 
         btnBackWrapper = findViewById(R.id.btn_back_wrapper);
         ViewCompat.setOnApplyWindowInsetsListener(btnBackWrapper, (v, insets) -> {
@@ -95,6 +98,7 @@ public class IslandDetailsActivity extends AppCompatActivity {
         skeleton.showSkeleton();
 
         setupFavoritesObserver();
+        setupFilterChips();
         fetchListings();
 
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -123,6 +127,84 @@ public class IslandDetailsActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
     }
 
+    private void setupFilterChips() {
+        TextView chipWheels = findViewById(R.id.chip_wheels);
+        TextView chipWater = findViewById(R.id.chip_water);
+        TextView chipOutdoors = findViewById(R.id.chip_outdoors);
+        TextView chipElectronics = findViewById(R.id.chip_electronics);
+        TextView chipBeachLeisure = findViewById(R.id.chip_beach_leisure);
+
+        filterChips = new TextView[]{chipWheels, chipWater, chipOutdoors, chipElectronics, chipBeachLeisure};
+
+        for (TextView chip : filterChips) {
+            if (chip != null) {
+                chip.setSelected(false);
+                chip.setOnClickListener(v -> handleChipToggle((TextView) v));
+            }
+        }
+    }
+
+    private void handleChipToggle(TextView selectedChip) {
+        boolean isNowSelected = !selectedChip.isSelected();
+        selectedChip.setSelected(isNowSelected);
+
+        if (isNowSelected) {
+            selectedChip.setBackgroundResource(R.drawable.chip_background_selected);
+        } else {
+            selectedChip.setBackgroundResource(R.drawable.chip_background);
+        }
+
+        applyFilters();
+    }
+
+    private void applyFilters() {
+        List<String> selectedCategories = new ArrayList<>();
+        for (TextView chip : filterChips) {
+            if (chip != null && chip.isSelected()) {
+                selectedCategories.add(chip.getText().toString());
+            }
+        }
+
+        List<Listing> filteredList;
+        if (selectedCategories.isEmpty()) {
+            filteredList = new ArrayList<>(allListings);
+        } else {
+            filteredList = new ArrayList<>();
+            for (Listing listing : allListings) {
+                if (listing.getCategory() != null) {
+                    for (String category : selectedCategories) {
+                        if (category.equalsIgnoreCase(listing.getCategory())) {
+                            filteredList.add(listing);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        currentListings = filteredList;
+        updateUIWithListings();
+    }
+
+    private void updateUIWithListings() {
+        if (currentListings.isEmpty()) {
+            emptyStateLayout.setVisibility(View.VISIBLE);
+            rv.setVisibility(View.GONE);
+        } else {
+            emptyStateLayout.setVisibility(View.GONE);
+            rv.setVisibility(View.VISIBLE);
+        }
+
+        List<String> favoriteIds = new ArrayList<>();
+        if (favoriteViewModel.getFavoriteListings().getValue() != null) {
+            for (Listing fav : favoriteViewModel.getFavoriteListings().getValue()) {
+                favoriteIds.add(fav.getId());
+            }
+        }
+
+        adapter.submitData(currentListings, favoriteIds);
+    }
+
     private void setupFavoritesObserver() {
         favoriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavoriteViewModel.class);
 
@@ -146,24 +228,10 @@ public class IslandDetailsActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
 
                     // Save the fetched listings globally
-                    currentListings = response.body().getData();
+                    allListings = response.body().getData();
+                    currentListings = new ArrayList<>(allListings);
 
-                    if (currentListings.isEmpty()) {
-                        emptyStateLayout.setVisibility(View.VISIBLE);
-                        rv.setVisibility(View.GONE);
-                    } else {
-                        emptyStateLayout.setVisibility(View.GONE);
-                        rv.setVisibility(View.VISIBLE);
-                    }
-
-                    List<String> favoriteIds = new ArrayList<>();
-                    if (favoriteViewModel.getFavoriteListings().getValue() != null) {
-                        for (Listing fav : favoriteViewModel.getFavoriteListings().getValue()) {
-                            favoriteIds.add(fav.getId());
-                        }
-                    }
-
-                    adapter.submitData(currentListings, favoriteIds);
+                    updateUIWithListings();
                     skeleton.showOriginal();
 
                 } else {

@@ -27,9 +27,6 @@
         </service>
 
         <activity
-            android:name=".ui.review.ReviewBookingActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.profile.ChangePassActivity"
             android:exported="false" />
         <activity
@@ -60,15 +57,15 @@
         <activity
             android:name=".ui.booking.RentForm"
             android:exported="false" />
+
         <activity
             android:name=".ui.booking.MyBookingsActivity"
             android:exported="false"
             android:label="My Bookings" />
+
         <activity
             android:name=".ui.listing.ListingsDetailsActivity"
             android:exported="false" />
-        <activity android:name=".ui.review.AllReviewsActivity"
-            android:exported="false"/>
         <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"
@@ -122,7 +119,7 @@
             android:name=".ui.onboarding.OnboardingActivity"
             android:exported="false" />
         <activity
-            android:name=".islands.IslandDetailsActivity"
+            android:name=".ui.islands.IslandDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".ui.history.HistoryActivity"
@@ -135,6 +132,12 @@
             android:exported="false" />
         <activity
             android:name=".ui.dashboard.DashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.review.AllReviewsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.review.ReviewBookingActivity"
             android:exported="false" />
     </application>
 

@@ -1,6 +1,7 @@
 package com.usc.rentbnb.ui.home;
 
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import com.faltenreich.skeletonlayout.Skeleton;
 import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class IslandsFragment extends Fragment {
@@ -86,8 +88,20 @@ public class IslandsFragment extends Fragment {
             }
         });
 
-        setUpObservers();
         rv.setAdapter(adapter);
+
+        rv.post(() -> {
+            int width  = rv.getWidth();
+            int height = rv.getHeight();
+            if (width == 0) {
+                DisplayMetrics dm = getResources().getDisplayMetrics();
+                width  = dm.widthPixels;
+                height = (int) (dm.widthPixels * 0.65f); // approximate card aspect ratio
+            }
+            adapter.attachPreloader(rv, width, height);
+        });
+
+        setUpObservers();
 
         skeleton = SkeletonLayoutUtils.applySkeleton(rv, R.layout.card_island, 3);
         skeleton.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
@@ -115,7 +129,13 @@ public class IslandsFragment extends Fragment {
         });
 
         viewModel.getIslands().observe(getViewLifecycleOwner(), islands -> {
-            adapter.setIslands(islands);
+            if (islands != null) {
+                // Trust the backend! It already sorted and filtered the islands.
+                adapter.setIslands(islands);
+            } else {
+                adapter.setIslands(new ArrayList<>());
+            }
+
             skeleton.showOriginal();
 
             if (swipeRefreshLayout != null) {
@@ -130,7 +150,16 @@ public class IslandsFragment extends Fragment {
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(layout -> {
                 skeleton.showSkeleton();
-                viewModel.fetchIslands();
+                if (requireActivity() instanceof HomeActivity) {
+                    HomeActivity home = (HomeActivity) requireActivity();
+                    if (home.userLat != 10.3157 || home.userLon != 123.8854) {
+                        viewModel.fetchNearbyIslands(home.userLat, home.userLon);
+                    } else {
+                        viewModel.fetchIslands();
+                    }
+                } else {
+                    viewModel.fetchIslands();
+                }
             });
         }
     }

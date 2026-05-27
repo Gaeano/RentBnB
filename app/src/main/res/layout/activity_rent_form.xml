@@ -125,6 +125,8 @@
                             app:startIconDrawable="@drawable/ic_calendar"
                             app:startIconTint="@color/teal_primary"
                             app:boxBackgroundColor="@android:color/transparent"
+                            app:boxStrokeColor="@color/box_stroke_color"
+                            app:hintTextColor="@color/indicator_active"
                             android:layout_marginEnd="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -134,6 +136,8 @@
                                 android:textColor="@color/text_dark"
                                 android:focusable="false"
                                 android:clickable="true"
+                                app:boxStrokeColor="@color/teal_primary"
+                                app:hintTextColor="@color/teal_primary"
                                 android:cursorVisible="false"
                                 android:inputType="none" />
                         </com.google.android.material.textfield.TextInputLayout>
@@ -147,6 +151,7 @@
                             app:startIconDrawable="@drawable/ic_calendar"
                             app:startIconTint="@color/teal_primary"
                             app:boxBackgroundColor="@android:color/transparent"
+                            app:boxStrokeColor="@color/box_stroke_color"
                             android:layout_marginStart="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -156,6 +161,8 @@
                                 android:textColor="@color/text_dark"
                                 android:focusable="false"
                                 android:clickable="true"
+                                app:boxStrokeColor="@color/teal_primary"
+                                app:hintTextColor="@color/teal_primary"
                                 android:cursorVisible="false"
                                 android:inputType="none" />
                         </com.google.android.material.textfield.TextInputLayout>
@@ -168,7 +175,9 @@
                         app:prefixTextColor="@color/text_dark"
                         app:startIconDrawable="@drawable/ic_profile"
                         app:startIconTint="@color/teal_primary"
+                        app:hintTextColor="@color/indicator_active"
                         app:boxBackgroundColor="@android:color/transparent"
+                        app:boxStrokeColor="@color/box_stroke_color"
                         android:layout_marginBottom="16dp">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -177,6 +186,8 @@
                             android:layout_height="wrap_content"
                             android:hint="9XX XXX XXXX"
                             android:textColor="@color/text_dark"
+                            app:boxStrokeColor="@color/box_stroke_color"
+                            app:hintTextColor="@color/teal_primary"
                             android:maxLength="10"
                             android:inputType="phone" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -205,12 +216,16 @@
                         android:hint="Select Payment"
                         app:startIconDrawable="@drawable/ic_pay"
                         app:startIconTint="@color/teal_primary"
-                        app:boxBackgroundColor="@android:color/transparent">
+                        app:hintTextColor="@color/indicator_active"
+                        app:boxBackgroundColor="@android:color/transparent"
+                        app:boxStrokeColor="@color/box_stroke_color">
 
                         <AutoCompleteTextView
                             android:id="@+id/actvPaymentMode"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            app:boxStrokeColor="@color/teal_primary"
+                            app:hintTextColor="@color/teal_primary"
                             android:textColor="@color/text_dark"
                             android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -353,6 +368,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Cardholder Name"
                 app:boxBackgroundColor="@android:color/transparent"
+                app:boxStrokeColor="@color/box_stroke_color"
                 android:layout_marginBottom="16dp">
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -367,6 +383,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Card Number (Mastercard / Visa)"
                 app:boxBackgroundColor="@android:color/transparent"
+                app:boxStrokeColor="@color/box_stroke_color"
                 android:layout_marginBottom="16dp">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etCardNumber"
@@ -390,6 +407,7 @@
                     android:layout_height="wrap_content"
                     android:hint="MM/YY"
                     app:boxBackgroundColor="@android:color/transparent"
+                    app:boxStrokeColor="@color/box_stroke_color"
                     android:layout_marginEnd="8dp">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
@@ -406,6 +424,7 @@
                     android:layout_height="wrap_content"
                     android:hint="CVV"
                     app:boxBackgroundColor="@android:color/transparent"
+                    app:boxStrokeColor="@color/box_stroke_color"
                     android:layout_marginStart="8dp">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"

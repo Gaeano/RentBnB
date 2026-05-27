@@ -158,7 +158,7 @@ public class RentForm extends AppCompatActivity {
 
             MaterialDatePicker<Long> startDatePicker = MaterialDatePicker.Builder.datePicker()
                     .setTitleText("Select Start Date")
-                    .setTheme(R.style.CustomMaterialCalendar)
+                    .setTheme(R.style.CustomDatePickerTheme)
                     .setSelection(selectedStartMillis == 0 ? MaterialDatePicker.todayInUtcMilliseconds() : selectedStartMillis)
                     .setCalendarConstraints(constraintsBuilder.build())
                     .build();
@@ -168,6 +168,7 @@ public class RentForm extends AppCompatActivity {
                         .setTimeFormat(TimeFormat.CLOCK_12H)
                         .setHour(12)
                         .setMinute(0)
+                        .setTheme(R.style.CustomTimePickerTheme)
                         .setTitleText("Select Start Time")
                         .build();
 
@@ -218,7 +219,7 @@ public class RentForm extends AppCompatActivity {
 
             MaterialDatePicker<Long> endDatePicker = MaterialDatePicker.Builder.datePicker()
                     .setTitleText("Select End Date")
-                    .setTheme(R.style.CustomMaterialCalendar)
+                    .setTheme(R.style.CustomDatePickerTheme)
                     .setSelection(selectedEndMillis == 0 ? selectedStartMillis : selectedEndMillis)
                     .setCalendarConstraints(constraintsBuilder.build())
                     .build();
@@ -228,6 +229,7 @@ public class RentForm extends AppCompatActivity {
                         .setTimeFormat(TimeFormat.CLOCK_12H)
                         .setHour(12)
                         .setMinute(0)
+                        .setTheme(R.style.CustomTimePickerTheme)
                         .setTitleText("Select End Time")
                         .build();
 

@@ -315,55 +315,53 @@ public class OwnerCalendarFragment extends Fragment {
         @NonNull
         @Override
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            TextView tv = new TextView(parent.getContext());
-            tv.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    (int) (parent.getContext().getResources().getDisplayMetrics().density * 44)));
-            tv.setGravity(android.view.Gravity.CENTER);
-            tv.setTextSize(13f);
-            return new VH(tv);
+            CalendarDayView cell = new CalendarDayView(parent.getContext());
+            int cellHeight = (int) (parent.getContext().getResources().getDisplayMetrics().density * 44);
+            cell.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, cellHeight));
+            return new VH(cell);
         }
 
         @Override
         public void onBindViewHolder(@NonNull VH holder, int position) {
-            CalendarDay day = days.get(position);
-            TextView tv = (TextView) holder.itemView;
-
-            tv.setText(day.label);
-            tv.setBackground(null);
-            tv.setTextColor(Color.parseColor("#1D1D1D"));
+            CalendarDay day  = days.get(position);
+            CalendarDayView cell = (CalendarDayView) holder.itemView;
 
             if (day.type == CalendarDay.TYPE_HEADER) {
-                tv.setTextColor(Color.parseColor("#757575"));
-                tv.setTypeface(null, android.graphics.Typeface.BOLD);
+                cell.bindHeader(day.label);
                 return;
             }
 
             if (day.type == CalendarDay.TYPE_EMPTY) {
-                tv.setText("");
+                cell.bindEmpty();
                 return;
             }
 
             // TYPE_DAY
             String key = day.toKey();
+
+            // Compute today's key for dot indicator
+            String todayKey = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                    .format(new java.util.Date());
+
             boolean isBooked   = bookedMap.containsKey(key) && !bookedMap.get(key).isEmpty();
             boolean isSelected = key.equals(selectedKey);
+            boolean isToday    = key.equals(todayKey);
 
-            if (isSelected) {
-                tv.setBackgroundResource(R.drawable.calendar_day_selected);
-                tv.setTextColor(Color.WHITE);
-            } else if (isBooked) {
-                boolean prevBooked = isPrevBooked(day);
-                boolean nextBooked = isNextBooked(day);
-                applyRangeBackground(tv, prevBooked, nextBooked);
-                tv.setTextColor(Color.WHITE);
-            } else {
-                tv.setBackground(null);
-                tv.setTextColor(Color.parseColor("#1D1D1D"));
+            // Determine range position for connected highlight shape
+            RangePosition rangePos = RangePosition.NONE;
+            if (isBooked && !isSelected) {
+                boolean prev = isPrevBooked(day);
+                boolean next = isNextBooked(day);
+                if (prev && next)      rangePos = RangePosition.MIDDLE;
+                else if (!prev && next) rangePos = RangePosition.START;
+                else if (prev)          rangePos = RangePosition.END;
+                else                    rangePos = RangePosition.SINGLE;
             }
 
-            tv.setOnClickListener(v -> {
-                String prevSelected = selectedKey;
+            cell.bindDay(day.label, isSelected, isToday, rangePos);
+
+            cell.setOnClickListener(v -> {
                 selectedKey = key;
                 notifyDataSetChanged();
                 updateAgendaForDate(key);
@@ -386,29 +384,168 @@ public class OwnerCalendarFragment extends Fragment {
             return bookedMap.containsKey(nextKey) && !bookedMap.get(nextKey).isEmpty();
         }
 
-        private void applyRangeBackground(TextView tv, boolean prevBooked, boolean nextBooked) {
-            int teal = Color.parseColor("#3DCFCF");
-
-            if (prevBooked && nextBooked) {
-                // Middle of range — full rectangle
-                tv.setBackgroundColor(teal);
-            } else if (!prevBooked && nextBooked) {
-                // Start of range — rounded left, flat right
-                tv.setBackground(new RangeDrawable(teal, RangeDrawable.START));
-            } else if (prevBooked && !nextBooked) {
-                // End of range — flat left, rounded right
-                tv.setBackground(new RangeDrawable(teal, RangeDrawable.END));
-            } else {
-                // Single day
-                tv.setBackground(new RangeDrawable(teal, RangeDrawable.SINGLE));
-            }
-        }
+        // applyRangeBackground removed — drawing is now handled by CalendarDayView.onDraw()
 
         @Override
         public int getItemCount() { return days.size(); }
 
         class VH extends RecyclerView.ViewHolder {
             VH(@NonNull View v) { super(v); }
+        }
+    }
+
+    // ===========================================================================
+    // RangePosition — describes where a day sits within a booked range.
+    // Declared here (static nested) because Java does not allow enums inside
+    // a non-static inner class (CalendarGridAdapter is non-static).
+    // ===========================================================================
+
+    enum RangePosition { NONE, START, MIDDLE, END, SINGLE }
+
+    // ===========================================================================
+    // CalendarDayView — custom view that draws range strip + day number + today dot
+    // all in a single onDraw() so the dot always clips above the strip.
+    // ===========================================================================
+
+    static class CalendarDayView extends View {
+
+        private static final int COLOR_TEAL       = 0xFF3DCFCF;
+        private static final int COLOR_TEAL_DARK  = 0xFF29AAAA;
+        private static final int COLOR_WHITE      = 0xFFFFFFFF;
+        private static final int COLOR_DARK_TEXT  = 0xFF1D1D1D;
+        private static final int COLOR_GREY_TEXT  = 0xFF757575;
+
+        private final Paint stripPaint  = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint textPaint   = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint dotPaint    = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        private String  label       = "";
+        private boolean isHeader    = false;
+        private boolean isSelected  = false;
+        private boolean isToday     = false;
+        // Import the enum via the enclosing class name
+        private RangePosition rangePos =
+                RangePosition.NONE;
+
+        public CalendarDayView(Context context) {
+            super(context);
+            init();
+        }
+
+        public CalendarDayView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            init();
+        }
+
+        private void init() {
+            textPaint.setTextAlign(Paint.Align.CENTER);
+            textPaint.setTextSize(36f);   // will be scaled to dp in bind
+        }
+
+        void bindHeader(String text) {
+            this.label      = text;
+            this.isHeader   = true;
+            this.isSelected = false;
+            this.isToday    = false;
+            this.rangePos   = RangePosition.NONE;
+            invalidate();
+        }
+
+        void bindEmpty() {
+            this.label      = "";
+            this.isHeader   = false;
+            this.isSelected = false;
+            this.isToday    = false;
+            this.rangePos   = RangePosition.NONE;
+            invalidate();
+        }
+
+        void bindDay(String text, boolean selected, boolean today,
+                     RangePosition pos) {
+            this.label      = text;
+            this.isHeader   = false;
+            this.isSelected = selected;
+            this.isToday    = today;
+            this.rangePos   = pos;
+            invalidate();
+        }
+
+        @Override
+        protected void onDraw(@NonNull Canvas canvas) {
+            if (label == null || label.isEmpty()) return;
+
+            float w = getWidth();
+            float h = getHeight();
+            float cx = w / 2f;
+            float cy = h / 2f;
+
+            float density = getResources().getDisplayMetrics().density;
+            float textSizePx = 13f * density;
+            textPaint.setTextSize(textSizePx);
+
+            if (isHeader) {
+                textPaint.setColor(COLOR_GREY_TEXT);
+                textPaint.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+                canvas.drawText(label, cx, cy - (textPaint.descent() + textPaint.ascent()) / 2f, textPaint);
+                return;
+            }
+
+            // --- Layer 1: Range strip ---
+            if (rangePos != RangePosition.NONE) {
+                stripPaint.setColor(COLOR_TEAL);
+                float stripTop    = cy - h * 0.35f;
+                float stripBottom = cy + h * 0.35f;
+                float r = (stripBottom - stripTop) / 2f;
+
+                RectF stripBounds = new RectF(0, stripTop, w, stripBottom);
+
+                switch (rangePos) {
+                    case SINGLE:
+                        canvas.drawRoundRect(stripBounds, r, r, stripPaint);
+                        break;
+                    case START:
+                        // Rounded left, flat right
+                        canvas.drawRoundRect(stripBounds, r, r, stripPaint);
+                        canvas.drawRect(cx, stripTop, w, stripBottom, stripPaint);
+                        break;
+                    case END:
+                        // Flat left, rounded right
+                        canvas.drawRoundRect(stripBounds, r, r, stripPaint);
+                        canvas.drawRect(0, stripTop, cx, stripBottom, stripPaint);
+                        break;
+                    case MIDDLE:
+                        canvas.drawRect(stripBounds, stripPaint);
+                        break;
+                }
+            }
+
+            // --- Layer 2: Selected circle (teal_dark, drawn above strip) ---
+            if (isSelected) {
+                float circleR = Math.min(w, h) * 0.38f;
+                circlePaint.setColor(COLOR_TEAL_DARK);
+                canvas.drawCircle(cx, cy, circleR, circlePaint);
+            }
+
+            // --- Layer 3: Day number text ---
+            // Text is white when on a strip or selected circle, dark otherwise
+            boolean onHighlight = isSelected
+                    || rangePos != RangePosition.NONE;
+            textPaint.setColor(onHighlight ? COLOR_WHITE : COLOR_DARK_TEXT);
+            textPaint.setTypeface(android.graphics.Typeface.DEFAULT);
+            // Shift text up slightly to leave room for the dot
+            float textY = cy - (textPaint.descent() + textPaint.ascent()) / 2f
+                    - (isToday ? density * 3f : 0f);
+            canvas.drawText(label, cx, textY, textPaint);
+
+            // --- Layer 4: Today dot (drawn last, always on top) ---
+            if (isToday) {
+                float dotR    = density * 2.5f;
+                float dotY    = cy + h * 0.28f;
+                // Dot color: white when on highlight, teal_dark when plain
+                dotPaint.setColor(onHighlight ? COLOR_WHITE : COLOR_TEAL_DARK);
+                canvas.drawCircle(cx, dotY, dotR, dotPaint);
+            }
         }
     }
 
@@ -451,14 +588,10 @@ public class OwnerCalendarFragment extends Fragment {
             if (title == null) title = "Item";
             holder.tvAgendaItem.setText(title);
 
-            // Day X of Y
-            int totalDays = b.getSchedule() != null ? b.getSchedule().getTotalDays() : 0;
-            int currentDay = getDayInBooking(b, selectedDateKey);
-            if (totalDays > 0 && currentDay > 0) {
-                holder.tvAgendaStatus.setText("Day " + currentDay + " of " + totalDays);
-            } else {
-                holder.tvAgendaStatus.setText(b.getStatus() != null ? b.getStatus() : "");
-            }
+            // Duration label — computed from actual timestamps, not totalDays.
+            // totalDays in Firestore can store the hour count for sub-day bookings
+            // (e.g. 15 for a 15-hour booking) so it cannot be trusted directly.
+            holder.tvAgendaStatus.setText(buildDurationLabel(b, selectedDateKey));
 
             // Load renter avatar
             String photoUrl = b.getRenterPhotoUrl();
@@ -471,19 +604,209 @@ public class OwnerCalendarFragment extends Fragment {
             } else {
                 holder.ivAgendaAvatar.setImageResource(R.drawable.userprofile);
             }
+
+            // Chat button — finds the existing chat room for this booking's
+            // listingId + renterId, then opens ChatRoomActivity.
+            if (holder.btnAgendaChat != null) {
+                holder.btnAgendaChat.setOnClickListener(v ->
+                        openChatRoomForBooking(v, b));
+            }
         }
 
-        private int getDayInBooking(Booking booking, String dateKey) {
-            if (booking.getStartDate() == null || dateKey == null) return -1;
-            try {
-                Date start   = sdf.parse(booking.getStartDate().substring(0, 10));
-                Date current = sdf.parse(dateKey);
-                if (start == null || current == null) return -1;
-                long diff = current.getTime() - start.getTime();
-                return (int) (diff / (1000 * 60 * 60 * 24)) + 1;
-            } catch (ParseException e) {
-                return -1;
+        /**
+         * Finds the chat room for this booking's listingId + renterId.
+         * If a room already exists, opens it directly.
+         * If no room exists (owner initiates first contact from calendar),
+         * creates a new room with mode = MODE_OWNER so Inquilino does not
+         * generate an opening message — the owner is starting the conversation.
+         */
+        private void openChatRoomForBooking(android.view.View v, Booking booking) {
+            String listingId    = booking.getListingId();
+            String renterId     = booking.getRenterId();
+            String ownerId      = booking.getOwnerId();
+            String listingTitle = booking.getListingTitle();
+            if (listingTitle == null || listingTitle.isEmpty())
+                listingTitle = booking.getProductName();
+            if (listingTitle == null) listingTitle = "";
+
+            String listingImageUrl = booking.getListingImageUrl();
+            if (listingImageUrl == null) listingImageUrl = "";
+
+            if (listingId == null || renterId == null || ownerId == null) {
+                android.widget.Toast.makeText(v.getContext(),
+                        "Chat unavailable for this booking.",
+                        android.widget.Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            // Disable button during async operation to prevent double-taps
+            v.setEnabled(false);
+
+            final String finalListingTitle    = listingTitle;
+            final String finalListingImageUrl = listingImageUrl;
+
+            FirebaseFirestore.getInstance()
+                    .collection("chatRooms")
+                    .whereEqualTo("listingId", listingId)
+                    .whereEqualTo("renterId",  renterId)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(snapshots -> {
+                        if (!isAdded()) { v.setEnabled(true); return; }
+
+                        if (snapshots != null && !snapshots.isEmpty()) {
+                            // Room already exists — open it
+                            v.setEnabled(true);
+                            String existingRoomId = snapshots.getDocuments().get(0).getId();
+                            String storedMode     = snapshots.getDocuments().get(0).getString("mode");
+                            if (storedMode == null)
+                                storedMode = com.usc.rentbnb.models.ChatRoom.MODE_OWNER;
+                            navigateToChatRoom(v.getContext(), existingRoomId, listingId,
+                                    ownerId, renterId, storedMode);
+                        } else {
+                            // No room — create one with MODE_OWNER so Inquilino stays silent
+                            createOwnerInitiatedRoom(v, listingId, finalListingTitle,
+                                    finalListingImageUrl, ownerId, renterId);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        v.setEnabled(true);
+                        android.widget.Toast.makeText(v.getContext(),
+                                "Could not open chat. Try again.",
+                                android.widget.Toast.LENGTH_SHORT).show();
+                    });
+        }
+
+        /**
+         * Creates a new chat room document with mode = MODE_OWNER.
+         * Called only when the owner initiates first contact from the calendar.
+         * MODE_OWNER is set at creation time — no second write needed.
+         */
+        private void createOwnerInitiatedRoom(android.view.View v,
+                                              String listingId,
+                                              String listingTitle,
+                                              String listingImageUrl,
+                                              String ownerId,
+                                              String renterId) {
+            java.util.Map<String, Object> roomData = new java.util.HashMap<>();
+            roomData.put("renterId",            renterId);
+            roomData.put("ownerId",             ownerId);
+            roomData.put("listingId",           listingId);
+            roomData.put("listingTitle",        listingTitle);
+            roomData.put("listingImageUrl",     listingImageUrl);
+            // MODE_OWNER at creation — Inquilino will not generate an opening message
+            roomData.put("mode",                com.usc.rentbnb.models.ChatRoom.MODE_OWNER);
+            roomData.put("lastMessage",         "");
+            roomData.put("lastMessageTimestamp", com.google.firebase.Timestamp.now());
+            roomData.put("participantIds",      java.util.Arrays.asList(renterId, ownerId));
+            java.util.Map<String, Integer> unread = new java.util.HashMap<>();
+            unread.put(renterId, 0);
+            unread.put(ownerId,  0);
+            roomData.put("unreadCount", unread);
+
+            FirebaseFirestore.getInstance()
+                    .collection("chatRooms")
+                    .add(roomData)
+                    .addOnSuccessListener(docRef -> {
+                        v.setEnabled(true);
+                        if (!isAdded()) return;
+                        navigateToChatRoom(v.getContext(), docRef.getId(), listingId,
+                                ownerId, renterId,
+                                com.usc.rentbnb.models.ChatRoom.MODE_OWNER);
+                    })
+                    .addOnFailureListener(e -> {
+                        v.setEnabled(true);
+                        android.widget.Toast.makeText(v.getContext(),
+                                "Could not create chat room. Try again.",
+                                android.widget.Toast.LENGTH_SHORT).show();
+                    });
+        }
+
+        private void navigateToChatRoom(android.content.Context ctx,
+                                        String chatRoomId,
+                                        String listingId,
+                                        String ownerId,
+                                        String renterId,
+                                        String mode) {
+            android.content.Intent intent = new android.content.Intent(
+                    ctx, com.usc.rentbnb.ui.chat.ChatRoomActivity.class);
+            intent.putExtra(com.usc.rentbnb.ui.chat.ChatRoomActivity.EXTRA_CHAT_ROOM_ID, chatRoomId);
+            intent.putExtra(com.usc.rentbnb.ui.chat.ChatRoomActivity.EXTRA_LISTING_ID,   listingId);
+            intent.putExtra(com.usc.rentbnb.ui.chat.ChatRoomActivity.EXTRA_OWNER_ID,     ownerId);
+            intent.putExtra(com.usc.rentbnb.ui.chat.ChatRoomActivity.EXTRA_RENTER_ID,    renterId);
+            intent.putExtra(com.usc.rentbnb.ui.chat.ChatRoomActivity.EXTRA_CURRENT_MODE, mode);
+            ctx.startActivity(intent);
+        }
+
+        /**
+         * Builds a human-readable duration label for the agenda card.
+         *
+         * Uses the actual startDate and endDate timestamps from the booking.
+         * Does NOT use schedule.totalDays because that field may store hours
+         * for sub-day bookings (e.g. a 15-hour booking stores totalDays=15).
+         *
+         * Rules:
+         *   < 24h between start and end  → "15 hours" (or "1 hour")
+         *   >= 24h                        → "Day X of Y" where Y is calendar days
+         */
+        private String buildDurationLabel(Booking booking, String currentDateKey) {
+            String startStr = booking.getStartDate();
+            String endStr   = booking.getEndDate();
+            if (startStr == null || endStr == null) {
+                return booking.getStatus() != null ? booking.getStatus() : "";
+            }
+
+            try {
+                // Parse both full datetime strings (yyyy-MM-dd HH:mm:ss or ISO)
+                Date startFull = parseDatetime(startStr);
+                Date endFull   = parseDatetime(endStr);
+                if (startFull == null || endFull == null) {
+                    return booking.getStatus() != null ? booking.getStatus() : "";
+                }
+
+                long totalMillis = endFull.getTime() - startFull.getTime();
+                long totalHours  = totalMillis / (1000L * 60 * 60);
+
+                if (totalHours < 24) {
+                    // Sub-day booking — show hours
+                    if (totalHours <= 0) totalHours = 1;
+                    return totalHours + (totalHours == 1 ? " hour" : " hours");
+                } else {
+                    // Multi-day booking — show "Day X of Y"
+                    // Y = number of calendar days spanned (inclusive)
+                    Date startDay = sdf.parse(startStr.substring(0, 10));
+                    Date endDay   = sdf.parse(endStr.substring(0, 10));
+                    Date curDay   = sdf.parse(currentDateKey);
+                    if (startDay == null || endDay == null || curDay == null) {
+                        return totalHours / 24 + " days";
+                    }
+                    long totalDaysSpanned = (endDay.getTime() - startDay.getTime())
+                            / (1000L * 60 * 60 * 24) + 1;
+                    long currentDayNum = (curDay.getTime() - startDay.getTime())
+                            / (1000L * 60 * 60 * 24) + 1;
+                    currentDayNum = Math.max(1, Math.min(currentDayNum, totalDaysSpanned));
+                    return "Day " + currentDayNum + " of " + totalDaysSpanned;
+                }
+            } catch (ParseException e) {
+                return booking.getStatus() != null ? booking.getStatus() : "";
+            }
+        }
+
+        /** Parses either "yyyy-MM-dd HH:mm:ss" or "yyyy-MM-dd'T'HH:mm:ss" datetime strings. */
+        private Date parseDatetime(String s) {
+            if (s == null) return null;
+            String[] formats = {
+                    "yyyy-MM-dd HH:mm:ss",
+                    "yyyy-MM-dd'T'HH:mm:ss",
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+            };
+            for (String fmt : formats) {
+                try {
+                    return new java.text.SimpleDateFormat(fmt, java.util.Locale.getDefault()).parse(s);
+                } catch (ParseException ignored) {}
+            }
+            // Fallback: date only
+            try { return sdf.parse(s.substring(0, 10)); } catch (ParseException e) { return null; }
         }
 
         @Override
@@ -492,6 +815,7 @@ public class OwnerCalendarFragment extends Fragment {
         class VH extends RecyclerView.ViewHolder {
             ShapeableImageView ivAgendaAvatar;
             TextView tvAgendaName, tvAgendaItem, tvAgendaStatus;
+            android.widget.ImageView btnAgendaChat;
 
             VH(@NonNull View itemView) {
                 super(itemView);
@@ -499,6 +823,7 @@ public class OwnerCalendarFragment extends Fragment {
                 tvAgendaName    = itemView.findViewById(R.id.tvAgendaName);
                 tvAgendaItem    = itemView.findViewById(R.id.tvAgendaItem);
                 tvAgendaStatus  = itemView.findViewById(R.id.tvAgendaStatus);
+                btnAgendaChat   = itemView.findViewById(R.id.btnAgendaChat);
             }
         }
     }

@@ -76,6 +76,19 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="CustomDatePickerTheme" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorPrimary">@color/teal_primary</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+    </style>
+
+    <style name="CustomTimePickerTheme" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="colorPrimary">@color/teal_primary</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+    </style>
+    <style name="CustomAlertDialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="colorPrimary">@color/indicator_active</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
 </resources>
 
 

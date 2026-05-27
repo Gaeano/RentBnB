@@ -75,7 +75,7 @@ public class IslandDetailsActivity extends AppCompatActivity {
             com.bumptech.glide.Glide.with(this)
                     .load(imageUrl)
                     .centerCrop()
-                    .placeholder(R.drawable.details_header)
+                    .placeholder(R.color.teal_primary)
                     .into(headerImage);
         }
 

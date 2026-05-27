@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.usc.rentbnb.R;
+import com.usc.rentbnb.adapters.BookingAdapter;
 import com.usc.rentbnb.models.Booking;
 import com.usc.rentbnb.models.BookingResponse;
 import com.usc.rentbnb.network.ApiClient;

@@ -2,7 +2,6 @@ package com.usc.rentbnb.ui.dashboard;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -21,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -320,7 +320,7 @@ public class OwnerDashboardFragment extends Fragment {
                 ? "Accept this booking request from " + renterName + "?"
                 : "Decline this booking request?";
 
-        new AlertDialog.Builder(requireContext())
+        new MaterialAlertDialogBuilder(requireContext(), R.style.CustomAlertDialog)
                 .setMessage(msg)
                 .setPositiveButton("Confirm", (d, w) -> submitStatusUpdate(booking.getId(), newStatus))
                 .setNegativeButton("Cancel", null)
@@ -368,7 +368,7 @@ public class OwnerDashboardFragment extends Fragment {
                 ? "\n\nReturn already confirmed. Pending penalty review."
                 : "";
 
-        new AlertDialog.Builder(requireContext())
+        new MaterialAlertDialogBuilder(requireContext(), R.style.CustomAlertDialog)
                 .setTitle("Confirm Return")
                 .setMessage("Has " + itemName + " been returned by the renter?" + statusNote)
                 .setPositiveButton("Yes, confirm return", (d, w) -> callConfirmReturn(booking))
@@ -426,7 +426,7 @@ public class OwnerDashboardFragment extends Fragment {
         etAmount.setText(String.format(Locale.getDefault(), "%.2f", penaltyRate));
         container.addView(etAmount);
 
-        new AlertDialog.Builder(requireContext())
+        new MaterialAlertDialogBuilder(requireContext(), R.style.CustomAlertDialog)
                 .setTitle("Apply Penalty Fee")
                 .setView(container)
                 .setPositiveButton("Charge & Complete", (d, w) -> {

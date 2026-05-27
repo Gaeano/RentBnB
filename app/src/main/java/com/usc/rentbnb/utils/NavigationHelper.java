@@ -87,11 +87,6 @@ public class NavigationHelper {
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(containerId, fragment)
                 .commit();
-
-
-
-
-
     }
 
     private void resetUI() {

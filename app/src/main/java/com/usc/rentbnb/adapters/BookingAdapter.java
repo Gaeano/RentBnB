@@ -1,4 +1,4 @@
-package com.usc.rentbnb.ui.booking;
+package com.usc.rentbnb.adapters;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;

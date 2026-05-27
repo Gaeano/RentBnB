@@ -140,23 +140,35 @@ public class RentalsFragment extends Fragment {
             updateAllRentalsView();
         });
 
+        // Initialize Skeletons
         skeletonNear = SkeletonLayoutUtils.applySkeleton(rvNear, R.layout.rentable_item_card, 2);
         skeletonNear.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
         skeletonNear.setMaskCornerRadius(16);
-        skeletonNear.showSkeleton();
 
         skeletonAll = SkeletonLayoutUtils.applySkeleton(rvAll, R.layout.rentable_item_card, 4);
         skeletonAll.setMaskColor(ContextCompat.getColor(requireContext(), R.color.text_grey));
         skeletonAll.setMaskCornerRadius(16);
-        skeletonAll.showSkeleton();
+
+        homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+        favoriteViewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
+
+        // FIX 1: Wait for layout to measure before attempting to draw the skeletons
+        rvNear.post(() -> {
+            if (homeViewModel.getListings().getValue() == null) {
+                if (skeletonNear != null && !skeletonNear.isSkeleton()) skeletonNear.showSkeleton();
+            }
+        });
+        rvAll.post(() -> {
+            if (homeViewModel.getListings().getValue() == null) {
+                if (skeletonAll != null && !skeletonAll.isSkeleton()) skeletonAll.showSkeleton();
+            }
+        });
 
         if (requireActivity() instanceof HomeActivity) {
             HomeActivity activity = (HomeActivity) requireActivity();
             onLocationUpdated(activity.userCity, activity.userLat, activity.userLon);
         }
 
-        homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
-        favoriteViewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
 
         setupObservers();
         favoriteViewModel.loadListings(userId);
@@ -164,8 +176,8 @@ public class RentalsFragment extends Fragment {
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(layout -> {
                 allRentalsLimit = 10;
-                skeletonNear.showSkeleton();
-                skeletonAll.showSkeleton();
+                // We don't manually call showSkeleton() here anymore.
+                // fetchListings() triggers isLoading = true, which handles it via the observer!
                 homeViewModel.fetchListings();
             });
         }
@@ -239,15 +251,24 @@ public class RentalsFragment extends Fragment {
 
     private void setupObservers() {
 
+        // FIX 2: Explicitly track the loading state to show/hide skeletons and refresh spinners
+        homeViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading != null) {
+                if (isLoading) {
+                    if (skeletonNear != null && !skeletonNear.isSkeleton()) skeletonNear.showSkeleton();
+                    if (skeletonAll != null && !skeletonAll.isSkeleton()) skeletonAll.showSkeleton();
+                } else {
+                    if (skeletonNear != null && skeletonNear.isSkeleton()) skeletonNear.showOriginal();
+                    if (skeletonAll != null && skeletonAll.isSkeleton()) skeletonAll.showOriginal();
+                    if (swipeRefreshLayout != null) swipeRefreshLayout.finishRefresh();
+                }
+            }
+        });
+
+        // FIX 3: Remove hide logic from the data observer, let isLoading handle it
         homeViewModel.getListings().observe(getViewLifecycleOwner(), listings -> {
             if (listings != null) {
                 currentAllListings = listings;
-                skeletonNear.showOriginal();
-                skeletonAll.showOriginal();
-
-                if (swipeRefreshLayout != null) {
-                    swipeRefreshLayout.finishRefresh();
-                }
 
                 adapterNear.submitData(currentAllListings, currentFavoriteIds);
                 updateAllRentalsView();
@@ -273,13 +294,6 @@ public class RentalsFragment extends Fragment {
 
         homeViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
-                skeletonNear.showOriginal();
-                skeletonAll.showOriginal();
-
-                if (swipeRefreshLayout != null) {
-                    swipeRefreshLayout.finishRefresh();
-                }
-
                 Toast.makeText(requireContext(), "Home Error: " + error, Toast.LENGTH_LONG).show();
             }
         });

@@ -24,6 +24,7 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<List<Listing>> listings = new MutableLiveData<>();
 
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
     private List<Island> allIslands = new ArrayList<>();
     private List<Listing> allListings = new ArrayList<>();
@@ -39,22 +40,26 @@ public class HomeViewModel extends ViewModel {
     public LiveData<String> getErrorMessage() {
         return errorMessage;
     }
-
+    public LiveData<Boolean> getIsLoading(){return isLoading;}
     public void fetchIslands() {
+        isLoading.setValue(true);
         ApiClient.getApiService().getIslands(null, null, null)
                 .enqueue(new Callback<IslandResponse>() {
                     @Override
                     public void onResponse(Call<IslandResponse> call, Response<IslandResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             allIslands = response.body().getData();
+                            isLoading.setValue(false);
                             islands.setValue(allIslands);
                         } else {
+                            isLoading.setValue(false);
                             errorMessage.setValue("Server error fetching islands: " + response.code());
                         }
                     }
 
                     @Override
                     public void onFailure(Call<IslandResponse> call, Throwable t) {
+                        isLoading.setValue(false);
                         errorMessage.setValue("Network error: " + t.getMessage());
                     }
                 });
@@ -65,6 +70,7 @@ public class HomeViewModel extends ViewModel {
     }
 
     public void fetchNearbyIslands(double lat, double lon, double radiusKm) {
+        isLoading.setValue(true);
         ApiClient.getApiService().getIslands(lat, lon, radiusKm)
                 .enqueue(new Callback<IslandResponse>() {
                     @Override
@@ -73,33 +79,40 @@ public class HomeViewModel extends ViewModel {
                                 && response.body().getData() != null) {
                             allIslands = response.body().getData();
                             // Directly pass the backend's data to the UI!
+                            isLoading.setValue(false);
                             islands.setValue(allIslands);
                         } else {
+                            isLoading.setValue(false);
                             fetchIslands();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<IslandResponse> call, Throwable t) {
+                        isLoading.setValue(false);
                         fetchIslands();
                     }
                 });
     }
 
     public void fetchListings() {
+        isLoading.setValue(true);
         ApiClient.getApiService().getListings(null).enqueue(new Callback<ListingResponse>() {
             @Override
             public void onResponse(Call<ListingResponse> call, Response<ListingResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     allListings = response.body().getData();
+                    isLoading.setValue(false);
                     listings.setValue(allListings);
                 } else {
+                    isLoading.setValue(false);
                     errorMessage.setValue("Server Error fetching Rentals: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<ListingResponse> call, Throwable t) {
+                isLoading.setValue(false);
                 errorMessage.setValue("Network Error: " + t.getMessage());
             }
         });

@@ -15,6 +15,8 @@ import com.usc.rentbnb.models.InquilinoReplyRequest;
 import com.usc.rentbnb.models.InquilinoResponse;
 import com.usc.rentbnb.models.Island;
 import com.usc.rentbnb.models.IslandResponse;
+import com.usc.rentbnb.models.LensRequest;
+import com.usc.rentbnb.models.LensResponse;
 import com.usc.rentbnb.models.User;
 import com.usc.rentbnb.models.FAQ;
 import com.usc.rentbnb.models.Listing;
@@ -230,4 +232,8 @@ public interface ApiService {
     // help
     @POST("chat/help")
     Call<HelpResponse> getHelpAnswer(@Body HelpRequest request);
+
+    // lens
+    @POST("lens/analyse")
+    Call<LensResponse> analyseImageWithLens(@Body LensRequest request);
 }

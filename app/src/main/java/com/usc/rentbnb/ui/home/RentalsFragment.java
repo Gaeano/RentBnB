@@ -1,5 +1,7 @@
 package com.usc.rentbnb.ui.home;
 
+import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,9 +10,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -20,12 +25,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.faltenreich.skeletonlayout.Skeleton;
 import com.faltenreich.skeletonlayout.SkeletonLayoutUtils;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.usc.rentbnb.R;
 import com.usc.rentbnb.adapters.ListingAdapter;
 import com.usc.rentbnb.models.Listing;
+import com.usc.rentbnb.ui.lens.AILensActivity;
 import com.usc.rentbnb.viewmodels.FavoriteViewModel;
 import com.usc.rentbnb.viewmodels.HomeViewModel;
 
@@ -55,9 +62,24 @@ public class RentalsFragment extends Fragment {
     private List<String> currentFavoriteIds = new ArrayList<>();
     private int allRentalsLimit = 10;
     private MaterialButton btnSeeMoreAllRentals;
+    private ExtendedFloatingActionButton fabAiLens;
 
     private FirebaseUser currentUser;
     private SmartRefreshLayout swipeRefreshLayout;
+
+    private final ActivityResultLauncher<String> cameraPermissionLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.RequestPermission(),
+                    isGranted -> {
+                        if (isGranted) {
+                            launchAiLens();
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    "Camera permission is required for AI Lens",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
 
     @Nullable
     @Override
@@ -83,6 +105,7 @@ public class RentalsFragment extends Fragment {
         locationTitleView = view.findViewById(R.id.tv_rentals_location_title);
         RecyclerView rvNear = view.findViewById(R.id.rv_rentals_near);
         RecyclerView rvAll = view.findViewById(R.id.rv_rentals_all);
+        fabAiLens = view.findViewById(R.id.fabAiLens);
 
         containerPopular = view.findViewById(R.id.container_popular);
         containerFavorites = view.findViewById(R.id.container_favorites);
@@ -146,6 +169,47 @@ public class RentalsFragment extends Fragment {
                 homeViewModel.fetchListings();
             });
         }
+
+        setupFab(view);
+    }
+
+    private void setupFab(View view) {
+        if (fabAiLens == null) return;
+
+        fabAiLens.setOnClickListener(v -> handleAiLensClick());
+
+        // The NestedScrollView is identified by its new id rentalsNestedScrollView.
+        // Hide the FAB when scrolling down; show it when back at the top.
+        NestedScrollView nestedScrollView = view.findViewById(R.id.rentalsNestedScrollView);
+        if (nestedScrollView == null) return;
+
+        nestedScrollView.setOnScrollChangeListener(
+                (NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                    if (scrollY > oldScrollY && scrollY > 0) {
+                        // Scrolling down — shrink then hide
+                        fabAiLens.shrink();
+                        fabAiLens.hide();
+                    } else if (scrollY == 0) {
+                        // Back at the very top — show and extend
+                        fabAiLens.show();
+                        fabAiLens.extend();
+                    }
+                }
+        );
+    }
+
+    private void handleAiLensClick() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            launchAiLens();
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void launchAiLens() {
+        Intent intent = new Intent(requireActivity(), AILensActivity.class);
+        startActivity(intent);
     }
 
     private void updateAllRentalsView() {

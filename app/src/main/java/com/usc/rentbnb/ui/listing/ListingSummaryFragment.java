@@ -106,6 +106,13 @@ public class ListingSummaryFragment extends Fragment {
                 ? "— none selected —"
                 : TextUtils.join(", ", draft.paymentMethods));
 
+        TextView tvPenalty = view.findViewById(R.id.tvSummaryPenalty);
+        if (draft.penaltyAmount > 0) {
+            tvPenalty.setText(String.format("₱%.2f / %s", draft.penaltyAmount, draft.penaltyUnit));
+        } else {
+            tvPenalty.setText("— none set —");
+        }
+
         TextView tvActivities = view.findViewById(R.id.tvSummaryActivities);
         tvActivities.setText(draft.suggestedActivities.isEmpty()
                 ? "— none selected —"
@@ -210,12 +217,12 @@ public class ListingSummaryFragment extends Fragment {
                                      AtomicInteger failedDrafts,
                                      int totalDrafts) {
 
-        CreateListingRequest.Penalties penalties = null;
+        CreateListingRequest.Penalties requestPenalties = null;
         boolean hasPenalty = draft.penaltyAmount > 0
                 && draft.penaltyUnit != null
                 && !draft.penaltyUnit.isEmpty();
         if (hasPenalty) {
-            penalties = new CreateListingRequest.Penalties(
+            requestPenalties = new CreateListingRequest.Penalties(
                     draft.penaltyUnit,
                     draft.penaltyAmount
             );
@@ -226,13 +233,16 @@ public class ListingSummaryFragment extends Fragment {
                 draft.description,
                 draft.category,
                 draft.island,
+                draft.address,
                 draft.price,
                 draft.priceUnit,
                 draft.paymentMethods,
                 draft.suggestedActivities,
                 imageUrls,
-                penalties
+                requestPenalties
         );
+
+        Log.d("ListingSubmission", "Submitting listing: " + new com.google.gson.Gson().toJson(request));
 
         ApiClient.getApiService().createListing(request)
                 .enqueue(new Callback<CreateListingResponse>() {
@@ -243,6 +253,15 @@ public class ListingSummaryFragment extends Fragment {
                                 && response.body().isSuccess()) {
                             checkAllDone(completedDrafts, failedDrafts, totalDrafts);
                         } else {
+                            String errorMsg = "Unknown error";
+                            if (response.body() != null) {
+                                errorMsg = response.body().getMessage();
+                            } else if (response.errorBody() != null) {
+                                try (okhttp3.ResponseBody errorBody = response.errorBody()) {
+                                    errorMsg = errorBody.string();
+                                } catch (Exception ignored) {}
+                            }
+                            Log.e("ListingSubmission", "Failed to create listing: " + errorMsg);
                             failedDrafts.incrementAndGet();
                             checkAllDone(completedDrafts, failedDrafts, totalDrafts);
                         }
@@ -250,6 +269,7 @@ public class ListingSummaryFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<CreateListingResponse> call, Throwable t) {
+                        Log.e("ListingSubmission", "Network failure creating listing", t);
                         failedDrafts.incrementAndGet();
                         checkAllDone(completedDrafts, failedDrafts, totalDrafts);
                     }

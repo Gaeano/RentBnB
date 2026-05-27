@@ -8,6 +8,7 @@ public class CreateListingRequest {
     private String description;
     private String category;
     private String island;
+    private String address;
     private double price;
     private String priceUnit;
     private List<String> paymentMethods;
@@ -16,13 +17,14 @@ public class CreateListingRequest {
     private Penalties penalties;
 
     public CreateListingRequest(String productName, String description, String category,
-                                String island, double price, String priceUnit,
+                                String island, String address, double price, String priceUnit,
                                 List<String> paymentMethods, List<String> suggestedActivities,
                                 List<String> imageUrls, Penalties penalties) {
         this.productName = productName;
         this.description = description;
         this.category = category;
         this.island = island;
+        this.address = address;
         this.price = price;
         this.priceUnit = priceUnit;
         this.paymentMethods = paymentMethods;

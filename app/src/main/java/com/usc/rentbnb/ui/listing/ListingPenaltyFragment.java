@@ -94,10 +94,10 @@ public class ListingPenaltyFragment extends Fragment {
             textView.setTypeface(isSelected ? ResourcesCompat.getFont(requireContext(), R.font.jost_bold) : ResourcesCompat.getFont(requireContext(), R.font.jost));
 
             if (isSelected) {
-                if (id == R.id.btnHourlyPenalty) selectedUnit = "hourly";
-                else if (id == R.id.btnDailyPenalty) selectedUnit = "daily";
-                else if (id == R.id.btnWeeklyPenalty) selectedUnit = "weekly";
-                else if (id == R.id.btnMonthlyPenalty) selectedUnit = "monthly";
+                if (id == R.id.btnHourlyPenalty) selectedUnit = "Hourly";
+                else if (id == R.id.btnDailyPenalty) selectedUnit = "Daily";
+                else if (id == R.id.btnWeeklyPenalty) selectedUnit = "Weekly";
+                else if (id == R.id.btnMonthlyPenalty) selectedUnit = "Monthly";
             }
         }
     }

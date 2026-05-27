@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -116,7 +117,7 @@ public class OwnerListingsFragment extends Fragment {
                     ? "Reactivate this listing? It will be visible to renters again."
                     : "Pause this listing? It will be hidden from all renters.";
 
-            new AlertDialog.Builder(requireContext())
+            new MaterialAlertDialogBuilder(requireContext(), R.style.CustomAlertDialog)
                     .setMessage(msg)
                     .setPositiveButton("Confirm", (d, w) -> toggleListingStatus(listing, newStatus))
                     .setNegativeButton("Cancel", null)

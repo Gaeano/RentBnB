@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "21228965617-b5cjahp2dv5gqhnf71hls9djsibdoo3t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.usc.rentbnb",
+            "certificate_hash": "d6dfc3015aa99df82a3614dfff9d529d590f9c16"
+          }
+        },
+        {
           "client_id": "21228965617-bg73ds87nictmsl8iutq0kems1tctkj0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

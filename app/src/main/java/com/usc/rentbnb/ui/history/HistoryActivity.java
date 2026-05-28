@@ -62,7 +62,7 @@ public class HistoryActivity extends AppCompatActivity {
         chipActive.setOnClickListener(v -> selectStatus("Active"));
         chipCompleted.setOnClickListener(v -> selectStatus("Completed"));
         chipOverdue.setOnClickListener(v -> selectStatus("Overdue"));
-        chipPending.setOnClickListener(v->selectStatus("Pending"));
+        chipPending.setOnClickListener(v->selectStatus("Pending_owner_approval"));
     }
 
     private void selectStatus(String status) {
@@ -82,7 +82,7 @@ public class HistoryActivity extends AppCompatActivity {
         TextView selectedChip;
         if ("Active".equals(currentStatus)) selectedChip = chipActive;
         else if ("Completed".equals(currentStatus)) selectedChip = chipCompleted;
-        else if ("Pending".equals(currentStatus)) selectedChip = chipPending;
+        else if ("Pending_owner_approval".equals(currentStatus)) selectedChip = chipPending;
         else selectedChip = chipOverdue;
 
         selectedChip.setBackgroundResource(R.drawable.bg_tab_active);

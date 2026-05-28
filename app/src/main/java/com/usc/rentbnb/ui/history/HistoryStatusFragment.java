@@ -135,8 +135,8 @@ public class HistoryStatusFragment extends Fragment {
             boolean statusMatch = false;
             if ("Active".equalsIgnoreCase(targetStatus)) {
                 statusMatch = "Active".equalsIgnoreCase(booking.getStatus());
-            } else if ("Pending".equalsIgnoreCase(targetStatus)){
-                statusMatch = "Pending".equalsIgnoreCase(booking.getStatus());
+            } else if ("Pending_owner_approval".equalsIgnoreCase(targetStatus)){
+                statusMatch = "Pending_owner_approval".equalsIgnoreCase(booking.getStatus());
             } else if ("Completed".equalsIgnoreCase(targetStatus)) {
                 statusMatch = "Completed".equalsIgnoreCase(booking.getStatus());
             } else if ("Overdue".equalsIgnoreCase(targetStatus)) {

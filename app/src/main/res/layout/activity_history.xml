@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="History"
+            android:text="Activity"
             android:textColor="#5BC8D3"
             android:textSize="36sp"
             android:textStyle="bold" />
@@ -135,6 +135,19 @@
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/chip_background"
                 android:text="Overdue"
+                android:textColor="@color/text_grey"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:paddingHorizontal="16dp" />
+
+            <TextView
+                android:id="@+id/chip_cancelled"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_background"
+                android:text="Cancelled"
                 android:textColor="@color/text_grey"
                 android:textSize="14sp"
                 android:textStyle="bold"

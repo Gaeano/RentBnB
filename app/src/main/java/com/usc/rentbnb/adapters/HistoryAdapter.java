@@ -34,8 +34,19 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
     private OnReviewClickListener reviewClickListener;
 
+    // --- Cancel click listener interface ---
+    public interface OnCancelClickListener {
+        void onCancelClick(Booking booking);
+    }
+
+    private OnCancelClickListener cancelClickListener;
+
     public void setOnReviewClickListener(OnReviewClickListener listener) {
         this.reviewClickListener = listener;
+    }
+
+    public void setOnCancelClickListener(OnCancelClickListener listener) {
+        this.cancelClickListener = listener;
     }
 
     public void setBookings(List<Booking> bookings) {
@@ -127,6 +138,18 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         } else {
             holder.btnLeaveReview.setVisibility(View.GONE);
         }
+
+        // Cancel Booking button — only show for PENDING bookings
+        if ("PENDING_OWNER_APPROVAL".equalsIgnoreCase(status) || "PENDING".equalsIgnoreCase(status)) {
+            holder.btnCancelBooking.setVisibility(View.VISIBLE);
+            holder.btnCancelBooking.setOnClickListener(v -> {
+                if (cancelClickListener != null) {
+                    cancelClickListener.onCancelClick(booking);
+                }
+            });
+        } else {
+            holder.btnCancelBooking.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -138,7 +161,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         ImageView image;
         TextView title, ownerName, price, dates, status;
         CardView statusCard;
-        MaterialButton btnLeaveReview;
+        MaterialButton btnLeaveReview, btnCancelBooking;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -150,6 +173,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
             status = itemView.findViewById(R.id.item_status);
             statusCard = itemView.findViewById(R.id.status_card);
             btnLeaveReview = itemView.findViewById(R.id.btn_leave_review);
+            btnCancelBooking = itemView.findViewById(R.id.btn_cancel_booking);
         }
     }
 

@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.usc.rentbnb.R;
@@ -25,7 +27,9 @@ import com.usc.rentbnb.network.ApiClient;
 import com.usc.rentbnb.ui.review.ReviewBookingActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -86,6 +90,15 @@ public class HistoryStatusFragment extends Fragment {
             startActivity(intent);
         });
 
+        historyAdapter.setOnCancelClickListener(booking -> {
+            new MaterialAlertDialogBuilder(requireContext(), R.style.CustomAlertDialog)
+                    .setTitle("Cancel Booking")
+                    .setMessage("Are you sure you want to cancel this booking request?")
+                    .setPositiveButton("Yes, Cancel", (d, w) -> cancelBooking(booking))
+                    .setNegativeButton("No", null)
+                    .show();
+        });
+
         rvHistoryList.setAdapter(historyAdapter);
 
         fetchHistoryData();
@@ -129,6 +142,38 @@ public class HistoryStatusFragment extends Fragment {
         });
     }
 
+    private void cancelBooking(Booking booking) {
+        loadingOverlay.setVisibility(View.VISIBLE);
+
+        Map<String, String> body = new HashMap<>();
+        body.put("status", "CANCELLED");
+
+        ApiClient.getApiService().updateBookingStatus(booking.getId(), body)
+                .enqueue(new Callback<BookingResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<BookingResponse> call, @NonNull Response<BookingResponse> response) {
+                        if (!isAdded()) return;
+                        loadingOverlay.setVisibility(View.GONE);
+
+                        if (response.isSuccessful()) {
+                            Toast.makeText(requireContext(), "Booking cancelled successfully.", Toast.LENGTH_SHORT).show();
+                            // Remove from local list and update UI
+                            allBookings.remove(booking);
+                            filterAndDisplay();
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to cancel booking.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<BookingResponse> call, @NonNull Throwable t) {
+                        if (!isAdded()) return;
+                        loadingOverlay.setVisibility(View.GONE);
+                        Toast.makeText(requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     private void filterAndDisplay() {
         List<Booking> filteredList = new ArrayList<>();
         for (Booking booking : allBookings) {
@@ -139,6 +184,8 @@ public class HistoryStatusFragment extends Fragment {
                 statusMatch = "Pending_owner_approval".equalsIgnoreCase(booking.getStatus());
             } else if ("Completed".equalsIgnoreCase(targetStatus)) {
                 statusMatch = "Completed".equalsIgnoreCase(booking.getStatus());
+            } else if ("Cancelled".equalsIgnoreCase(targetStatus)) {
+                statusMatch = "CANCELLED".equalsIgnoreCase(booking.getStatus()) || "REJECTED".equalsIgnoreCase(booking.getStatus());
             } else if ("Overdue".equalsIgnoreCase(targetStatus)) {
                 statusMatch = "Overdue".equalsIgnoreCase(booking.getStatus()) || "Cancelled".equalsIgnoreCase(booking.getStatus());
             }

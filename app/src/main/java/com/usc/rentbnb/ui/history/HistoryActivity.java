@@ -21,7 +21,7 @@ import com.usc.rentbnb.R;
 public class HistoryActivity extends AppCompatActivity {
 
     private EditText searchBar;
-    private TextView chipActive, chipPending, chipCompleted, chipOverdue;
+    private TextView chipActive, chipPending, chipCompleted, chipOverdue, chipCancelled;
     private String currentStatus = "Active";
     private HistoryStatusFragment currentFragment;
 
@@ -39,6 +39,7 @@ public class HistoryActivity extends AppCompatActivity {
         chipPending = findViewById(R.id.chip_pending);
         chipCompleted = findViewById(R.id.chip_completed);
         chipOverdue = findViewById(R.id.chip_overdue);
+        chipCancelled = findViewById(R.id.chip_cancelled);
 
         ViewCompat.setOnApplyWindowInsetsListener(historyHeader, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
@@ -63,6 +64,7 @@ public class HistoryActivity extends AppCompatActivity {
         chipCompleted.setOnClickListener(v -> selectStatus("Completed"));
         chipOverdue.setOnClickListener(v -> selectStatus("Overdue"));
         chipPending.setOnClickListener(v->selectStatus("Pending_owner_approval"));
+        chipCancelled.setOnClickListener(v -> selectStatus("Cancelled"));
     }
 
     private void selectStatus(String status) {
@@ -78,12 +80,14 @@ public class HistoryActivity extends AppCompatActivity {
         resetChipStyle(chipCompleted);
         resetChipStyle(chipOverdue);
         resetChipStyle(chipPending);
+        resetChipStyle(chipCancelled);
 
         TextView selectedChip;
         if ("Active".equals(currentStatus)) selectedChip = chipActive;
         else if ("Completed".equals(currentStatus)) selectedChip = chipCompleted;
         else if ("Pending_owner_approval".equals(currentStatus)) selectedChip = chipPending;
-        else selectedChip = chipOverdue;
+        else if ("Overdue".equals(currentStatus)) selectedChip = chipOverdue;
+        else selectedChip = chipCancelled;
 
         selectedChip.setBackgroundResource(R.drawable.bg_tab_active);
         selectedChip.setTextColor(ContextCompat.getColor(this, R.color.teal_primary));
